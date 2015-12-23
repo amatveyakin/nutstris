@@ -5,6 +5,7 @@ set(executable_name nutstris)
 set(src_dir ${CMAKE_SOURCE_DIR}/src)
 set(srcs
     ${src_dir}/main.cpp
+    ${src_dir}/render/renderer.cpp
 )
 
 include_directories(${src_dir})

@@ -14,7 +14,8 @@ add_executable(${executable_name}  ${srcs})
 set(CMAKE_MODULE_PATH "/usr/share/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
 find_package(SFML 2 REQUIRED system window graphics network audio)
 find_package(OpenGL REQUIRED)
-target_link_libraries(${executable_name} ${SFML_LIBRARIES} ${OPENGL_LIBRARIES})
+find_package(GLEW REQUIRED)
+target_link_libraries(${executable_name} ${SFML_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
 
 add_definitions("-std=c++14")
 

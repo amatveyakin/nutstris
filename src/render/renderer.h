@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 
 namespace render {
-class ShaderProgram;
+class CubeMesh;
 
 class Renderer {
 public:
@@ -13,9 +13,7 @@ public:
   
   void render();
 private:
-  GLuint vertexArrayID_;
-
-  std::unique_ptr<ShaderProgram> dummyProgram_;
+  std::unique_ptr<CubeMesh> cubeMesh_;
 };
 
 }

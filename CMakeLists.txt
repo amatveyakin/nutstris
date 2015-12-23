@@ -8,6 +8,7 @@ set(srcs
     ${src_dir}/render/renderer.cpp
     ${src_dir}/render/shader.cpp
     ${src_dir}/render/shaderprogram.cpp
+    ${src_dir}/render/cubemesh.cpp
 )
 
 include_directories(${src_dir})

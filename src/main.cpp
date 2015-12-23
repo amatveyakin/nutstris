@@ -1,4 +1,5 @@
 #include <SFML/Window.hpp>
+#include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
 #include "render/renderer.h"
 

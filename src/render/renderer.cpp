@@ -1,5 +1,7 @@
 #include "render/renderer.h"
 
+namespace render {
+
 namespace {
 static const GLfloat g_vertex_buffer_data[] = {
   -1.0f, -1.0f, 0.0f,
@@ -39,4 +41,6 @@ Renderer::~Renderer() {
 void Renderer::render() {
   glBindVertexArray(vertexArrayID_);
   glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
 }

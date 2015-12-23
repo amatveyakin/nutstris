@@ -9,7 +9,7 @@ int main() {
 
   // load resources, initialize the OpenGL states, ...
 
-  Renderer renderer;
+  render::Renderer renderer;
   // run the main loop
   bool running = true;
   while (running) {

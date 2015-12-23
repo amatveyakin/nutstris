@@ -2,6 +2,8 @@
 #define RENDERER_H
 #include <GL/glew.h>
 
+namespace render {
+
 class Renderer {
 public:
   Renderer();
@@ -11,5 +13,7 @@ public:
 private:
   GLuint vertexArrayID_;
 };
+
+}
 
 #endif // RENDERER_H

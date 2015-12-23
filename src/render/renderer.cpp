@@ -1,4 +1,6 @@
 #include "render/renderer.h"
+#include "render/shaderprogram.h"
+#include "render/shader.h"
 
 namespace render {
 
@@ -32,6 +34,10 @@ Renderer::Renderer() {
     nullptr             // array buffer offset
   );
   glEnableVertexAttribArray(0);
+
+  auto vertexShader = VertexShader("src/render/shaders/dummy.vs");
+  auto fragmentShader = FragmentShader("src/render/shaders/dummy.fs");
+  dummyProgram_ = std::make_unique<ShaderProgram>(vertexShader, fragmentShader);
 }
 
 Renderer::~Renderer() {
@@ -39,6 +45,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render() {
+  dummyProgram_->makeActive();
   glBindVertexArray(vertexArrayID_);
   glDrawArrays(GL_TRIANGLES, 0, 3);
 }

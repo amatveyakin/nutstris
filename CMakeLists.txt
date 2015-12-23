@@ -6,6 +6,8 @@ set(src_dir ${CMAKE_SOURCE_DIR}/src)
 set(srcs
     ${src_dir}/main.cpp
     ${src_dir}/render/renderer.cpp
+    ${src_dir}/render/shader.cpp
+    ${src_dir}/render/shaderprogram.cpp
 )
 
 include_directories(${src_dir})

@@ -1,8 +1,10 @@
 #ifndef RENDERER_H
 #define RENDERER_H
+#include <memory>
 #include <GL/glew.h>
 
 namespace render {
+class ShaderProgram;
 
 class Renderer {
 public:
@@ -12,6 +14,8 @@ public:
   void render();
 private:
   GLuint vertexArrayID_;
+
+  std::unique_ptr<ShaderProgram> dummyProgram_;
 };
 
 }

@@ -1,6 +1,7 @@
 #include "shader.h"
 #include <iostream>
 #include <fstream>
+#include <stdexcept>
 #include <GL/glew.h>
 
 namespace render {

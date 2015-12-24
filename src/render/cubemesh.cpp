@@ -26,7 +26,9 @@ CubeMesh::CubeMesh() {
 
   glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), nullptr);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), reinterpret_cast<GLvoid*>(12));
   glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);

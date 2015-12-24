@@ -1,7 +1,9 @@
 #version 330 core
 
+in vec3 vertexNormal;
+
 out vec3 color;
 
 void main() {
-  color = vec3(1,0,0);
+  color = - vec3(1,0,0) * vertexNormal.z;
 }

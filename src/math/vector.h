@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include "math/math_utils.hpp"
+#include "math/basic.h"
 
 
 namespace math {
@@ -127,12 +127,12 @@ public:
   // in-place operators
   VectorT& applyDivFloored (int q) {
     for (int i = 0; i < DIMENSION; ++i)
-      derived ()[i] = ::divFloored (derived ()[i], q);
+      derived ()[i] = divFloored (derived ()[i], q);
     return derived ();
   }
   VectorT& applyModFloored (int q) {
     for (int i = 0; i < DIMENSION; ++i)
-      derived ()[i] = ::modFloored (derived ()[i], q);
+      derived ()[i] = modFloored (derived ()[i], q);
     return derived ();
   }
 

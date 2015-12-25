@@ -1,6 +1,7 @@
 #include "shaderprogram.h"
 #include <stdexcept>
 #include "render/shader.h"
+#include "render/matrixutil.h"
 
 namespace render {
 
@@ -26,6 +27,9 @@ ShaderProgram::ShaderProgram(VertexShader& vertexShader, FragmentShader& fragmen
       throw std::runtime_error("Shader program link error: " + linkLog);
     }
   }
+
+  MVPmatrixID_ = glGetUniformLocation(id_, "MVP");
+  modelToWorldMatrixID_ = glGetUniformLocation(id_, "ModelToWorld");
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -34,6 +38,13 @@ ShaderProgram::~ShaderProgram() {
 
 void ShaderProgram::makeActive() {
   glUseProgram(id_);
+  auto matrixWorld = matrixutil::rotation({0.1, 0.2, 0.3}, t);
+  t += 0.01;
+  auto matrixView = matrixutil::lookAt({4.5, 4.5, 4.5}, {0, 0, 0}, {0, 1, 0});
+  auto matrixProj = /*math::Mat4x4f::identityMatrix();*/  matrixutil::perspective(M_PI / 2.0, 4.0 / 3.0, 0.01f, 100.0f);
+  auto MVP = matrixProj * matrixView * matrixWorld;
+  glUniformMatrix4fv(MVPmatrixID_, 1, GL_FALSE, MVP.elements());
+  glUniformMatrix4fv(modelToWorldMatrixID_, 1, GL_FALSE, matrixWorld.elements());
 }
 
 

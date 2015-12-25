@@ -15,6 +15,8 @@ public:
 
 private:
   GLuint id_;
+  GLuint MVPmatrixID_, modelToWorldMatrixID_;
+  double t = 0.0;
 };
 
 }

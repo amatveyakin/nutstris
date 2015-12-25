@@ -22,14 +22,18 @@ CubeMesh::CubeMesh() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   const int transformLayout = 4;
+  const int colorLayout = 8;
   glGenBuffers(1, &transformsBuffer_);
   glBindBuffer(GL_ARRAY_BUFFER, transformsBuffer_);
   for (int i = 0; i < 4; i++) {
     glEnableVertexAttribArray(transformLayout + i);
     glVertexAttribPointer(transformLayout + i, 4, GL_FLOAT, false,
-			  sizeof(float) * 16, reinterpret_cast<GLvoid*>( sizeof(float) * 4 * i ));
+			  sizeof(PerCubeData), reinterpret_cast<GLvoid*>( sizeof(float) * 4 * i ));
     glVertexAttribDivisor(transformLayout + i, 1);
   }
+  glEnableVertexAttribArray(colorLayout);
+  glVertexAttribPointer(colorLayout, 3, GL_FLOAT, false, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( sizeof(float) * 16 ));
+  glVertexAttribDivisor(colorLayout, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   GLuint indexBuffer;

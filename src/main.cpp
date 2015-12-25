@@ -4,7 +4,9 @@
 #include "render/renderer.h"
 
 int main() {
-  sf::Window window(sf::VideoMode(800, 600), "OpenGL");
+  sf::ContextSettings contextSettings;
+  contextSettings.depthBits = 24;
+  sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, contextSettings);
   window.setVerticalSyncEnabled(true);
 
   // load resources, initialize the OpenGL states, ...

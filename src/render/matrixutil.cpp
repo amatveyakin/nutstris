@@ -1,5 +1,7 @@
 #include "matrixutil.h"
 
+#include "math/metric.h"
+
 namespace render {
 namespace matrixutil {
 

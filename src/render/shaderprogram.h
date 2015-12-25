@@ -10,12 +10,12 @@ class ShaderProgram {
 public:
   ShaderProgram(VertexShader& vertexShader, FragmentShader& fragmentShader);
   ~ShaderProgram();
-  
+
   void makeActive();
 
 private:
   GLuint id_;
-  GLuint MVPmatrixID_, modelToWorldMatrixID_;
+  GLuint VPmatrixID_;
   double t = 0.0;
 };
 

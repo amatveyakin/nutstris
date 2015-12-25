@@ -15,7 +15,11 @@ Renderer::~Renderer() {
 }
 
 void Renderer::render() {
-  cubeMesh_->render();
+  std::vector<CubeMesh::PerCubeData> cubesData;
+  for (int i = -5; i <= 5; ++i)
+    for (int j = -5; j <= 5; ++j)
+      cubesData.push_back({math::Mat4x4f::translationMatrix({i * 1.0f, j * 1.0f, 0.0f})});
+  cubeMesh_->render(cubesData);
 }
 
 }

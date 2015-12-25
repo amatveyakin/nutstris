@@ -5,7 +5,7 @@
 #include "render/shaderprogram.h"
 
 namespace render {
-  
+
 CubeMesh::CubeMesh() {
   glGenVertexArrays(1, &vertexArrayID_);
   glBindVertexArray(vertexArrayID_);
@@ -15,6 +15,21 @@ CubeMesh::CubeMesh() {
   glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
   auto verticesData = createVerticesPositionsAndNormals_(0.5f, 0.1f, 10);
   glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData[0]) * verticesData.size(), verticesData.data(), GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), nullptr);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), reinterpret_cast<GLvoid*>(12));
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  const int transformLayout = 4;
+  glGenBuffers(1, &transformsBuffer_);
+  glBindBuffer(GL_ARRAY_BUFFER, transformsBuffer_);
+  for (int i = 0; i < 4; i++) {
+    glEnableVertexAttribArray(transformLayout + i);
+    glVertexAttribPointer(transformLayout + i, 4, GL_FLOAT, false,
+			  sizeof(float) * 16, reinterpret_cast<GLvoid*>( sizeof(float) * 4 * i ));
+    glVertexAttribDivisor(transformLayout + i, 1);
+  }
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   GLuint indexBuffer;
@@ -23,13 +38,6 @@ CubeMesh::CubeMesh() {
   auto indicesData = createIndices_(10);
   nIndices_ = indicesData.size();
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesData[0]) * indicesData.size(), indicesData.data(), GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), nullptr);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), reinterpret_cast<GLvoid*>(12));
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glBindVertexArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -43,10 +51,14 @@ CubeMesh::~CubeMesh() {
 
 }
 
-void CubeMesh::render() {
+void CubeMesh::render(const std::vector<PerCubeData>& cubesData) {
+  glBindBuffer(GL_ARRAY_BUFFER, transformsBuffer_);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(cubesData[0]) * cubesData.size(), cubesData.data(), GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
   shaderProgram_->makeActive();
   glBindVertexArray(vertexArrayID_);
-  glDrawElements(GL_TRIANGLES, nIndices_, GL_UNSIGNED_INT, nullptr );
+  glDrawElementsInstanced(GL_TRIANGLES, nIndices_, GL_UNSIGNED_INT, nullptr, cubesData.size() );
 }
 
 std::vector<std::pair<math::Vec3f, math::Vec3f>> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {

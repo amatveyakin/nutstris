@@ -5,6 +5,7 @@ namespace render {
 
 Renderer::Renderer() {
   glewInit();
+  glEnable(GL_CULL_FACE);
   cubeMesh_ = std::make_unique<CubeMesh>();
 }
 

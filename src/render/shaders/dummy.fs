@@ -2,9 +2,13 @@
 
 in vec3 vertexNormal;
 in vec3 vertexColor;
+in vec2 textureCoord;
+
+uniform sampler2DArray textures;
 
 out vec3 color;
 
 void main() {
-  color = vertexColor * (0.2 * max(0.0, vertexNormal.z + vertexNormal.x + vertexNormal.y) + 0.2);
+  vec4 textureColor = texture(textures, vec3(textureCoord, 1));
+  color = textureColor.rgb + vertexColor * (0.2 * max(0.0, vertexNormal.z + vertexNormal.x + vertexNormal.y) + 0.2);
 }

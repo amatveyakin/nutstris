@@ -45,6 +45,9 @@ void ShaderProgram::makeActive() {
   auto matrixProj = /*math::Mat4x4f::identityMatrix();*/  matrixutil::perspective(M_PI / 2.0, widthToHeightAspect, 0.01f, 100.0f);
   auto VP = matrixProj * matrixView;
   glUniformMatrix4fv(VPmatrixID_, 1, GL_FALSE, VP.elements());
+
+  auto texturesID = glGetUniformLocation(id_, "textures");
+  glUniform1i(texturesID, 0);
 }
 
 

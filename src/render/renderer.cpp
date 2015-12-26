@@ -1,5 +1,6 @@
 #include "render/renderer.h"
 #include "render/cubemesh.h"
+#include "render/textureloader.h"
 
 namespace render {
 
@@ -8,6 +9,7 @@ Renderer::Renderer() {
   glEnable(GL_CULL_FACE);
   glEnable(GL_DEPTH_TEST);
   cubeMesh_ = std::make_unique<CubeMesh>();
+  textureLoader_ = std::make_unique<TextureLoader>("resources/textures/bonuses/");
 }
 
 Renderer::~Renderer() {

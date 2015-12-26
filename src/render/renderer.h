@@ -5,6 +5,7 @@
 
 namespace render {
 class CubeMesh;
+class TextureLoader;
 
 class Renderer {
 public:
@@ -14,6 +15,7 @@ public:
   void render();
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;
+  std::unique_ptr<TextureLoader> textureLoader_;
 };
 
 }

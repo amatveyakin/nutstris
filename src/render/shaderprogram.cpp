@@ -33,16 +33,20 @@ ShaderProgram::~ShaderProgram() {
   glDeleteProgram(id_);
 }
 
-void ShaderProgram::setMatrix(const std::string& name, const math::Mat4x4f& matrix) {
+void ShaderProgram::setUniform(const std::string& name, const math::Mat4x4f& matrix) {
   auto matrixId =glGetUniformLocation(id_, name.c_str());
   assert(matrixId != -1);
   glUniformMatrix4fv(matrixId, 1, GL_FALSE, matrix.elements());
 }
 
+void ShaderProgram::setUniform(const std::string& name, int value) {
+  auto id =glGetUniformLocation(id_, name.c_str());
+  assert(id != -1);
+  glUniform1i(id, value);
+}
+
 void ShaderProgram::makeActive() {
   glUseProgram(id_);
-  auto texturesID = glGetUniformLocation(id_, "textures");
-  glUniform1i(texturesID, 0);
 }
 
 

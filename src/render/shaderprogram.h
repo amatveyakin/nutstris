@@ -14,7 +14,8 @@ public:
   ShaderProgram(VertexShader& vertexShader, FragmentShader& fragmentShader);
   ~ShaderProgram();
 
-  void setMatrix(const std::string& name, const math::Mat4x4f& matrix);
+  void setUniform(const std::string& name, const math::Mat4x4f& value);
+  void setUniform(const std::string& name, int value);
 
   void makeActive();
 

@@ -1,6 +1,8 @@
 #include "render/renderer.h"
 #include "render/cubemesh.h"
 #include "render/textureloader.h"
+#include "render/matrixutil.h"
+#include "render/shaderprogram.h"
 
 namespace render {
 
@@ -24,6 +26,11 @@ void Renderer::render() {
         math::Mat4x4f::translationMatrix({i * 1.0f, j * 1.0f, 0.0f}),
         math::Vec3f(0.5 + i * 0.1f, 0.5 + j * 0.1f, 0.0f)
       });
+
+  auto matrixView = matrixutil::lookAt({0.0, 1.5, 10.5}, {0, 0, 0}, {0, 1, 0});
+  auto matrixProj = matrixutil::perspective(M_PI / 2.5f, 4.0 / 3.0, 0.01f, 100.0f);
+  auto VP = matrixProj * matrixView;
+  cubeMesh_->getShaderProgram().setMatrix("VP", VP);
   cubeMesh_->render(cubesData);
 }
 

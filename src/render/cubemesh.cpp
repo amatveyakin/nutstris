@@ -65,6 +65,10 @@ void CubeMesh::render(const std::vector<PerCubeData>& cubesData) {
   glDrawElementsInstanced(GL_TRIANGLES, nIndices_, GL_UNSIGNED_INT, nullptr, cubesData.size() );
 }
 
+ShaderProgram& CubeMesh::getShaderProgram() {
+  return *shaderProgram_;
+}
+
 std::vector<std::pair<math::Vec3f, math::Vec3f>> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
   auto nVertices = 8 * angleSteps * angleSteps;
   std::vector<std::pair<math::Vec3f, math::Vec3f>> result(nVertices);

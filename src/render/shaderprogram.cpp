@@ -1,7 +1,7 @@
 #include "shaderprogram.h"
 #include <stdexcept>
 #include "render/shader.h"
-#include "render/matrixutil.h"
+
 
 namespace render {
 
@@ -27,25 +27,20 @@ ShaderProgram::ShaderProgram(VertexShader& vertexShader, FragmentShader& fragmen
       throw std::runtime_error("Shader program link error: " + linkLog);
     }
   }
-
-  VPmatrixID_ = glGetUniformLocation(id_, "VP");
 }
 
 ShaderProgram::~ShaderProgram() {
   glDeleteProgram(id_);
 }
 
+void ShaderProgram::setMatrix(const std::string& name, const math::Mat4x4f& matrix) {
+  auto matrixId =glGetUniformLocation(id_, name.c_str());
+  assert(matrixId != -1);
+  glUniformMatrix4fv(matrixId, 1, GL_FALSE, matrix.elements());
+}
+
 void ShaderProgram::makeActive() {
   glUseProgram(id_);
-  auto matrixView = matrixutil::lookAt({0.0, 1.5, 10.5}, {0, 0, 0}, {0, 1, 0});
-
-  int viewPortInfo[4];
-  glGetIntegerv(GL_VIEWPORT, viewPortInfo);
-  float widthToHeightAspect = float(viewPortInfo[2]) / float(viewPortInfo[3]);
-  auto matrixProj = /*math::Mat4x4f::identityMatrix();*/  matrixutil::perspective(M_PI / 2.0, widthToHeightAspect, 0.01f, 100.0f);
-  auto VP = matrixProj * matrixView;
-  glUniformMatrix4fv(VPmatrixID_, 1, GL_FALSE, VP.elements());
-
   auto texturesID = glGetUniformLocation(id_, "textures");
   glUniform1i(texturesID, 0);
 }

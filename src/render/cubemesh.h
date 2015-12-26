@@ -20,6 +20,8 @@ public:
 
   void render(const std::vector<PerCubeData>& cubesData);
 
+  ShaderProgram& getShaderProgram();
+
 private:
   std::vector<std::pair<math::Vec3f, math::Vec3f>> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
   std::vector<GLuint> createIndices_(int angleSteps) const;

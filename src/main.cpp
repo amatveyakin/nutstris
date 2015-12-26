@@ -6,6 +6,7 @@
 int main() {
   sf::ContextSettings contextSettings;
   contextSettings.depthBits = 24;
+  contextSettings.antialiasingLevel = 16;
   sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, contextSettings);
   window.setVerticalSyncEnabled(true);
 

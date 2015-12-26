@@ -16,6 +16,7 @@ public:
   struct PerCubeData {
     math::Mat4x4f modelToWorld;
     math::Vec3f   color;
+    int           textureIndex;
   };
 
   void render(const std::vector<PerCubeData>& cubesData);

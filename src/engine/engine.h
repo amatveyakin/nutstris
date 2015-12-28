@@ -148,25 +148,25 @@ const int    BONUS_CHANCES[N_BONUSES] =
 };
 
 const int    BONUS_ENLARGED_HINT_QUEUE_SIZE = 7;
-const Time   BONUS_FADING_DURATION = sf::seconds(0.5f);
+const Time   BONUS_FADING_DURATION = 0.5s;
 
 const float  BONUS_SPEED_UP_VALUE = 0.8f;
 const float  BONUS_SLOW_DOWN_VALUE = 1.0f;
 
-const Time   BONUS_FLIPPING_SCREEN_DURATION = sf::seconds(0.8f);
-const Time   BONUS_ROTATING_SCREEN_PERIOD = sf::seconds(10.0f);
-const Time   BONUS_WAVE_PERIOD = sf::seconds(2.0f);
-const Time   BONUS_CLEAR_FIELD_DURATION = sf::seconds(1.0f);
-const Time   BONUS_CUTTING_BLOCKS_DURATION = sf::seconds(0.5f);
-const Time   BONUS_REMOVING_HINT_DURATION = sf::seconds(1.0f);
-const Time   BONUS_LANTERN_FADING_TIME = sf::seconds(1.5f);
-// const Time   BONUS_LANTERN_ANIMATION_TIME = sf::seconds(PIECE_FORCED_LOWERING_ANIMATION_TIME);  // (?)
+const Time   BONUS_FLIPPING_SCREEN_DURATION = 0.8s;
+const Time   BONUS_ROTATING_SCREEN_PERIOD = 10.0s;
+const Time   BONUS_WAVE_PERIOD = 2.0s;
+const Time   BONUS_CLEAR_FIELD_DURATION = 1.0s;
+const Time   BONUS_CUTTING_BLOCKS_DURATION = 0.5s;
+const Time   BONUS_REMOVING_HINT_DURATION = 1.0s;
+const Time   BONUS_LANTERN_FADING_TIME = 1.5s;
+// const Time   BONUS_LANTERN_ANIMATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;  // (?)
 const Speed  BONUS_LANTERN_MAX_SPEED = 100.0f; // Requirements: BONUS_LANTERN_MAX_SPEED >= 1.0 / DROPPING_PIECE_LOWERING_TIME
 
-const Time   MIN_BONUS_APPEAR_TIME = sf::seconds(4.0f);
-const Time   MAX_BONUS_APPEAR_TIME = sf::seconds(6.0f);
-const Time   MIN_BONUS_LIFE_TIME = sf::seconds(20.0);
-const Time   MAX_BONUS_LIFE_TIME = sf::seconds(25.0);
+const Time   MIN_BONUS_APPEAR_TIME = 4.0s;
+const Time   MAX_BONUS_APPEAR_TIME = 6.0s;
+const Time   MIN_BONUS_LIFE_TIME = 20.0s;
+const Time   MAX_BONUS_LIFE_TIME = 25.0s;
 
 /*const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
 const int    N_BONUS_GENERATION_ATTEMPTS = 5;
@@ -415,7 +415,7 @@ struct FieldLocks
 
 //=================================== Events ===================================
 
-const Time   EVENT_DELAY_TIME = sf::seconds(0.01f); // (?)
+const Time   EVENT_DELAY_TIME = 0.01s; // (?)
 
 enum EventType
 {

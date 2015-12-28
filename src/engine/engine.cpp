@@ -10,7 +10,7 @@ namespace engine {
 
 namespace {
   Time randomTimeRange(Time minValue, Time maxValue) {
-    return sf::seconds(math::randomRange(minValue.asSeconds(), maxValue.asSeconds()));
+    return 1.0s * math::randomRange(minValue / 1.0s, maxValue / 1.0s);
   }
 }  // namespace
 
@@ -20,58 +20,58 @@ namespace {
 
 /*const float  STARTING_SPEED = 1.0;
 const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
-const Time   ROUTINE_SPEED_UP_INTERVAL = sf::seconds(2.0f);
+const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
 const float  NORMAL_SPEED_LIMIT = 5.0;
 const float  ABSOLUTE_SPEED_LIMIT = 10.0;
 
-const Time   AUTO_LOWERING_TIME = sf::seconds(0.8f);
-const Time   DROPPING_PIECE_LOWERING_TIME = sf::seconds(0.04f);
-const Time   LINE_DISAPPEAR_TIME = sf::seconds(1.0f);
-const Time   LINE_COLLAPSE_TIME = sf::seconds(0.05f);
+const Time   AUTO_LOWERING_TIME = 0.8s;
+const Time   DROPPING_PIECE_LOWERING_TIME = 0.04s;
+const Time   LINE_DISAPPEAR_TIME = 1.0s;
+const Time   LINE_COLLAPSE_TIME = 0.05s;
 
-const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(0.8f);
-const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = sf::seconds(0.1f);   // = DOWN_KEY_REACTIVATION_TIME
-const Time   LINE_COLLAPSE_ANIMATION_TIME = sf::seconds(0.3f);
-const Time   PIECE_MOVING_ANIMATION_TIME = sf::seconds(0.4f);
-const Time   PIECE_ROTATING_ANIMATION_TIME = sf::seconds(0.4f);
+const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = 0.8s;
+const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = 0.1s;   // = DOWN_KEY_REACTIVATION_TIME
+const Time   LINE_COLLAPSE_ANIMATION_TIME = 0.3s;
+const Time   PIECE_MOVING_ANIMATION_TIME = 0.4s;
+const Time   PIECE_ROTATING_ANIMATION_TIME = 0.4s;
 
-const Time   HINT_APPERAING_TIME = sf::seconds(0.3f);
-const Time   HINT_MATERIALIZATION_TIME = sf::seconds(0.2f);
-const Time   PLAYER_DYING_ANIMATION_TIME = sf::seconds(1.0f);*/
+const Time   HINT_APPERAING_TIME = 0.3s;
+const Time   HINT_MATERIALIZATION_TIME = 0.2s;
+const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;*/
 
 
 const float  STARTING_SPEED = 1.0;
 const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
-const Time   ROUTINE_SPEED_UP_INTERVAL = sf::seconds(2.0f);
+const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
 const float  NORMAL_SPEED_LIMIT = 5.0;
 const float  ABSOLUTE_SPEED_LIMIT = 10.0;
 
-const Time   AUTO_LOWERING_TIME = sf::seconds(0.8f);
-const Time   DROPPING_PIECE_LOWERING_TIME = sf::seconds(0.02f);
-const Time   LINE_DISAPPEAR_TIME = sf::seconds(0.6f);
-const Time   LINE_COLLAPSE_TIME = sf::seconds(0.06f);
+const Time   AUTO_LOWERING_TIME = 0.8s;
+const Time   DROPPING_PIECE_LOWERING_TIME = 0.02s;
+const Time   LINE_DISAPPEAR_TIME = 0.6s;
+const Time   LINE_COLLAPSE_TIME = 0.06s;
 
-//const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(AUTO_LOWERING_TIME);
-const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(0.2f);
-const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = sf::seconds(0.1f);   // = DOWN_KEY_REACTIVATION_TIME
-const Time   LINE_COLLAPSE_ANIMATION_TIME = sf::seconds(0.06f);
-const Time   PIECE_MOVING_ANIMATION_TIME = sf::seconds(0.08f);
-const Time   PIECE_ROTATING_ANIMATION_TIME = sf::seconds(0.05f);
+//const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = AUTO_LOWERING_TIME;
+const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = 0.2s;
+const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = 0.1s;   // = DOWN_KEY_REACTIVATION_TIME
+const Time   LINE_COLLAPSE_ANIMATION_TIME = 0.06s;
+const Time   PIECE_MOVING_ANIMATION_TIME = 0.08s;
+const Time   PIECE_ROTATING_ANIMATION_TIME = 0.05s;
 
-const Time   HINT_APPERAING_TIME = sf::seconds(0.3f);
-const Time   HINT_MATERIALIZATION_TIME = sf::seconds(0.2f);
-const Time   PLAYER_DYING_ANIMATION_TIME = sf::seconds(1.0f);
+const Time   HINT_APPERAING_TIME = 0.3s;
+const Time   HINT_MATERIALIZATION_TIME = 0.2s;
+const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 
 
 //================================== Keyboard ==================================
 
 // TODO: find optimal value for KEY_REACTIVATION_TIMEs
-const Time   MOVE_KEY_REACTIVATION_TIME = sf::seconds(0.12f);
-const Time   ROTATE_KEY_REACTIVATION_TIME = sf::seconds(0.15f);
-//const Time   DOWN_KEY_REACTIVATION_TIME = sf::seconds(0.08f);
+const Time   MOVE_KEY_REACTIVATION_TIME = 0.12s;
+const Time   ROTATE_KEY_REACTIVATION_TIME = 0.15s;
+//const Time   DOWN_KEY_REACTIVATION_TIME = 0.08s;
 const Time   DOWN_KEY_REACTIVATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;
-const Time   DROP_KEY_REACTIVATION_TIME = sf::seconds(0.25f);
-const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME = sf::seconds(0.2f);
+const Time   DROP_KEY_REACTIVATION_TIME = 0.25s;
+const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME = 0.2s;
 
 const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
 {

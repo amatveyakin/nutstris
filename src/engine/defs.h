@@ -5,16 +5,18 @@
 #ifndef ENGINE_DEFS_H
 #define ENGINE_DEFS_H
 
+#include <chrono>
 #include <limits>
 
 #include <SFML/Graphics/Color.hpp>
-#include <SFML/System/Time.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
 #include "math/vector.h"
 
 
 namespace engine {
+
+using namespace std::chrono_literals;
 
 // TODO(Andrei): Fix naming
 const int    FIELD_WIDTH = 10;
@@ -33,9 +35,9 @@ using FloatFieldCoords = math::Vec2f;
 using CompareFieldCoords = math::LexicographicCompareVec2i;
 
 
-using Time = sf::Time;
-const Time NEVER_HAPPENED = sf::microseconds(std::numeric_limits<sf::Int64>::min());
-const Time WILL_NEVER_HAPPEN = sf::microseconds(std::numeric_limits<sf::Int64>::max());
+using Time = std::chrono::duration<float>;  // seconds
+const Time NEVER_HAPPENED = Time::min();
+const Time WILL_NEVER_HAPPEN = Time::max();
 
 // TODO(Andrei): Adequate Speed type
 using Speed = float;

@@ -181,7 +181,7 @@ public:
 
   virtual FloatFieldCoords relativePosition(Time currentTime)
   {
-    float deltaTime = (currentTime - lastUpdated_).asSeconds();
+    float deltaTime = (currentTime - lastUpdated_) / 1.0s;
     lastUpdated_ = currentTime;
     if (binding == NULL)
       return position_;
@@ -218,7 +218,7 @@ protected:
 class SmoothEffectType : public BaseEffectType
 {
 public:
-  SmoothEffectType() : INITIAL_TIME(Time::Zero), MIN_PROGRESS(0.0), MAX_PROGRESS(1.0),
+  SmoothEffectType() : INITIAL_TIME(Time::zero()), MIN_PROGRESS(0.0), MAX_PROGRESS(1.0),
                        PROGRESS_RANGE(MAX_PROGRESS - MIN_PROGRESS),
                        progress_(MIN_PROGRESS), lastUpdated_(INITIAL_TIME) { }
 
@@ -262,7 +262,7 @@ class PeriodicalEffectType : public SmoothEffectType
 public:
   Time period;
 
-  PeriodicalEffectType() : period(sf::seconds(1.0)), STOPPING_ACCELERATION_COEFF(sf::seconds(0.05f)), isStopping_(false) { }
+  PeriodicalEffectType() : period(1.0s), STOPPING_ACCELERATION_COEFF(0.05s), isStopping_(false) { }
 
   void enable(Time newPeriod)
   {
@@ -274,7 +274,7 @@ public:
   void disable()
   {
     isStopping_ = true;
-    stoppingAcceleration_ = Time::Zero;
+    stoppingAcceleration_ = Time::zero();
   }
 
   float progress(Time currentTime)
@@ -290,7 +290,7 @@ public:
     if (isStopping_)
     {
       stoppingAcceleration_ += progress_increment * STOPPING_ACCELERATION_COEFF;
-      progress_ += stoppingAcceleration_.asSeconds();
+      progress_ += stoppingAcceleration_ / 1.0s;
     }
 
     while (progress_ > MAX_PROGRESS)
@@ -323,7 +323,7 @@ class FadingEffectType : public SmoothEffectType
 public:
   Time duration;
 
-  FadingEffectType() : duration(sf::seconds(1.0)) { }
+  FadingEffectType() : duration(1.0s) { }
 
   void enable(Time newDuration)
   {
@@ -355,7 +355,7 @@ class SingleEffectType : public SmoothEffectType   // Name (?)
 public:
   Time duration;
 
-  SingleEffectType() : duration(sf::seconds(1.0)) { }
+  SingleEffectType() : duration(1.0s) { }
 
   void enable(Time newDuration)
   {
@@ -389,7 +389,7 @@ class FlashEffectType : public SmoothEffectType
 public:
   Time halfDuration;
 
-  FlashEffectType() : halfDuration(sf::seconds(1.0)) { }
+  FlashEffectType() : halfDuration(1.0s) { }
 
   void enable(Time newDuration)
   {
@@ -429,7 +429,7 @@ class PermanentEffectType : public SmoothEffectType   // Name (?)
 public:
   Time duration;
 
-  PermanentEffectType() : duration(sf::seconds(1.0)) { }
+  PermanentEffectType() : duration(1.0s) { }
 
   void enable(Time newDuration)
   {

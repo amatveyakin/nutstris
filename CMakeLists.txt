@@ -26,7 +26,7 @@ find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 target_link_libraries(${executable_name} ${SFML_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
 
-add_definitions("-std=c++14")
+add_definitions("-std=c++14 -fext-numeric-literals")
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wcast-align -Wunused -Wformat=2 -Wcast-qual -Wold-style-cast -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")

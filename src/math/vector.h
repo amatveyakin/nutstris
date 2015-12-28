@@ -275,15 +275,6 @@ public:
   ElementT w () const                       { return Parent::at (3); }
   ElementT& w ()                            { return Parent::at (3); }
 
-  ElementT r () const                       { return Parent::at (0); }
-  ElementT& r ()                            { return Parent::at (0); }
-  ElementT g () const                       { return Parent::at (1); }
-  ElementT& g ()                            { return Parent::at (1); }
-  ElementT b () const                       { return Parent::at (2); }
-  ElementT& b ()                            { return Parent::at (2); }
-  ElementT a () const                       { return Parent::at (3); }
-  ElementT& a ()                            { return Parent::at (3); }
-
   void setCoordinates (ElementT x__, ElementT y__, ElementT z__, ElementT w__)  { x () = x__;  y () = y__;  z () = z__;  w () = w__; }
 
   static Vector e1 ()                       { return Vector (1, 0, 0, 0); }

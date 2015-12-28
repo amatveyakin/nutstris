@@ -13,6 +13,8 @@
 
 namespace math {
 
+struct Uninitialized {};
+
 // TODO: turn it into template
 static const double MIN_NORM = 1e-8;
 
@@ -26,20 +28,34 @@ static const double MIN_NORM = 1e-8;
 template <int DIMENSION, typename ElementT>
 class VectorBase {
 public:
-  ElementT at (size_t index) const          { return m_elements [index]; }
-  ElementT& at (size_t index)               { return m_elements [index]; }
-  ElementT operator[] (size_t index) const  { return m_elements [index]; }
-  ElementT& operator[] (size_t index)       { return m_elements [index]; }
+  VectorBase() : m_elements() {}
+  explicit VectorBase(Uninitialized) {}
+  explicit VectorBase(const ElementT* elements)   { std::copy(elements, elements + DIMENSION, m_elements); }
 
-  const ElementT* data () const             { return m_elements; }
-  ElementT* data ()                         { return m_elements; }
+  ElementT at(size_t index) const           { return m_elements [index]; }
+  ElementT& at(size_t index)                { return m_elements [index]; }
+  ElementT operator[](size_t index) const   { return m_elements [index]; }
+  ElementT& operator[](size_t index)        { return m_elements [index]; }
 
-  bool operator== (const VectorBase& a) {
-    static_assert (std::numeric_limits <ElementT>::is_integer, "Comparing floating point vectors with operator== is strongly discouraged!");
-    for (int i = 0; i < DIMENSION; ++i)
+  const ElementT* data() const              { return m_elements; }
+  ElementT* data()                          { return m_elements; }
+
+  const ElementT* cbegin() const            { return m_elements; }
+  ElementT* begin()                         { return m_elements; }
+  const ElementT* cend() const              { return m_elements + DIMENSION; }
+  ElementT* end()                           { return m_elements + DIMENSION; }
+
+  bool operator== (const VectorBase& a) const {
+    static_assert (std::numeric_limits <ElementT>::is_integer, "Comparing floating point numbers with operator== is discouraged!");
+    for (int i = 0; i < DIMENSION; ++i) {
       if (m_elements[i] != a.m_elements[i])
         return false;
+    }
     return true;
+  }
+  bool operator!= (const VectorBase& a) const {
+    static_assert (std::numeric_limits <ElementT>::is_integer, "Comparing floating point numbers with operator!= is discouraged!");
+    return !(&this == a);
   }
 
 protected:
@@ -82,7 +98,7 @@ public:
 
   // unary operators
   VectorT operator- () const {
-    return VectorT::zero () - derived ();
+    return VectorT () - derived ();
   }
 
   // binary operators
@@ -155,19 +171,18 @@ public:
 template <int DIMENSION, typename VectorT, typename ElementT>
 class VectorConversations {
 public:
-  void copyFromArray (const ElementT* elements) {
-    for (int i = 0; i < DIMENSION; ++i)
-      derived ()[i] = elements[i];
-  }
   template <typename OtherElementT>
-  void copyFromArrayConverted (const OtherElementT* elements) {
+  static void converted (const OtherElementT* elements) {
+    VectorT result;
     for (int i = 0; i < DIMENSION; ++i)
-      derived ()[i] = elements[i];
+      result[i] = static_cast<ElementT>(elements[i]);
+    return result;
   }
   template <typename OtherVectorT>
-  void copyFromVectorConverted (OtherVectorT source) {
-    copyFromArrayConverted (source.data ());
+  static void converted (OtherVectorT source) {
+    return converted (source.data ());
   }
+
   void copyToArray (ElementT* elements) const {
     for (int i = 0; i < DIMENSION; ++i)
       elements[i] = derived ()[i];
@@ -191,11 +206,9 @@ private:
   typedef VectorBase <2, ElementT> Parent;
 
 public:
-  Vector ()                                           { }
-  template <typename OtherElementT>
-  explicit Vector (Vector <2, OtherElementT> other)   { this->copyFromVectorConverted (other); }
+  using Parent::Parent;
+  Vector () {}
   Vector (ElementT x__, ElementT y__)                 { setCoordinates (x__, y__); }
-  explicit Vector (ElementT* coords__)                { fromArray (coords__); }
 
   ElementT x () const                       { return Parent::at (0); }
   ElementT& x ()                            { return Parent::at (0); }
@@ -204,11 +217,9 @@ public:
 
   void setCoordinates (ElementT x__, ElementT y__)  { x () = x__;  y () = y__; }
 
-  static Vector zero ()                     { return Vector (0, 0); }
-  static Vector replicated (ElementT value) { return Vector (value, value); }
   static Vector e1 ()                       { return Vector (1, 0); }
   static Vector e2 ()                       { return Vector (0, 1); }
-  static Vector e_i (int i)                 { Vector result = Vector::zero ();  result[i] = 1;  return result; }
+  static Vector e_i (int i)                 { Vector result;  result[i] = 1;  return result; }
 };
 
 template <typename ElementT>
@@ -220,11 +231,9 @@ private:
   typedef VectorBase <3, ElementT> Parent;
 
 public:
-  Vector ()                                           { }
-  template <typename OtherElementT>
-  explicit Vector (Vector <3, OtherElementT> other)   { this->copyFromVectorConverted (other); }
+  using Parent::Parent;
+  Vector () {}
   Vector (ElementT x__, ElementT y__, ElementT z__)   { setCoordinates (x__, y__, z__); }
-  explicit Vector (ElementT* coords__)                { fromArray (coords__); }
 
   ElementT x () const                       { return Parent::at (0); }
   ElementT& x ()                            { return Parent::at (0); }
@@ -238,12 +247,10 @@ public:
   // TODO: generate other subsets and permutations
   Vector <2, ElementT> xy () const          { return Vector <2, ElementT> (x (), y ()); }
 
-  static Vector zero ()                     { return Vector (0, 0, 0); }
-  static Vector replicated (ElementT value) { return Vector (value, value, value); }
   static Vector e1 ()                       { return Vector (1, 0, 0); }
   static Vector e2 ()                       { return Vector (0, 1, 0); }
   static Vector e3 ()                       { return Vector (0, 0, 1); }
-  static Vector e_i (int i)                 { Vector result = Vector::zero ();  result[i] = 1;  return result; }
+  static Vector e_i (int i)                 { Vector result;  result[i] = 1;  return result; }
 };
 
 template <typename ElementT>
@@ -255,11 +262,9 @@ private:
   typedef VectorBase <4, ElementT> Parent;
 
 public:
-  Vector ()                                                         { }
-  template <typename OtherElementT>
-  explicit Vector (Vector <4, OtherElementT> other)                 { this->copyFromVectorConverted (other); }
+  using Parent::Parent;
+  Vector () {}
   Vector (ElementT x__, ElementT y__, ElementT z__, ElementT w__)   { setCoordinates (x__, y__, z__, w__); }
-  explicit Vector (ElementT* coords__)                              { fromArray (coords__); }
 
   ElementT x () const                       { return Parent::at (0); }
   ElementT& x ()                            { return Parent::at (0); }
@@ -281,13 +286,11 @@ public:
 
   void setCoordinates (ElementT x__, ElementT y__, ElementT z__, ElementT w__)  { x () = x__;  y () = y__;  z () = z__;  w () = w__; }
 
-  static Vector zero ()                     { return Vector (0, 0, 0, 0); }
-  static Vector replicated (ElementT value) { return Vector (value, value, value, value); }
   static Vector e1 ()                       { return Vector (1, 0, 0, 0); }
   static Vector e2 ()                       { return Vector (0, 1, 0, 0); }
   static Vector e3 ()                       { return Vector (0, 0, 1, 0); }
   static Vector e4 ()                       { return Vector (0, 0, 0, 1); }
-  static Vector e_i (int i)                 { Vector result = Vector::zero ();  result[i] = 1;  return result; }
+  static Vector e_i (int i)                 { Vector result;  result[i] = 1;  return result; }
 };
 
 
@@ -295,34 +298,6 @@ public:
 #define XY_LIST(vec__)    (vec__).x (), (vec__).y ()
 #define XYZ_LIST(vec__)   (vec__).x (), (vec__).y (), (vec__).z ()
 #define XYZW_LIST(vec__)  (vec__).x (), (vec__).y (), (vec__).z (), (vec__).w ()
-
-
-template <int DIMENSION, typename ElementT>
-Vector <DIMENSION, ElementT> min (Vector <DIMENSION, ElementT> a, Vector <DIMENSION, ElementT> b) {
-  Vector <DIMENSION, ElementT> result;
-  for (int i = 0; i < DIMENSION; ++i)
-    result[i] = min (a[i], b[i]);
-  return result;
-}
-
-template <int DIMENSION, typename ElementT>
-Vector <DIMENSION, ElementT> max (Vector <DIMENSION, ElementT> a, Vector <DIMENSION, ElementT> b) {
-  Vector <DIMENSION, ElementT> result;
-  for (int i = 0; i < DIMENSION; ++i)
-    result[i] = max (a[i], b[i]);
-  return result;
-}
-
-
-template <int DIMENSION, typename ElementT>
-Vector <DIMENSION, ElementT> floor (Vector <DIMENSION, ElementT> a) {
-  static_assert (!std::numeric_limits <ElementT>::is_integer,
-                 "Are you sure your want to apply floor function to an integer type?");
-  Vector <DIMENSION, ElementT> result;
-  for (int i = 0; i < DIMENSION; ++i)
-    result[i] = floor (a[i]);
-  return result;
-}
 
 
 template <int DIMENSION, typename ElementT>

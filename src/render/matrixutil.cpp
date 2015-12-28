@@ -16,7 +16,7 @@ math::Mat4x4f createFromColumns(math::Vec3f e1, math::Vec3f e2, math::Vec3f e3, 
 math::Mat4x4f rotation(math::Vec3f axis, float angle) {
   axis = math::L2::normalized(axis);
   math::Vec3f basis[3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-  math::Vec3f transformed[3] = {};
+  math::Vec3f transformed[3];
   for (int i = 0; i < 3; ++i)
   {
     auto along = math::dotProduct(basis[i], axis);
@@ -39,7 +39,7 @@ math::Mat4x4f lookAt(math::Vec3f eye, math::Vec3f center, math::Vec3f up) {
 }
 
 math::Mat4x4f perspective(float fov, float aspect, float clipNear, float clipFar) {
-  auto result = math::Mat4x4f::zeroMatrix();
+  math::Mat4x4f result;
   auto f = 1.0f / tan(fov / 2.0f);
   result(0, 0) = f;
   result(1, 1) = f / aspect;
@@ -49,6 +49,5 @@ math::Mat4x4f perspective(float fov, float aspect, float clipNear, float clipFar
   return result;
 }
 
-
-}
-}
+}  // namespace matrixutil
+}  // namespace render

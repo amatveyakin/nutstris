@@ -9,11 +9,17 @@ namespace math {
 // A column-major order matrix
 template <int N_ROWS, int N_COLS, typename ElementT>
 class MatrixBase {
-private:
-  static const int N_ELEMENTS = N_ROWS * N_COLS;
-  size_t internalIndex_(int row, int col) const { return col * N_ROWS + row; }
-
 public:
+  MatrixBase() : m_elements() {}
+  explicit MatrixBase(Uninitialized) {}
+  explicit MatrixBase(const ElementT* elements)   { std::copy(elements, elements + N_ELEMENTS, m_elements); }
+  explicit MatrixBase(const std::array<Vector<N_COLS, ElementT>, N_ROWS>& columns) {
+    for (int i = 0; i < N_ROWS; ++i) {
+      for (int j = 0; j < N_COLS; ++j)
+        this->at(i, j) = columns[j][i];
+    }
+  }
+
   const ElementT* elements () const             { return m_elements; }
   ElementT* elements ()                         { return m_elements; }
 
@@ -23,7 +29,10 @@ public:
   ElementT& at (int row, int col)               { return m_elements [internalIndex_(row, col)]; }
 
 protected:
+  static const int N_ELEMENTS = N_ROWS * N_COLS;
   ElementT m_elements [N_ELEMENTS];
+
+  size_t internalIndex_(int row, int col) const { return col * N_ROWS + row; }
 
   template <int, typename, typename>
   friend class CommonVectorLinearOperations;
@@ -35,15 +44,11 @@ template <int N_ROWS, int N_COLS, typename ElementT>
 class Matrix : public MatrixBase <N_ROWS, N_COLS, ElementT>,
                public VectorLinearOperations <N_ROWS * N_COLS, Matrix <N_ROWS, N_COLS, ElementT>, ElementT>
 {
-public:
-  static Matrix zeroMatrix () {
-    Matrix result;
-    std::fill (result.m_elements, result.m_elements + N_ELEMENTS, 0);
-    return result;
-  }
-
 private:
-  static const int N_ELEMENTS = N_ROWS * N_COLS;
+  typedef MatrixBase <N_ROWS, N_COLS, ElementT> Parent;
+
+public:
+  using Parent::Parent;
 };
 
 // Square matrix
@@ -51,23 +56,14 @@ template <int SIZE, typename ElementT>
 class Matrix <SIZE, SIZE, ElementT> : public MatrixBase <SIZE, SIZE, ElementT>,
                                       public VectorLinearOperations <SIZE * SIZE, Matrix <SIZE, SIZE, ElementT>, ElementT>
 {
+private:
+  typedef MatrixBase <SIZE, SIZE, ElementT> Parent;
+
 public:
-  Matrix() {}
-
-  explicit Matrix(const std::array<Vector<SIZE, ElementT>, SIZE>& columns) {
-    for (int i = 0; i < SIZE; ++i)
-      for (int j = 0; j < SIZE; ++j)
-	this->at(i, j) = columns[j][i];
-  }
-
-  static Matrix zeroMatrix () {
-    Matrix result;
-    std::fill (result.m_elements, result.m_elements + N_ELEMENTS, 0);
-    return result;
-  }
+  using Parent::Parent;
 
   static Matrix identityMatrix () {
-    Matrix result = Matrix::zeroMatrix ();
+    Matrix result;
     for (int i = 0; i < SIZE; ++i)
       result (i, i) = 1;
     return result;
@@ -81,18 +77,13 @@ public:
   }
 
   Matrix transposed() const {
-    Matrix result;
-    for (int i = 0; i < SIZE; ++i)
+    Matrix result{Uninitialized{}};
+    for (int i = 0; i < SIZE; ++i) {
       for (int j = 0; j < SIZE; ++j)
-	result(i, j) = this->at(j, i);
-
+        result(i, j) = this->at(j, i);
+    }
     return result;
   }
-
-
-
-private:
-  static const int N_ELEMENTS = SIZE * SIZE;
 };
 
 

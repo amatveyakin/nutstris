@@ -1,6 +1,7 @@
 #ifndef MATH_BASIC_H
 #define MATH_BASIC_H
 
+#include <cstdlib>
 #include <limits>
 
 
@@ -92,6 +93,12 @@ NumericT lcm (NumericT a, NumericT b) {
   NumericT result = a / gcd (a, b);
   result *= b;
   return result;
+}
+
+
+inline double randomRange(double minValue, double maxValue) {
+  // TODO(Andrei): use std::uniform_real_distribution
+  return minValue + double(rand()) * (maxValue - minValue) / RAND_MAX;
 }
 
 }  // namespace math

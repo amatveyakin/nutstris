@@ -1,7 +1,9 @@
-#include <SFML/Window.hpp>
 #include <GL/glew.h>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Window.hpp>
+
 #include "render/renderer.h"
+#include "engine/engine.h"
 
 int main() {
   sf::ContextSettings contextSettings;

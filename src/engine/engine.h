@@ -6,168 +6,91 @@
 
 // TODO: use more throw's instead of assertions
 
-// TODO: Realize  field.lock() / field.unlock():  the field may be make immutable for some time
+// TODO: Implement  field.lock() / field.unlock():  the field may be made immutable for some time
 //       add all events that what to change the field are delayed  (?)
 // No, looks like it's better to check specific conditions before any change
 
 // TODO: game speed up formula -- ?
 
-#ifndef CRAZYTETRIS_ENGINE_H
-#define CRAZYTETRIS_ENGINE_H
+#ifndef ENGINE_ENGINE_H
+#define ENGINE_ENGINE_H
 
 #include <climits>
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <bitset>
-#include <set>
-#include <map>
-#include "Strings.h"
-#include "Declarations.h"
-#include "IOFunctions.h"
-#include "VisualEffects.h"
 
-using std::wstring;
-using std::pair;
-using std::make_pair;
-using std::vector;
-using std::bitset;
-using std::multiset;
-using std::map;
+#include "engine/keyboard.h"
+#include "engine/visual_effects.h"
+#include "util/containers.h"
+#include "util/file.h"
 
 
-
+namespace engine {
 
 //================================ Time & speed ================================
 
-// Continuous mode
+extern const float  STARTING_SPEED;
+extern const float  ROUTINE_SPEED_UP_VALUE;
+extern const Time   ROUTINE_SPEED_UP_INTERVAL;
+extern const float  NORMAL_SPEED_LIMIT;
+extern const float  ABSOLUTE_SPEED_LIMIT;
 
-/*const float  STARTING_SPEED = 1.0;
-const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
-const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0f;
-const float  NORMAL_SPEED_LIMIT = 5.0;
-const float  ABSOLUTE_SPEED_LIMIT = 10.0;
-
-const Time   AUTO_LOWERING_TIME = 0.8f;
+extern const Time   AUTO_LOWERING_TIME;
 // Time necessary for a dropping piece to move one line down
-const Time   DROPPING_PIECE_LOWERING_TIME = 0.04f;
-const Time   LINE_DISAPPEAR_TIME = 1.0f;
-const Time   LINE_COLLAPSE_TIME = 0.05f;
+extern const Time   DROPPING_PIECE_LOWERING_TIME;
+extern const Time   LINE_DISAPPEAR_TIME;
+extern const Time   LINE_COLLAPSE_TIME;
 
-const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = 0.8f;
-const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = 0.1f;   // = DOWN_KEY_REACTIVATION_TIME
-const Time   LINE_COLLAPSE_ANIMATION_TIME = 0.3f;
-const Time   PIECE_MOVING_ANIMATION_TIME = 0.4f;
-const Time   PIECE_ROTATING_ANIMATION_TIME = 0.4f;
+//extern const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME;
+extern const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME;
+extern const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME;
+extern const Time   LINE_COLLAPSE_ANIMATION_TIME;
+extern const Time   PIECE_MOVING_ANIMATION_TIME;
+extern const Time   PIECE_ROTATING_ANIMATION_TIME;
 
-const Time   HINT_APPERAING_TIME = 0.3f;
-const Time   HINT_MATERIALIZATION_TIME = 0.2f;
-const Time   PLAYER_DYING_ANIMATION_TIME = 1.0f;*/
-
-
-
-const float  STARTING_SPEED = 1.0;
-const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
-const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0f;
-const float  NORMAL_SPEED_LIMIT = 5.0;
-const float  ABSOLUTE_SPEED_LIMIT = 10.0;
-
-const Time   AUTO_LOWERING_TIME = 0.8f;
-// Time necessary for a dropping piece to move one line down
-const Time   DROPPING_PIECE_LOWERING_TIME = 0.02f;
-const Time   LINE_DISAPPEAR_TIME = 0.6f;
-const Time   LINE_COLLAPSE_TIME = 0.06f;
-
-//const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = AUTO_LOWERING_TIME;
-const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = 0.2f;
-const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = 0.1f;   // = DOWN_KEY_REACTIVATION_TIME
-const Time   LINE_COLLAPSE_ANIMATION_TIME = 0.06f;
-const Time   PIECE_MOVING_ANIMATION_TIME = 0.08f;
-const Time   PIECE_ROTATING_ANIMATION_TIME = 0.05f;
-
-const Time   HINT_APPERAING_TIME = 0.3f;
-const Time   HINT_MATERIALIZATION_TIME = 0.2f;
-const Time   PLAYER_DYING_ANIMATION_TIME = 1.0f;
-
+extern const Time   HINT_APPERAING_TIME;
+extern const Time   HINT_MATERIALIZATION_TIME;
+extern const Time   PLAYER_DYING_ANIMATION_TIME;
 
 
 //================================== Keyboard ==================================
 
-const int N_PLAYER_KEYS = 7;
-
-enum PlayerKey
-{
-  keyLeft,
-  keyRight,
-  keyRotateCCW,
-  keyRotateCW,
-  keyDown,
-  keyDrop,
-  keyNextVictim
-};
-
 // TODO: find optimal value for KEY_REACTIVATION_TIMEs
-const Time   MOVE_KEY_REACTIVATION_TIME = 0.12f;
-const Time   ROTATE_KEY_REACTIVATION_TIME = 0.15f;
-//const Time   DOWN_KEY_REACTIVATION_TIME = 0.08f;
-const Time   DOWN_KEY_REACTIVATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;
-const Time   DROP_KEY_REACTIVATION_TIME = 0.25f;
-const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME = 0.2f;
+extern const Time   MOVE_KEY_REACTIVATION_TIME;
+extern const Time   ROTATE_KEY_REACTIVATION_TIME;
+//extern const Time   DOWN_KEY_REACTIVATION_TIME;
+extern const Time   DOWN_KEY_REACTIVATION_TIME;
+extern const Time   DROP_KEY_REACTIVATION_TIME;
+extern const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME;
 
-const wstring PLAYER_KEY_NAMES[N_PLAYER_KEYS] =
-{
-  L"Влево: ",
-  L"Вправо: ",
-  L"Вращать против часовой: ",
-  L"Вращать по часовой: ",
-  L"Вниз: ",
-  L"Бросить: ",
-  L"Следующая цель: "
-};
-
-const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
-{
-  MOVE_KEY_REACTIVATION_TIME,
-  MOVE_KEY_REACTIVATION_TIME,
-  ROTATE_KEY_REACTIVATION_TIME,
-  ROTATE_KEY_REACTIVATION_TIME,
-  DOWN_KEY_REACTIVATION_TIME,
-  DROP_KEY_REACTIVATION_TIME,
-  CHANGE_VICTIM_KEY_REACTIVATION_TIME
-};
+extern const Time   PLAYER_KEY_REACTIVATION_TIME[];
 
 
-
-const int N_GLOBAL_KEYS = 0;
+static const int N_GLOBAL_KEYS = 0;
 
 enum GlobalKey { };
 
-// const string GLOBAL_KEY_NAME[N_GLOBAL_KEYS] = { };
-
-// const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = { };
-
-const wstring GLOBAL_KEY_NAME[1] = { L"qwerty" };
-
-const Time   GLOBAL_KEY_REACTIVATION_TIME[1] = { 123.0 };
-
+extern const Time   GLOBAL_KEY_REACTIVATION_TIME[];
 
 
 struct PlayerKeyList
 {
-  KeyboardKey keyLeft;
-  KeyboardKey keyRight;
-  KeyboardKey keyRotateCCW;
-  KeyboardKey keyRotateCW;
-  KeyboardKey keyDown;
-  KeyboardKey keyDrop;
-  KeyboardKey keyNextVictim;
+  Keyboard::Key keyLeft;
+  Keyboard::Key keyRight;
+  Keyboard::Key keyRotateCCW;
+  Keyboard::Key keyRotateCW;
+  Keyboard::Key keyDown;
+  Keyboard::Key keyDrop;
+  Keyboard::Key keyNextVictim;
 };
 
 union Controls
 {
   PlayerKeyList keyByName;
-  KeyboardKey keyArray[N_PLAYER_KEYS];
+  Keyboard::Key keyArray[N_PLAYER_KEYS];
 };
-
 
 
 struct GlobalKeyList { };
@@ -175,30 +98,29 @@ struct GlobalKeyList { };
 union GlobalControls
 {
   GlobalKeyList keyByName;
-//  KeyboardKey keyArray[N_GLOBAL_KEYS];
-  KeyboardKey keyArray[1];
+//  Keyboard::Key keyArray[N_GLOBAL_KEYS];
+  Keyboard::Key keyArray[1];
 };
-
 
 
 //================================== Bonuses ===================================
 
-#define SKIP_BUFFS          case bnEnlargeHintQueue:  case bnPieceTheft:
+#define SKIP_BUFFS          case Bonus::EnlargeHintQueue:  case Bonus::PieceTheft:
 
-#define SKIP_KIND_SORCERIES case bnHeal:  case bnSlowDown:  case bnClearField:
+#define SKIP_KIND_SORCERIES case Bonus::Heal:  case Bonus::SlowDown:  case Bonus::ClearField:
 
-#define SKIP_DEBUFFS        case bnFlippedScreen:  case bnCrazyPieces: \
-                            case bnTruncatedBlocks:  case bnNoHint:
+#define SKIP_DEBUFFS        case Bonus::FlippedScreen:  case Bonus::CrazyPieces: \
+                            case Bonus::TruncatedBlocks:  case Bonus::NoHint:
 
-#define SKIP_EVIL_SORCERIES case bnSpeedUp:  // case bnFlipField:
+#define SKIP_EVIL_SORCERIES case Bonus::SpeedUp:  // case Bonus::FlipField:
 
 #define SKIP_ENCHANTMENTS  SKIP_BUFFS  SKIP_DEBUFFS
 
 #define SKIP_SORCERIES  SKIP_KIND_SORCERIES  SKIP_EVIL_SORCERIES
 
-#define SKIP_ALL_BUT_SORCERIES  SKIP_ENCHANTMENTS  case bnNoBonus:
+#define SKIP_ALL_BUT_SORCERIES  SKIP_ENCHANTMENTS  case Bonus::None:
 
-#define SKIP_ALL_BUT_ENCHANTMENTS  SKIP_SORCERIES  case bnNoBonus:
+#define SKIP_ALL_BUT_ENCHANTMENTS  SKIP_SORCERIES  case Bonus::None:
 
 #define SKIP_ALL_BUT_BUFFS  SKIP_ALL_BUT_ENCHANTMENTS  SKIP_DEBUFFS
 
@@ -208,43 +130,43 @@ union GlobalControls
 
 const int    BONUS_CHANCES[N_BONUSES] =
 {
-  0,  // bnNoBonus
-  0,  // bnEnlargeHintQueue
-  0,  // bnPieceTheft
-  10, // bnHeal
-  4,  // bnSlowDown
-  2,  // bnClearField
-  4,  // bnFlippedScreen
-  3,  // bnRotatingScreen
-  4,  // bnWave
-  3,  // bnLantern
-  0,  // bnCrazyPieces
-  4,  // bnTruncatedBlocks
-  0,  // bnNoHint
-  4   // bnSpeedUp
-//  2   // bnFlipField
+  0,  // Bonus::None
+  0,  // Bonus::EnlargeHintQueue
+  0,  // Bonus::PieceTheft
+  10, // Bonus::Heal
+  4,  // Bonus::SlowDown
+  2,  // Bonus::ClearField
+  4,  // Bonus::FlippedScreen
+  3,  // Bonus::RotatingScreen
+  4,  // Bonus::Wave
+  3,  // Bonus::Lantern
+  0,  // Bonus::CrazyPieces
+  4,  // Bonus::TruncatedBlocks
+  0,  // Bonus::NoHint
+  4   // Bonus::SpeedUp
+//  2   // Bonus::FlipField
 };
 
 const int    BONUS_ENLARGED_HINT_QUEUE_SIZE = 7;
-const Time   BONUS_FADING_DURATION = 0.5f;
+const Time   BONUS_FADING_DURATION = sf::seconds(0.5f);
 
 const float  BONUS_SPEED_UP_VALUE = 0.8f;
 const float  BONUS_SLOW_DOWN_VALUE = 1.0f;
 
-const Time   BONUS_FLIPPING_SCREEN_DURATION = 0.8f;
-const Time   BONUS_ROTATING_SCREEN_PERIOD = 10.0f;
-const Time   BONUS_WAVE_PERIOD = 2.0f;
-const Time   BONUS_CLEAR_FIELD_DURATION = 1.0f;
-const Time   BONUS_CUTTING_BLOCKS_DURATION = 0.5f;
-const Time   BONUS_REMOVING_HINT_DURATION = 1.0f;
-const Time   BONUS_LANTERN_FADING_TIME = 1.5f;
-// const Time   BONUS_LANTERN_ANIMATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;  // (?)
-const Time   BONUS_LANTERN_MAX_SPEED = 100.0f; // Requirements: BONUS_LANTERN_MAX_SPEED >= 1.0 / DROPPING_PIECE_LOWERING_TIME
+const Time   BONUS_FLIPPING_SCREEN_DURATION = sf::seconds(0.8f);
+const Time   BONUS_ROTATING_SCREEN_PERIOD = sf::seconds(10.0f);
+const Time   BONUS_WAVE_PERIOD = sf::seconds(2.0f);
+const Time   BONUS_CLEAR_FIELD_DURATION = sf::seconds(1.0f);
+const Time   BONUS_CUTTING_BLOCKS_DURATION = sf::seconds(0.5f);
+const Time   BONUS_REMOVING_HINT_DURATION = sf::seconds(1.0f);
+const Time   BONUS_LANTERN_FADING_TIME = sf::seconds(1.5f);
+// const Time   BONUS_LANTERN_ANIMATION_TIME = sf::seconds(PIECE_FORCED_LOWERING_ANIMATION_TIME);  // (?)
+const Speed  BONUS_LANTERN_MAX_SPEED = 100.0f; // Requirements: BONUS_LANTERN_MAX_SPEED >= 1.0 / DROPPING_PIECE_LOWERING_TIME
 
-const Time   MIN_BONUS_APPEAR_TIME = 4.0f;
-const Time   MAX_BONUS_APPEAR_TIME = 6.0f;
-const Time   MIN_BONUS_LIFE_TIME = 20.0;
-const Time   MAX_BONUS_LIFE_TIME = 25.0;
+const Time   MIN_BONUS_APPEAR_TIME = sf::seconds(4.0f);
+const Time   MAX_BONUS_APPEAR_TIME = sf::seconds(6.0f);
+const Time   MIN_BONUS_LIFE_TIME = sf::seconds(20.0);
+const Time   MAX_BONUS_LIFE_TIME = sf::seconds(25.0);
 
 /*const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
 const int    N_BONUS_GENERATION_ATTEMPTS = 5;
@@ -260,19 +182,17 @@ const int    BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL = FIELD_HEIGHT / 2;
 
 
 
-const Bonus  FIRST_BUFF         = bnEnlargeHintQueue;
-const Bonus  LAST_BUFF          = bnPieceTheft;
-const int    N_BUFFS            = LAST_BUFF - FIRST_BUFF + 1;
+const Bonus  FIRST_BUFF         = Bonus::EnlargeHintQueue;
+const Bonus  LAST_BUFF          = Bonus::PieceTheft;
 
-const Bonus  FIRST_DEBUFF       = bnFlippedScreen;
-const Bonus  LAST_DEBUFF        = bnNoHint;
-const int    N_DEBUFFS          = LAST_DEBUFF - FIRST_DEBUFF + 1;
+const Bonus  FIRST_DEBUFF       = Bonus::FlippedScreen;
+const Bonus  LAST_DEBUFF        = Bonus::NoHint;
 
 const Bonus  FIRST_KIND_BONUS   = FIRST_BUFF;
-const Bonus  LAST_KIND_BONUS    = bnClearField;
+const Bonus  LAST_KIND_BONUS    = Bonus::ClearField;
 
 const Bonus  FIRST_EVIL_BONUS   = FIRST_DEBUFF;
-const Bonus  LAST_EVIl_BONUS    = bnSpeedUp;
+const Bonus  LAST_EVIl_BONUS    = Bonus::SpeedUp;
 
 inline bool isKind(Bonus bonus)
 {
@@ -299,9 +219,9 @@ inline bool isEnchantment(Bonus bonus)  // (?) Is it necessary?
   return isBuff(bonus) || isDebuff(bonus);
 }
 
-typedef ShiftedBitSet<N_BUFFS, FIRST_BUFF> Buffs;
+typedef util::StronglyTypedBitSet<Bonus, FIRST_BUFF, LAST_BUFF> Buffs;
 
-typedef ShiftedBitSet<N_DEBUFFS, FIRST_DEBUFF> Debuffs;
+typedef util::StronglyTypedBitSet<Bonus, FIRST_DEBUFF, LAST_DEBUFF> Debuffs;
 
 
 
@@ -334,34 +254,32 @@ struct Bounds
 };
 
 
-
 struct BlockStructure
 {
-  vector<FieldCoords> blocks;
+  std::vector<FieldCoords> blocks;
   Bounds bounds;
 
   void setBounds()
   {
     if (blocks.empty())
-      throw ERR_EMPTY_BLOCK;
-    bounds.bottom = blocks[0].row;
-    bounds.top = blocks[0].row;
-    bounds.left = blocks[0].col;
-    bounds.right = blocks[0].col;
-    for (vector<FieldCoords>::iterator i = blocks.begin() + 1; i != blocks.end(); ++i)
+      throw std::runtime_error("Empty piece found");
+    bounds.bottom = blocks[0].y();
+    bounds.top = blocks[0].y();
+    bounds.left = blocks[0].x();
+    bounds.right = blocks[0].x();
+    for (auto& b : blocks)
     {
-      if (i->row < bounds.bottom)
-        bounds.bottom = i->row;
-      if (i->row > bounds.top)
-        bounds.top = i->row;
-      if (i->col < bounds.left)
-        bounds.left = i->col;
-      if (i->col > bounds.right)
-        bounds.right = i->col;
+      if (b.y() < bounds.bottom)
+        bounds.bottom = b.y();
+      if (b.y() > bounds.top)
+        bounds.top = b.y();
+      if (b.x() < bounds.left)
+        bounds.left = b.x();
+      if (b.x() > bounds.right)
+        bounds.right = b.x();
     }
   }
 };
-
 
 
 struct PieceTemplate
@@ -370,7 +288,6 @@ struct PieceTemplate
   int chance;
   BlockStructure structure[N_PIECE_ROTATION_STATES];
 };
-
 
 
 struct Piece
@@ -383,13 +300,6 @@ struct Piece
   {
     pieceTemplate = NULL;
   }
-
-  /*void setPiece(PieceTemplate* pieceTemplate__, int rotationState__, FieldCoords position__)
-  {
-    pieceTemplate = pieceTemplate__;
-    rotationState = rotationState__;
-    position = position__;
-  }*/
 
   bool empty()
   {
@@ -423,26 +333,18 @@ struct Piece
 };
 
 
-
 struct FieldCell
 {
   bool blocked;
   Color color;
   Bonus bonus;
 
-  /*void assign(const FieldCell& a)
-  {
-    blocked = a.blocked;
-    color = a.color;
-    bonus = a.bonus;
-  }*/
-
   void clear()
   {
     blocked = false;
   }
 
-  void setBlock(Color color__, Bonus bonus__ = bnNoBonus)
+  void setBlock(Color color__, Bonus bonus__ = Bonus::None)
   {
     blocked = true;
     color = color__;
@@ -461,12 +363,12 @@ struct FieldCell
 };
 
 
-
-struct Field : public Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                                   FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>
+struct Field : public util::Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
+                                         FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>
 {
   Field();
 
+  // TODO: swap and rename arguments
   FieldCell& operator()(int row, int col)
   {
     return Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
@@ -483,23 +385,21 @@ struct Field : public Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
 
   FieldCell& operator()(FieldCoords position)
   {
-    return operator()(position.row, position.col);
+    return operator()(position.y(), position.x());
   }
 
   const FieldCell& operator()(FieldCoords position) const
   {
-    return operator()(position.row, position.col);
+    return operator()(position.y(), position.x());
   }
 
   void clear();
 };
 
 
-
 enum FallingPieceState { psAbsent, psNormal, psDropping };
 
 const char   PIECE_TEMPLATE_FREE_CHAR  = '.';
-
 
 
 struct FieldLocks
@@ -513,10 +413,9 @@ struct FieldLocks
 };
 
 
-
 //=================================== Events ===================================
 
-const Time   EVENT_DELAY_TIME = 0.01f; // (?)
+const Time   EVENT_DELAY_TIME = sf::seconds(0.01f); // (?)
 
 enum EventType
 {
@@ -533,7 +432,6 @@ enum EventType
 };
 
 
-
 struct LineCollapseParameters
 {
   int row;
@@ -543,7 +441,6 @@ union EventParameters
 {
   LineCollapseParameters lineCollapse;
 };
-
 
 
 struct Event
@@ -564,12 +461,11 @@ struct Event
 };
 
 
-
 // TODO: reorganize that (may be add counter of events of a certain type or use several sets ot maps)
 class EventSet
 {
 public:
-  typedef multiset<Event>::iterator iterator;
+  typedef std::multiset<Event>::iterator iterator;
 
   iterator begin()
   {
@@ -643,9 +539,8 @@ public:
   }
 
 private:
-  multiset<Event> events_;
+  std::multiset<Event> events_;
 };
-
 
 
 //=================================== Player ===================================
@@ -667,7 +562,7 @@ struct Statistics
 
 struct AccountInfo
 {
-  wstring name;
+  std::string name;
 //  Statistics totalStatistics;
   // TODO: other stats
 };
@@ -693,9 +588,9 @@ public:
   FieldLocks    fieldLocks;     // R
   Time          latestLineCollapse; // R
 
-  FallingPieceState     fallingPieceState;  // R
-  Piece                 fallingPiece;       // R
-  vector<const Piece>   nextPieces;         // R
+  FallingPieceState   fallingPieceState;  // R
+  Piece               fallingPiece;       // R
+  std::vector<Piece>  nextPieces;         // R
 
   Buffs         buffs;          // R
   Debuffs       debuffs;        // R
@@ -703,14 +598,14 @@ public:
 
   EventSet      events;         // R
 
-  vector<BlockImage>            lyingBlockImages;   // R  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
-  map<FieldCoords, int>         lyingBlockIndices;  // R
-  MovingObject                  fallingPieceFrame;  // R
-  vector<BlockImage>            fallingBlockImages; // R  (based on fallingPieceFrame)
-  vector<DisappearingLine>      disappearingLines;  // R
-  PlayerVisualEffects           visualEffects;      // R
+  std::vector<BlockImage>                         lyingBlockImages;   // R  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
+  std::map<FieldCoords, int, CompareFieldCoords>  lyingBlockIndices;  // R
+  MovingObject                                    fallingPieceFrame;  // R
+  std::vector<BlockImage>                         fallingBlockImages; // R  (based on fallingPieceFrame)
+  std::vector<DisappearingLine>                   disappearingLines;  // R
+  PlayerVisualEffects                             visualEffects;      // R
 
-  FixedZeroBasedArray<Time, N_PLAYER_KEYS> nextKeyActivationTable; // C
+  util::FixedZeroBasedArray<Time, N_PLAYER_KEYS> nextKeyActivationTable; // C
 
   void          init(Game* game__, int number__);
   void          loadAccountInfo(int newAccount);
@@ -722,7 +617,7 @@ public:
   Time          pieceLoweringInterval();
 
   Player*       victim() const;
-  wstring       victimName() const;
+  std::string   victimName() const;
 
   // TODO: standardize terminology:  fantasy  OR  formal (?)
   void          takesBonus(Bonus bonus);
@@ -783,29 +678,28 @@ private:
 };
 
 
-
 //==================================== Game ====================================
 
 class Game
 {
 public:
-  vector<AccountInfo> accounts;
+  std::vector<AccountInfo> accounts;
 
   // TODO: participants array (to speed up booting)
-  FixedZeroBasedArray<Player, MAX_PLAYERS> players;
-  vector<Player*> participants;
-  vector<Player*> activePlayers;
+  util::FixedZeroBasedArray<Player, MAX_PLAYERS> players;
+  std::vector<Player*> participants;
+  std::vector<Player*> activePlayers;
 
-  vector<PieceTemplate> pieceTemplates;
-  vector<int>   randomPieceTable;
+  std::vector<PieceTemplate> pieceTemplates;
+  std::vector<int>   randomPieceTable;
 
-  vector<Bonus> randomBonusTable;
+  std::vector<Bonus> randomBonusTable;
 
   Time          currentTime;
   GlobalVisualEffects   globalEffects;
 
 //  FixedZeroBasedArray<Time, N_GLOBAL_KEYS> nextGlobalKeyActivationTable;
-  FixedZeroBasedArray<Time, 1> nextGlobalKeyActivationTable;
+  util::FixedZeroBasedArray<Time, 1> nextGlobalKeyActivationTable;
   GlobalControls globalControls;
 
   void          init();
@@ -829,4 +723,6 @@ private:
   void          loadDefaultSettings();
 };
 
-#endif
+}  // namespace engine
+
+#endif  // ENGINE_ENGINE_H

@@ -172,15 +172,15 @@ template <int DIMENSION, typename VectorT, typename ElementT>
 class VectorConversations {
 public:
   template <typename OtherElementT>
-  static void converted (const OtherElementT* elements) {
+  static VectorT fromArrayConverted (const OtherElementT* elements) {
     VectorT result;
     for (int i = 0; i < DIMENSION; ++i)
       result[i] = static_cast<ElementT>(elements[i]);
     return result;
   }
   template <typename OtherVectorT>
-  static void converted (OtherVectorT source) {
-    return converted (source.data ());
+  static VectorT fromVectorConverted (OtherVectorT source) {
+    return fromArrayConverted (source.data ());
   }
 
   void copyToArray (ElementT* elements) const {

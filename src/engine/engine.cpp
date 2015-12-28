@@ -1,7 +1,92 @@
-#include <windows.h>
+#include "engine/engine.h"
+
 #include <cstdio>
-#include "IOFunctions.h"
-#include "Engine.h"
+
+#include "engine/strings.h"
+#include "util/file.h"
+
+
+namespace engine {
+
+namespace {
+  Time randomTimeRange(Time minValue, Time maxValue) {
+    return sf::seconds(math::randomRange(minValue.asSeconds(), maxValue.asSeconds()));
+  }
+}  // namespace
+
+//================================ Time & speed ================================
+
+// Continuous mode
+
+/*const float  STARTING_SPEED = 1.0;
+const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
+const Time   ROUTINE_SPEED_UP_INTERVAL = sf::seconds(2.0f);
+const float  NORMAL_SPEED_LIMIT = 5.0;
+const float  ABSOLUTE_SPEED_LIMIT = 10.0;
+
+const Time   AUTO_LOWERING_TIME = sf::seconds(0.8f);
+const Time   DROPPING_PIECE_LOWERING_TIME = sf::seconds(0.04f);
+const Time   LINE_DISAPPEAR_TIME = sf::seconds(1.0f);
+const Time   LINE_COLLAPSE_TIME = sf::seconds(0.05f);
+
+const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(0.8f);
+const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = sf::seconds(0.1f);   // = DOWN_KEY_REACTIVATION_TIME
+const Time   LINE_COLLAPSE_ANIMATION_TIME = sf::seconds(0.3f);
+const Time   PIECE_MOVING_ANIMATION_TIME = sf::seconds(0.4f);
+const Time   PIECE_ROTATING_ANIMATION_TIME = sf::seconds(0.4f);
+
+const Time   HINT_APPERAING_TIME = sf::seconds(0.3f);
+const Time   HINT_MATERIALIZATION_TIME = sf::seconds(0.2f);
+const Time   PLAYER_DYING_ANIMATION_TIME = sf::seconds(1.0f);*/
+
+
+const float  STARTING_SPEED = 1.0;
+const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
+const Time   ROUTINE_SPEED_UP_INTERVAL = sf::seconds(2.0f);
+const float  NORMAL_SPEED_LIMIT = 5.0;
+const float  ABSOLUTE_SPEED_LIMIT = 10.0;
+
+const Time   AUTO_LOWERING_TIME = sf::seconds(0.8f);
+const Time   DROPPING_PIECE_LOWERING_TIME = sf::seconds(0.02f);
+const Time   LINE_DISAPPEAR_TIME = sf::seconds(0.6f);
+const Time   LINE_COLLAPSE_TIME = sf::seconds(0.06f);
+
+//const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(AUTO_LOWERING_TIME);
+const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME = sf::seconds(0.2f);
+const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME = sf::seconds(0.1f);   // = DOWN_KEY_REACTIVATION_TIME
+const Time   LINE_COLLAPSE_ANIMATION_TIME = sf::seconds(0.06f);
+const Time   PIECE_MOVING_ANIMATION_TIME = sf::seconds(0.08f);
+const Time   PIECE_ROTATING_ANIMATION_TIME = sf::seconds(0.05f);
+
+const Time   HINT_APPERAING_TIME = sf::seconds(0.3f);
+const Time   HINT_MATERIALIZATION_TIME = sf::seconds(0.2f);
+const Time   PLAYER_DYING_ANIMATION_TIME = sf::seconds(1.0f);
+
+
+//================================== Keyboard ==================================
+
+// TODO: find optimal value for KEY_REACTIVATION_TIMEs
+const Time   MOVE_KEY_REACTIVATION_TIME = sf::seconds(0.12f);
+const Time   ROTATE_KEY_REACTIVATION_TIME = sf::seconds(0.15f);
+//const Time   DOWN_KEY_REACTIVATION_TIME = sf::seconds(0.08f);
+const Time   DOWN_KEY_REACTIVATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;
+const Time   DROP_KEY_REACTIVATION_TIME = sf::seconds(0.25f);
+const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME = sf::seconds(0.2f);
+
+const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
+{
+  MOVE_KEY_REACTIVATION_TIME,
+  MOVE_KEY_REACTIVATION_TIME,
+  ROTATE_KEY_REACTIVATION_TIME,
+  ROTATE_KEY_REACTIVATION_TIME,
+  DOWN_KEY_REACTIVATION_TIME,
+  DROP_KEY_REACTIVATION_TIME,
+  CHANGE_VICTIM_KEY_REACTIVATION_TIME
+};
+
+
+const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = {};
+
 
 //=================================== Field ====================================
 
@@ -45,7 +130,7 @@ void Game::init()
   loadAccounts();
   loadSettings();
   for (int key = 0; key < N_GLOBAL_KEYS; ++key)
-    nextGlobalKeyActivationTable[key] = 0.0;
+    nextGlobalKeyActivationTable[key] = NEVER_HAPPENED;
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].init(this, iPlayer);
 }
@@ -65,12 +150,12 @@ void Game::loadDefaultAccounts()
 {
   accounts.resize(MAX_PLAYERS);
   for (size_t iAccount = 0; iAccount < accounts.size(); ++iAccount)
-    accounts[iAccount].name = wstring(L"Player ") + wchar_t(iAccount + '1');  // TODO: rewrite
+    accounts[iAccount].name = std::string("Player ") + char(iAccount + '1');  // TODO: rewrite
 }
 
 void Game::loadSettings()
 {
-  SmartFileHandler settingsFile(SETTINGS_FILE.c_str(), L"r");
+  util::SmartFileHandler settingsFile(SETTINGS_FILE, "r");
   if (settingsFile.get() == NULL)
   {
       loadDefaultSettings();
@@ -78,10 +163,10 @@ void Game::loadSettings()
   }
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
-    fscanf_s(settingsFile.get(), "%d\n", &players[iPlayer].accountNumber);
-//    fscanf_s(settingsFile.get(), "%d\n", &players[iPlayer].participates);
+    fscanf(settingsFile.get(), "%d\n", &players[iPlayer].accountNumber);
+//    fscanf(settingsFile.get(), "%d\n", &players[iPlayer].participates);
     int tmp;
-    fscanf_s(settingsFile.get(), "%d\n", &tmp);
+    fscanf(settingsFile.get(), "%d\n", &tmp);
     switch (tmp)
     {
     case 0:
@@ -91,18 +176,21 @@ void Game::loadSettings()
       players[iPlayer].participates = true;
       break;
     default:
-      throw ERR_FILE_CORRUPTED; // TODO: format
+      throw std::runtime_error(ERR_FILE_CORRUPTED); // TODO: format
     }
-    for (int key = 0; key < N_PLAYER_KEYS; ++key)
-      fscanf_s(settingsFile.get(), "%d\n", &players[iPlayer].controls.keyArray[key]);
+    for (int iKey = 0; iKey < N_PLAYER_KEYS; ++iKey) {
+      int keyValue = 0;
+      fscanf(settingsFile.get(), "%d\n", &keyValue);
+      players[iPlayer].controls.keyArray[iKey] = static_cast<Keyboard::Key>(keyValue);
+    }
   }
 }
 
 void Game::saveSettings()
 {
-  SmartFileHandler settingsFile(SETTINGS_FILE.c_str(), L"w");
+  util::SmartFileHandler settingsFile(SETTINGS_FILE, "w");
   if (settingsFile.get() == NULL)
-    throw ERR_FILE_WRITE_ERROR;   // TODO: format
+    throw std::runtime_error(ERR_FILE_WRITE_ERROR);   // TODO: format
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
     fprintf(settingsFile.get(), "%d\n", players[iPlayer].accountNumber);
@@ -116,43 +204,43 @@ void Game::loadDefaultSettings()
 {
   players[0].participates = true;
   players[0].accountNumber = 0;
-  players[0].controls.keyByName.keyLeft = 'A';
-  players[0].controls.keyByName.keyRight = 'D';
-  players[0].controls.keyByName.keyRotateCCW = 'W';
-  players[0].controls.keyByName.keyRotateCW = 'E';
-  players[0].controls.keyByName.keyDown = 'S';
-  players[0].controls.keyByName.keyDrop = VK_TAB;
-  players[0].controls.keyByName.keyNextVictim = 'Q';
+  players[0].controls.keyByName.keyLeft = Keyboard::A;
+  players[0].controls.keyByName.keyRight = Keyboard::D;
+  players[0].controls.keyByName.keyRotateCCW = Keyboard::W;
+  players[0].controls.keyByName.keyRotateCW = Keyboard::E;
+  players[0].controls.keyByName.keyDown = Keyboard::S;
+  players[0].controls.keyByName.keyDrop = Keyboard::Tab;
+  players[0].controls.keyByName.keyNextVictim = Keyboard::Q;
 
   players[1].participates = false;
   players[1].accountNumber = 1;
-  players[1].controls.keyByName.keyLeft = 'H';
-  players[1].controls.keyByName.keyRight = 'K';
-  players[1].controls.keyByName.keyRotateCCW = 'U';
-  players[1].controls.keyByName.keyRotateCW = 'I';
-  players[1].controls.keyByName.keyDown = 'J';
-  players[1].controls.keyByName.keyDrop = VK_SPACE;
-  players[1].controls.keyByName.keyNextVictim = 'L';
+  players[1].controls.keyByName.keyLeft = Keyboard::H;
+  players[1].controls.keyByName.keyRight = Keyboard::K;
+  players[1].controls.keyByName.keyRotateCCW = Keyboard::U;
+  players[1].controls.keyByName.keyRotateCW = Keyboard::I;
+  players[1].controls.keyByName.keyDown = Keyboard::J;
+  players[1].controls.keyByName.keyDrop = Keyboard::Space;
+  players[1].controls.keyByName.keyNextVictim = Keyboard::L;
 
   players[2].participates = true;
   players[2].accountNumber = 2;
-  players[2].controls.keyByName.keyLeft = VK_LEFT;
-  players[2].controls.keyByName.keyRight = VK_RIGHT;
-  players[2].controls.keyByName.keyRotateCCW = VK_UP;
-  players[2].controls.keyByName.keyRotateCW = VK_DELETE;
-  players[2].controls.keyByName.keyDown = VK_DOWN;
-  players[2].controls.keyByName.keyDrop = VK_RSHIFT;
-  players[2].controls.keyByName.keyNextVictim = VK_RCONTROL;
+  players[2].controls.keyByName.keyLeft = Keyboard::Left;
+  players[2].controls.keyByName.keyRight = Keyboard::Right;
+  players[2].controls.keyByName.keyRotateCCW = Keyboard::Up;
+  players[2].controls.keyByName.keyRotateCW = Keyboard::Delete;
+  players[2].controls.keyByName.keyDown = Keyboard::Down;
+  players[2].controls.keyByName.keyDrop = Keyboard::RShift;
+  players[2].controls.keyByName.keyNextVictim = Keyboard::RControl;
 
   players[3].participates = false;
   players[3].accountNumber = 3;
-  players[3].controls.keyByName.keyLeft = VK_NUMPAD4;
-  players[3].controls.keyByName.keyRight = VK_NUMPAD6;
-  players[3].controls.keyByName.keyRotateCCW = VK_NUMPAD8;
-  players[3].controls.keyByName.keyRotateCW = VK_NUMPAD9;
-  players[3].controls.keyByName.keyDown = VK_NUMPAD5;
-  players[3].controls.keyByName.keyDrop = VK_NUMPAD0;
-  players[3].controls.keyByName.keyNextVictim = VK_ADD;
+  players[3].controls.keyByName.keyLeft = Keyboard::Numpad4;
+  players[3].controls.keyByName.keyRight = Keyboard::Numpad6;
+  players[3].controls.keyByName.keyRotateCCW = Keyboard::Numpad8;
+  players[3].controls.keyByName.keyRotateCW = Keyboard::Numpad9;
+  players[3].controls.keyByName.keyDown = Keyboard::Numpad5;
+  players[3].controls.keyByName.keyDrop = Keyboard::Numpad0;
+  players[3].controls.keyByName.keyNextVictim = Keyboard::Add;
 }
 
 void Game::newMatch()
@@ -177,11 +265,10 @@ void Game::newRound(Time currentTime__)
 
 void Game::endRound()
 {
-  MessageBox(0, L"Good game :-)", L"The end", 0);
   exit(0);
 }
 
-void Game::onGlobalKeyPress(GlobalKey key) { }
+void Game::onGlobalKeyPress(GlobalKey /*key*/) { }
 
 void Game::onTimer(Time currentTime__)
 {
@@ -189,13 +276,13 @@ void Game::onTimer(Time currentTime__)
 
   for (int key = 0; key < N_GLOBAL_KEYS; ++key)
   {
-    if (keyPressed(globalControls.keyArray[key] &&
-        (currentTime >= nextGlobalKeyActivationTable[key])))
+    if (Keyboard::isKeyPressed(globalControls.keyArray[key]) &&
+        (currentTime >= nextGlobalKeyActivationTable[key]))
     {
       onGlobalKeyPress(GlobalKey(key));
       nextGlobalKeyActivationTable[key] = currentTime + GLOBAL_KEY_REACTIVATION_TIME[key];
     }
-    else if (!keyPressed(globalControls.keyArray[key]))
+    else if (!Keyboard::isKeyPressed(globalControls.keyArray[key]))
       nextGlobalKeyActivationTable[key]  = currentTime;
   }
 
@@ -203,13 +290,13 @@ void Game::onTimer(Time currentTime__)
   {
     for (int key = 0; key < N_PLAYER_KEYS; ++key)
     {
-      if (keyPressed(activePlayers[iPlayer]->controls.keyArray[key]) &&
+      if (Keyboard::isKeyPressed(activePlayers[iPlayer]->controls.keyArray[key]) &&
           (currentTime >= activePlayers[iPlayer]->nextKeyActivationTable[key]))
       {
         activePlayers[iPlayer]->onKeyPress(PlayerKey(key));
         activePlayers[iPlayer]->nextKeyActivationTable[key] = currentTime + PLAYER_KEY_REACTIVATION_TIME[key];
       }
-      else if (!keyPressed(activePlayers[iPlayer]->controls.keyArray[key]))
+      else if (!Keyboard::isKeyPressed(activePlayers[iPlayer]->controls.keyArray[key]))
         activePlayers[iPlayer]->nextKeyActivationTable[key] = currentTime;
     }
   }
@@ -223,7 +310,7 @@ void Game::onTimer(Time currentTime__)
     {
       for (int key = 0; key < N_PLAYER_KEYS; ++key)
       {
-        if (keyPressed(players[iPlayer].controls.keyArray[key]) &&
+        if (Keyboard::isKeyPressed(players[iPlayer].controls.keyArray[key]) &&
             (currentTime >= players[iPlayer].nextKeyActivationTable[key]))
         {
           players[iPlayer].onKeyPress(PlayerKey(key));
@@ -242,29 +329,29 @@ void Game::onTimer(Time currentTime__)
 
 void Game::loadPieces()   // TODO: rewrite it cleaner
 {
-  SmartFileHandler piecesFile(PIECE_TEMPLATES_FILE.c_str(), L"r");
+  util::SmartFileHandler piecesFile(PIECE_TEMPLATES_FILE, "r");
   if (piecesFile.get() == NULL)
-    throw ERR_FILE_NOT_FOUND;   // TODO: format
+    throw std::runtime_error(ERR_FILE_NOT_FOUND);   // TODO: format
 
   pieceTemplates.clear();
   char pieceBlock[MAX_PIECE_SIZE][MAX_PIECE_SIZE + 1];
   int nPieceTemplates;
-  fscanf_s(piecesFile.get(), "%d", &nPieceTemplates);
+  fscanf(piecesFile.get(), "%d", &nPieceTemplates);
   pieceTemplates.resize(nPieceTemplates);
 
   for (int iPiece = 0; iPiece < nPieceTemplates; ++iPiece)
   {
-    fscanf_s(piecesFile.get(), "%d", &pieceTemplates[iPiece].chance);
-    skipWhitespace(piecesFile.get());
-    fscanf_s(piecesFile.get(), "(%f,%f,%f)", &pieceTemplates[iPiece].color.r,
-          &pieceTemplates[iPiece].color.g, &pieceTemplates[iPiece].color.b);
-    pieceTemplates[iPiece].color.a = 1.0;
+    fscanf(piecesFile.get(), "%d", &pieceTemplates[iPiece].chance);
+    util::skipWhitespace(piecesFile.get());
+    float r, g, b;
+    fscanf(piecesFile.get(), "(%f,%f,%f)", &r, &g, &b);
+    pieceTemplates[iPiece].color = colorFromFloat(r, g, b, 1.f);
 
     for (int rotationState = 0; rotationState < N_PIECE_ROTATION_STATES; ++rotationState)
     {
       for (int row = MAX_PIECE_SIZE - 1; row >= 0; --row)
       {
-        skipWhitespace(piecesFile.get());
+        util::skipWhitespace(piecesFile.get());
         fgets(&pieceBlock[row][0], MAX_PIECE_SIZE + 1, piecesFile.get());
       }
 
@@ -277,21 +364,21 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
           if (pieceBlock[row][col] != PIECE_TEMPLATE_FREE_CHAR)
           {
             if ((pieceBlock[row][col] < '0') || (pieceBlock[row][col] > '9'))
-              throw ERR_FILE_CORRUPTED;    // TODO: format
-            maxBlockNumber = myMax(maxBlockNumber, pieceBlock[row][col] - '0');
+              throw std::runtime_error(ERR_FILE_CORRUPTED);    // TODO: format
+            maxBlockNumber = math::max(maxBlockNumber, pieceBlock[row][col] - '0');
             ++nBlockInCurrentPiece;
           }
         }
       }
       if (maxBlockNumber + 1 != nBlockInCurrentPiece)
-        throw ERR_FILE_CORRUPTED;    // TODO: format
+        throw std::runtime_error(ERR_FILE_CORRUPTED);    // TODO: format
 
       pieceTemplates[iPiece].structure[rotationState].blocks.resize(nBlockInCurrentPiece);
       for (int row = 0; row < MAX_PIECE_SIZE; ++row)
         for (int col = 0; col < MAX_PIECE_SIZE; ++col)
           if (pieceBlock[row][col] != PIECE_TEMPLATE_FREE_CHAR)
             pieceTemplates[iPiece].structure[rotationState].blocks[pieceBlock[row][col] - '0'] =
-                    FieldCoords(row - CENTRAL_PIECE_ROW, col - CENTRAL_PIECE_COL);
+                    FieldCoords(col - CENTRAL_PIECE_COL, row - CENTRAL_PIECE_ROW);
       pieceTemplates[iPiece].structure[rotationState].setBounds();
     }
   }
@@ -304,9 +391,10 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
 
 void Game::loadBonuses()
 {
-  for (Bonus bonus = FIRST_REAL_BONUS; bonus <= LAST_REAL_BONUS; ++bonus)
-    for (int i = 0; i < BONUS_CHANCES[bonus]; ++i)
+  for (Bonus bonus = FIRST_REAL_BONUS; bonus <= LAST_REAL_BONUS; bonus = static_cast<Bonus>(static_cast<int>(bonus) + 1)) {
+    for (int i = 0; i < BONUS_CHANCES[static_cast<int>(bonus)]; ++i)
       randomBonusTable.push_back(bonus);
+  }
 }
 
 
@@ -318,7 +406,7 @@ void Player::init(Game* game__, int number__)
   game = game__;
   number = number__;
   for (int key = 0; key < N_PLAYER_KEYS; ++key)
-    nextKeyActivationTable[key] = 0.0;
+    nextKeyActivationTable[key] = NEVER_HAPPENED;
 }
 
 void Player::loadAccountInfo(int newAccount)
@@ -353,7 +441,7 @@ void Player::prepareForNewRound()
   visualEffects.clear();
   visualEffects.lantern.parent = NULL;  // TODO: move to initialization?
   visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
-  visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_HEIGHT - 1.0f) / 2.0f, (FIELD_WIDTH  - 1.0f) / 2.0f));
+  visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0f) / 2.0f, (FIELD_HEIGHT - 1.0f) / 2.0f));
   visualEffects.lantern.maxSpeed = BONUS_LANTERN_MAX_SPEED;
   latestLineCollapse = NEVER_HAPPENED;
   victimNumber = number;
@@ -382,9 +470,9 @@ Player* Player::victim() const
   return (victimNumber != number) ? &game->players[victimNumber] : NULL;
 }
 
-wstring Player::victimName() const
+std::string Player::victimName() const
 {
-  return victim() ? victim()->account()->name : L"[nobody]";
+  return victim() ? victim()->account()->name : "[nobody]";
 }
 
 void Player::takesBonus(Bonus bonus)
@@ -404,12 +492,13 @@ void Player::applyBonus(Bonus bonus)
   {
     switch (bonus)
     {
-    case bnEnlargeHintQueue:
+    case Bonus::EnlargeHintQueue:
       resizePieceQueue(BONUS_ENLARGED_HINT_QUEUE_SIZE);
       break;
-    case bnPieceTheft:
+    case Bonus::PieceTheft:
       break;
     SKIP_ALL_BUT_BUFFS;
+    default: break;  // TODO(Andrei): handle all values
     }
     buffs.add(bonus);
   }
@@ -419,6 +508,7 @@ void Player::applyBonus(Bonus bonus)
     {
     // ...
     SKIP_ALL_BUT_DEBUFFS;
+    default: break;  // TODO(Andrei): handle all values
     }
     debuffs.add(bonus);
   }
@@ -426,23 +516,24 @@ void Player::applyBonus(Bonus bonus)
   {
     switch (bonus)
     {
-    case bnHeal:
+    case Bonus::Heal:
       events.push(etHeal, currentTime());
 //      heal();
       break;
-    case bnSlowDown:
+    case Bonus::SlowDown:
       bonusSlowDown();
       break;
-    case bnClearField:
+    case Bonus::ClearField:
       events.push(etBeginClearField, currentTime());
       break;
-    case bnSpeedUp:
+    case Bonus::SpeedUp:
       bonusSpeedUp();
       break;
-//    case bnFlipField:
+//    case Bonus::FlipField:
 //      // ...
 //      break;
     SKIP_ALL_BUT_SORCERIES;
+    default: break;  // TODO(Andrei): handle all values
     }
   }
   enableBonusVisualEffect(bonus);
@@ -455,14 +546,15 @@ void Player::disenchant(Bonus bonus)
   {
     switch (bonus)
     {
-    case bnEnlargeHintQueue:
+    case Bonus::EnlargeHintQueue:
       resizePieceQueue(NORMAL_HINT_QUEUE_SIZE);
       break;
-    case bnPieceTheft:
+    case Bonus::PieceTheft:
       // ...
       break;
     // ...
     SKIP_ALL_BUT_BUFFS;
+    default: break;  // TODO(Andrei): handle all values
     }
     buffs.remove(bonus);
   }
@@ -472,6 +564,7 @@ void Player::disenchant(Bonus bonus)
     {
     // ...
     SKIP_ALL_BUT_DEBUFFS;
+    default: break;  // TODO(Andrei): handle all values
     }
     debuffs.remove(bonus);
   }
@@ -481,7 +574,7 @@ void Player::disenchant(Bonus bonus)
 void Player::heal()
 {
   // optimize disabling all effects (?)
-  for (Bonus i = FIRST_DEBUFF; i <= LAST_DEBUFF; ++i)
+  for (Bonus i = FIRST_DEBUFF; i <= LAST_DEBUFF; i = static_cast<Bonus>(static_cast<int>(i) + 1))
     if (debuffs.test(i))
       disenchant(i);
 }
@@ -504,7 +597,7 @@ void Player::endClearField()
 
 void Player::kill()
 {
-  for (vector<Player*>::iterator i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
+  for (auto i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
   {
     if ((*i)->victimNumber == number)
     {
@@ -514,7 +607,7 @@ void Player::kill()
     }
   }
 
-  for (vector<Player*>::iterator i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
+  for (auto i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
   {
     if (*i == this)
     {
@@ -533,26 +626,26 @@ void Player::kill()
 void Player::onKeyPress(PlayerKey key)
 {
   switch (key) {
-  case keyLeft:
+  case PlayerKey::Left:
     movePiece(-1);
     break;
-  case keyRight:
+  case PlayerKey::Right:
     movePiece(1);
     break;
-  case keyRotateCW:
+  case PlayerKey::RotateCW:
     rotatePiece(-1);
     break;
-  case keyRotateCCW:
+  case PlayerKey::RotateCCW:
     rotatePiece(1);
     break;
-  case keyDown:
+  case PlayerKey::Down:
     events.eraseEventType(etPieceLowering);
     lowerPiece(true /* forced */);
     break;
-  case keyDrop:
+  case PlayerKey::Drop:
     dropPiece();
     break;
-  case keyNextVictim:
+  case PlayerKey::NextVictim:
     cycleVictim();
     break;
   }
@@ -641,7 +734,7 @@ void Player::onTimer()
       kill();
       break;
     default:
-      throw ERR_INTERNAL_ERROR;  // TODO: formal  "Events queue crashed (event %d found)"
+      throw std::runtime_error(ERR_INTERNAL_ERROR);  // TODO: formal  "Events queue crashed (event %d found)"
     }
     if (eventDelayed)
     {
@@ -673,7 +766,7 @@ bool Player::canDisposePiece(FieldCoords position, const BlockStructure& piece) 
 bool Player::fallingPieceCannotReachSky() const
 {
   for (int i = 0; i < N_PIECE_ROTATION_STATES; ++i)
-    if (fallingPiece.pieceTemplate->structure[i].bounds.top + fallingPiece.position.row >= FIELD_HEIGHT)
+    if (fallingPiece.pieceTemplate->structure[i].bounds.top + fallingPiece.position.y() >= FIELD_HEIGHT)
       return false;
   return true;
 }
@@ -688,8 +781,8 @@ Piece Player::randomPiece() const
   Piece piece;
   piece.pieceTemplate = &game->pieceTemplates[game->randomPieceTable[rand() % game->randomPieceTable.size()]];
   piece.rotationState = rand() % N_PIECE_ROTATION_STATES;
-  piece.position.row = FIELD_HEIGHT - piece.currentStructure().bounds.bottom;
-  piece.position.col = MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE); // TODO: modify the formula
+  piece.position.y() = FIELD_HEIGHT - piece.currentStructure().bounds.bottom;
+  piece.position.x() = MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE); // TODO: modify the formula
   return piece;
 }
 
@@ -701,39 +794,41 @@ bool Player::bonusIsUseful(Bonus bonus) const
 
   switch (bonus)
   {
-  case bnHeal:
+  case Bonus::None:
+    return false;
+  case Bonus::Heal:
     return debuffs.any();
     break;
-  case bnSlowDown:
+  case Bonus::SlowDown:
     return speed > STARTING_SPEED + BONUS_SLOW_DOWN_VALUE;  // (?)
     break;
-  case bnClearField:
+  case Bonus::ClearField:
     return highestNonemptyRow() > BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL;
     break;
 
-  case bnFlippedScreen:
+  case Bonus::FlippedScreen:
     // ...
     break;
-  case bnRotatingScreen:
+  case Bonus::RotatingScreen:
     // ...
     break;
-  case bnWave:
+  case Bonus::Wave:
     // ...
     break;
-  case bnLantern:
+  case Bonus::Lantern:
     // ...
     break;
-  case bnCrazyPieces:
+  case Bonus::CrazyPieces:
     // ...
     break;
-  case bnTruncatedBlocks:
+  case Bonus::TruncatedBlocks:
     // ...
     break;
-  case bnNoHint:
+  case Bonus::NoHint:
     // ...
     break;
 
-  case bnSpeedUp:
+  case Bonus::SpeedUp:
     // ...
     break;
 
@@ -751,7 +846,7 @@ Bonus Player::randomBonus() const
     if (bonusIsUseful(bonus))
       return bonus;
   }
-  return bnNoBonus;
+  return Bonus::None;
 }
 
 void Player::setUpPiece()
@@ -759,7 +854,7 @@ void Player::setUpPiece()
   for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
   {
     FieldCoords cell = fallingPiece.absoluteCoords(i);
-    if (cell.row >= FIELD_HEIGHT)
+    if (cell.y() >= FIELD_HEIGHT)
     {
       // Don't let the field borders to get spoilt!
       events.push(etKill, currentTime());
@@ -771,13 +866,13 @@ void Player::setUpPiece()
     // TODO: copy images from one array to another with motion (?)
 
     lyingBlockImages.push_back(BlockImage(NULL, fallingPiece.color(), cell));
-    lyingBlockIndices.insert(make_pair(cell, lyingBlockImages.size() - 1));
+    lyingBlockIndices.insert(std::make_pair(cell, lyingBlockImages.size() - 1));
   }
   fallingBlockImages.clear();
   fallingPieceState = psAbsent;
 
   bool fullLinesFound = removeFullLines();
-  Time newPieceDelay = fullLinesFound ? myMax(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
+  Time newPieceDelay = fullLinesFound ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
                                         HINT_MATERIALIZATION_TIME;
   events.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
   visualEffects.hintMaterialization.enable(newPieceDelay);
@@ -831,7 +926,7 @@ void Player::lowerPiece(bool forced)
   if (fallingPieceState == psAbsent)
     return;
 
-  FieldCoords newPosition = fallingPiece.position + FieldCoords(-1, 0);
+  FieldCoords newPosition = fallingPiece.position + FieldCoords(0, -1);
   // We should not forget about the case when a piece gets stuck as the result of
   // field modification. Such pieces should not continue falling.
   if (canDisposePiece(fallingPiece.position, fallingPiece.currentStructure()) &&
@@ -885,7 +980,7 @@ bool Player::removeFullLines()
       disappearingLines.back().row = row;
       for (int col = 0; col < FIELD_WIDTH; ++col)
       {
-        if (field(row, col).bonus != bnNoBonus)
+        if (field(row, col).bonus != Bonus::None)
         {
           takesBonus(field(row, col).bonus);
           events.eraseEventType(etBonusDisappearance);
@@ -894,17 +989,17 @@ bool Player::removeFullLines()
         disappearingLines.back().blockColor[col] = field(row, col).color;
         field(row, col).clear();
 
-        lyingBlockImages[lyingBlockIndices[FieldCoords(row, col)]] = lyingBlockImages.back();
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
         // TODO: No, *that* was not the point of  lyingBlockIndices !
-        for (map<FieldCoords, int>::iterator it = lyingBlockIndices.begin(); it != lyingBlockIndices.end(); ++it)
+        for (auto it = lyingBlockIndices.begin(); it != lyingBlockIndices.end(); ++it)
         {
-          if (it->second == lyingBlockImages.size() - 1) {
-            it->second = lyingBlockIndices[FieldCoords(row, col)];
+          if (it->second == static_cast<int>(lyingBlockImages.size()) - 1) {
+            it->second = lyingBlockIndices[FieldCoords(col, row)];
             break;
           }
         }
         lyingBlockImages.pop_back();
-        lyingBlockIndices.erase(FieldCoords(row, col));
+        lyingBlockIndices.erase(FieldCoords(col, row));
       }
 
       if (latestLineCollapse < currentTime() + LINE_DISAPPEAR_TIME)
@@ -927,11 +1022,11 @@ void Player::collapseLine(int row)  // TODO: optimize
     {
       field(curRow, col) = field(curRow + 1, col);
       if (field(curRow, col).isBlocked())
-        moveLyingBlockImage(FieldCoords(curRow + 1, col), FieldCoords(curRow, col), LINE_COLLAPSE_ANIMATION_TIME);
+        moveLyingBlockImage(FieldCoords(col, curRow + 1), FieldCoords(col, curRow), LINE_COLLAPSE_ANIMATION_TIME);
     }
   }
 
-  for (vector<DisappearingLine>::iterator i = disappearingLines.begin();
+  for (auto i = disappearingLines.begin();
        i != disappearingLines.end(); ++i)
   {
     if (i->row == row)
@@ -940,20 +1035,20 @@ void Player::collapseLine(int row)  // TODO: optimize
       break;
     }
   }
-  for (vector<DisappearingLine>::iterator i = disappearingLines.begin();
+  for (auto i = disappearingLines.begin();
        i != disappearingLines.end(); ++i)
     if (i->row > row)
-      --(i->row);
-  for (EventSet::iterator myEvent = events.begin(); myEvent != events.end(); ++myEvent)
+      --i->row;
+  for (auto myEvent = events.begin(); myEvent != events.end(); ++myEvent)
     if ((myEvent->type == etLineCollapse) && (myEvent->parameters.lineCollapse.row > row))
-      --(int&)(myEvent->parameters.lineCollapse.row);
+      --const_cast<int&>(myEvent->parameters.lineCollapse.row);
 }
 
 void Player::movePiece(int direction)
 {
   if (fallingPieceState != psNormal)
     return;
-  FieldCoords newPosition = fallingPiece.position + FieldCoords(0, direction);
+  FieldCoords newPosition = fallingPiece.position + FieldCoords(direction, 0);
   if (canDisposePiece(newPosition, fallingPiece.currentStructure()))
   {
     fallingPieceFrame.addMotion(newPosition - fallingPiece.position, currentTime(), PIECE_MOVING_ANIMATION_TIME);
@@ -986,16 +1081,16 @@ void Player::rotatePiece(int direction)
   {
     fallingPiece.rotationState = newFallingPieceRotationState;
   }
-  else if (canDisposePiece(fallingPiece.position + FieldCoords(0, 1),  // TODO: optimize
+  else if (canDisposePiece(fallingPiece.position + FieldCoords(1, 0),  // TODO: optimize
       fallingPiece.pieceTemplate->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.position += FieldCoords(0, 1);
+    fallingPiece.position += FieldCoords(1, 0);
     fallingPiece.rotationState = newFallingPieceRotationState;
   }
-  else if (canDisposePiece(fallingPiece.position - FieldCoords(0, 1),  // TODO: optimize
+  else if (canDisposePiece(fallingPiece.position - FieldCoords(1, 0),  // TODO: optimize
       fallingPiece.pieceTemplate->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.position -= FieldCoords(0, 1);
+    fallingPiece.position -= FieldCoords(1, 0);
     fallingPiece.rotationState = newFallingPieceRotationState;
   }
 
@@ -1011,7 +1106,7 @@ void Player::rotatePiece(int direction)
 bool Player::generateBonus()  // TODO: remake
 {
   Bonus bonus = randomBonus();  // Is that possible (?)
-  if (bonus == bnNoBonus)
+  if (bonus == Bonus::None)
     return false;
 
   for (int iter = 0; iter < N_BONUS_GENERATION_ATTEMPTS; ++iter)
@@ -1026,9 +1121,9 @@ bool Player::generateBonus()  // TODO: remake
         if (field(row, col).isBlocked())
         {
           field(row, col).bonus = bonus;
-          lyingBlockImages[lyingBlockIndices[FieldCoords(row, col)]].bonus = bonus;
-          lyingBlockImages[lyingBlockIndices[FieldCoords(row, col)]].bonusImage.enable(BONUS_FADING_DURATION);
-          planBonusDisappearance(FieldCoords(row, col));
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonus = bonus;
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage.enable(BONUS_FADING_DURATION);
+          planBonusDisappearance(FieldCoords(col, row));
           return true;
         }
       }
@@ -1045,8 +1140,8 @@ void Player::removeBonuses()
     {
       if (field(row, col).isBlocked())
       {
-        field(row, col).bonus = bnNoBonus;
-        lyingBlockImages[lyingBlockIndices[FieldCoords(row, col)]].bonusImage.disable();
+        field(row, col).bonus = Bonus::None;
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage.disable();
       }
     }
   }
@@ -1055,12 +1150,12 @@ void Player::removeBonuses()
 
 void Player::planBonusAppearance()
 {
-  events.push(etBonusAppearance, currentTime() + randomRange(MIN_BONUS_APPEAR_TIME, MAX_BONUS_APPEAR_TIME));
+  events.push(etBonusAppearance, currentTime() + randomTimeRange(MIN_BONUS_APPEAR_TIME, MAX_BONUS_APPEAR_TIME));
 }
 
 void Player::planBonusDisappearance(FieldCoords bonusCoords)
 {
-  Time bonusDisappearTime = currentTime() + randomRange(MIN_BONUS_LIFE_TIME, MAX_BONUS_LIFE_TIME);
+  Time bonusDisappearTime = currentTime() + randomTimeRange(MIN_BONUS_LIFE_TIME, MAX_BONUS_LIFE_TIME);
   events.push(etBonusDisappearance, bonusDisappearTime);
   lyingBlockImages[lyingBlockIndices[bonusCoords]].bonusImage.stopAt(
           bonusDisappearTime - BONUS_FADING_DURATION);
@@ -1121,22 +1216,22 @@ void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, T
 
 void Player::routineSpeedUp()
 {
-  float maxSpeed = myMax(NORMAL_SPEED_LIMIT, speed);
+  float maxSpeed = std::max(NORMAL_SPEED_LIMIT, speed);
   speed += ROUTINE_SPEED_UP_VALUE;
-  speed = myMin(speed, maxSpeed);
+  speed = std::min(speed, maxSpeed);
   events.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
 }
 
 void Player::bonusSpeedUp()
 {
   speed += BONUS_SPEED_UP_VALUE;
-  speed = myMin(speed, ABSOLUTE_SPEED_LIMIT);
+  speed = std::min(speed, ABSOLUTE_SPEED_LIMIT);
 }
 
 void Player::bonusSlowDown()
 {
   speed -= BONUS_SLOW_DOWN_VALUE;
-  speed = myMax(speed, STARTING_SPEED);
+  speed = std::max(speed, STARTING_SPEED);
 }
 
 void Player::cycleVictim()
@@ -1153,44 +1248,45 @@ void Player::enableBonusVisualEffect(Bonus bonus)
 {
   switch (bonus)
   {
-  case bnHeal:
+  case Bonus::Heal:
     // no effect
     break;
-  case bnSlowDown:
+  case Bonus::SlowDown:
     // no effect
     break;
-  case bnClearField:
+  case Bonus::ClearField:
     // (!) It is enabled in beginClearField().  May be the conceptions needs changing
     //visualEffects.fieldCleaning.enable(BONUS_CLEAR_FIELD_DURATION / 2);  // (!) Change if effect type is changed
     break;
-  case bnFlippedScreen:
+  case Bonus::FlippedScreen:
     visualEffects.flippedScreen.enable(BONUS_FLIPPING_SCREEN_DURATION);
     break;
-  case bnRotatingScreen:
+  case Bonus::RotatingScreen:
     visualEffects.rotatingField.enable(BONUS_ROTATING_SCREEN_PERIOD);
     break;
-  case bnWave:
+  case Bonus::Wave:
     visualEffects.wave.enable(BONUS_WAVE_PERIOD);
     break;
-  case bnLantern:
+  case Bonus::Lantern:
     visualEffects.lantern.enable(BONUS_LANTERN_FADING_TIME);
     break;
-  case bnCrazyPieces:
+  case Bonus::CrazyPieces:
     // no effect
     break;
-  case bnTruncatedBlocks:
+  case Bonus::TruncatedBlocks:
     visualEffects.semicubes.enable(BONUS_CUTTING_BLOCKS_DURATION);
     break;
-  case bnNoHint:
+  case Bonus::NoHint:
     visualEffects.noHint.enable(BONUS_REMOVING_HINT_DURATION);
     break;
-  case bnSpeedUp:
+  case Bonus::SpeedUp:
     // no effect
     break;
-//  case bnFlipField:
+//  case Bonus::FlipField:
 //    // no effect *at this moment*
 //    break;
-  case bnNoBonus: ;
+  case Bonus::None: ;
+  default: break;  // TODO(Andrei): handle all values
   }
 }
 
@@ -1198,43 +1294,44 @@ void Player::disableBonusVisualEffect(Bonus bonus)
 {
   switch (bonus)
   {
-  case bnHeal:
+  case Bonus::Heal:
     // no effect
     break;
-  case bnSlowDown:
+  case Bonus::SlowDown:
     // no effect
     break;
-  case bnClearField:
+  case Bonus::ClearField:
     // the effect ends itself
     break;
-  case bnFlippedScreen:
+  case Bonus::FlippedScreen:
     visualEffects.flippedScreen.disable();
     break;
-  case bnRotatingScreen:
+  case Bonus::RotatingScreen:
     visualEffects.rotatingField.disable();
     break;
-  case bnWave:
+  case Bonus::Wave:
     visualEffects.wave.disable();
     break;
-  case bnLantern:
+  case Bonus::Lantern:
     visualEffects.lantern.disable();
     break;
-  case bnCrazyPieces:
+  case Bonus::CrazyPieces:
     // no effect
     break;
-  case bnTruncatedBlocks:
+  case Bonus::TruncatedBlocks:
     visualEffects.semicubes.disable();
     break;
-  case bnNoHint:
+  case Bonus::NoHint:
     visualEffects.noHint.disable();
     break;
-  case bnSpeedUp:
+  case Bonus::SpeedUp:
     // no effect
     break;
-//  case bnFlipField:
+//  case Bonus::FlipField:
 //    // no effect *at this moment*
 //    break;
-  case bnNoBonus: ;
+  case Bonus::None: ;
+  default: break;  // TODO(Andrei): handle all values
   }
 }
 
@@ -1254,3 +1351,5 @@ void Player::flipBlocks()
 {
   // TODO: implement  Player::flipBlocks()  OR  remove it
 }
+
+}  // ENGINE_ENGINE_H

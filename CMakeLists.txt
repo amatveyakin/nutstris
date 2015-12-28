@@ -5,12 +5,15 @@ set(executable_name nutstris)
 set(src_dir ${CMAKE_SOURCE_DIR}/src)
 set(srcs
     ${src_dir}/main.cpp
+    ${src_dir}/engine/engine.cpp
+    ${src_dir}/engine/keyboard.cpp
     ${src_dir}/render/renderer.cpp
     ${src_dir}/render/shader.cpp
     ${src_dir}/render/shaderprogram.cpp
     ${src_dir}/render/cubemesh.cpp
     ${src_dir}/render/textureloader.cpp
     ${src_dir}/render/matrixutil.cpp
+    ${src_dir}/util/file.cpp
 )
 
 include_directories(${src_dir})

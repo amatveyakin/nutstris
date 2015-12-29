@@ -123,7 +123,7 @@ public:
 
   void addMotion(FieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration)
   {
-    addMotion(aimingShiftVector, movingStartTime, movingDuration);
+    addMotion(FloatFieldCoords::fromVectorConverted(aimingShiftVector), movingStartTime, movingDuration);
   }
 
   virtual void placeAt(FloatFieldCoords newPosition)

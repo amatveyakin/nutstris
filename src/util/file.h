@@ -25,7 +25,6 @@ class SmartFileHandler {
 public:
   SmartFileHandler(const std::string& path, const std::string& mode) :
       fileHandle_(fopen(path.c_str(), mode.c_str()), &fclose) {
-    assert(fileHandle_.get());
   }
 
   FILE* get() const {

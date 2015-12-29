@@ -8,7 +8,7 @@ std::string joinPath(const std::string& beginning, const std::string& ending) {
   assert(!ending.empty());
   assert(ending[0] != kPathDelimiter);  // only the first part can be an absolute path
   auto result = beginning;
-  if (result.back() == kPathDelimiter)
+  if (result.back() != kPathDelimiter)
     result += kPathDelimiter;
   result += ending;
   return result;

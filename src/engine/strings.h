@@ -13,7 +13,7 @@ namespace engine {
 
 // TODO: add ..._NAME to file name constants
 
-const std::string RECOURCE_FOLDER = "Resources";
+const std::string RECOURCE_FOLDER = "resources";
 const std::string PIECE_TEMPLATES_FILE = util::joinPath(RECOURCE_FOLDER, "Pieces");
 const std::string SETTINGS_FILE = "Settings";
 const std::string ACCOUNTS_FILE = "Accounts";

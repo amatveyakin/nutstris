@@ -121,20 +121,10 @@ public:
     motions.push_back(LinearMotion(aimingShiftVector, movingStartTime, movingDuration));
   }
 
-  void addMotion(FieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration)
-  {
-    addMotion(FloatFieldCoords::fromVectorConverted(aimingShiftVector), movingStartTime, movingDuration);
-  }
-
   virtual void placeAt(FloatFieldCoords newPosition)
   {
     AffixmentPointObject::placeAt(newPosition);
     motions.clear();
-  }
-
-  void placeAt(FieldCoords newPosition)
-  {
-    return placeAt(FloatFieldCoords::fromVectorConverted(newPosition));
   }
 
   virtual FloatFieldCoords relativePosition(Time currentTime)
@@ -628,7 +618,7 @@ public:
   {
     parent = parent__;
     bonusImage.clear();
-    placeAt(position);
+    placeAt(FloatFieldCoords(position));
   }
 
   /*void placeNewImageAt(VisualObject* parent__, Color color__, FieldCoords position)

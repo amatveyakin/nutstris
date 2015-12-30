@@ -907,7 +907,7 @@ bool Player::sendNewPiece()
   visualEffects.hintMaterialization.disable();
 
   fallingPieceState = psNormal;
-  fallingPieceFrame.placeAt(fallingPiece.position);
+  fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece.position));
   for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
     fallingBlockImages.push_back(BlockImage(&fallingPieceFrame, fallingPiece.color(), fallingPiece.relativeCoords(i)));
 //  visualEffects.lantern.bindTo(&fallingPieceFrame);
@@ -935,7 +935,7 @@ void Player::lowerPiece(bool forced)
     Time loweringTime = (fallingPieceState == psDropping) ? DROPPING_PIECE_LOWERING_TIME :
                         (forced ? PIECE_FORCED_LOWERING_ANIMATION_TIME :
                                   PIECE_AUTO_LOWERING_ANIMATION_TIME);
-    fallingPieceFrame.addMotion(newPosition - fallingPiece.position, currentTime(), loweringTime);
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position), currentTime(), loweringTime);
 
     fallingPiece.position = newPosition;
 
@@ -1051,7 +1051,7 @@ void Player::movePiece(int direction)
   FieldCoords newPosition = fallingPiece.position + FieldCoords(direction, 0);
   if (canDisposePiece(newPosition, fallingPiece.currentStructure()))
   {
-    fallingPieceFrame.addMotion(newPosition - fallingPiece.position, currentTime(), PIECE_MOVING_ANIMATION_TIME);
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position), currentTime(), PIECE_MOVING_ANIMATION_TIME);
     fallingPiece.position = newPosition;
   }
 }
@@ -1097,8 +1097,8 @@ void Player::rotatePiece(int direction)
   for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
   {
     fallingBlockImages[i].addMotion(
-            fallingPiece.absoluteCoords(i) -
-            (oldPosition + fallingPiece.pieceTemplate->structure[oldRotationState].blocks[i]),
+            FloatFieldCoords(fallingPiece.absoluteCoords(i) -
+                             (oldPosition + fallingPiece.pieceTemplate->structure[oldRotationState].blocks[i])),
             currentTime(), PIECE_ROTATING_ANIMATION_TIME);
   }
 }
@@ -1209,7 +1209,7 @@ void Player::removeBlockImage(vector<BlockImage>& imageArray, FieldCoords positi
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
   if (movingFrom == movingTo)
     return;
-  lyingBlockImages[lyingBlockIndices[movingFrom]].addMotion(movingTo - movingFrom, currentTime(), movingDuration);
+  lyingBlockImages[lyingBlockIndices[movingFrom]].addMotion(FloatFieldCoords(movingTo - movingFrom), currentTime(), movingDuration);
   lyingBlockIndices[movingTo] = lyingBlockIndices[movingFrom];
   lyingBlockIndices.erase(movingFrom);
 }

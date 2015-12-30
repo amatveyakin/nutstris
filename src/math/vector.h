@@ -31,6 +31,11 @@ public:
   VectorBase() : m_elements() {}
   explicit VectorBase(Uninitialized) {}
   explicit VectorBase(const ElementT* elements)   { std::copy(elements, elements + DIMENSION, m_elements); }
+  template <typename OtherElementT>
+  explicit VectorBase(const VectorBase<DIMENSION, OtherElementT>& source) {
+    for (int i = 0; i < DIMENSION; ++i)
+      m_elements[i] = static_cast<ElementT>(source[i]);
+  }
 
   ElementT at(size_t index) const           { return m_elements [index]; }
   ElementT& at(size_t index)                { return m_elements [index]; }
@@ -168,29 +173,6 @@ public:
   DECLARE_DERIVED (VectorT)
 };
 
-template <int DIMENSION, typename VectorT, typename ElementT>
-class VectorConversations {
-public:
-  template <typename OtherElementT>
-  static VectorT fromArrayConverted (const OtherElementT* elements) {
-    VectorT result;
-    for (int i = 0; i < DIMENSION; ++i)
-      result[i] = static_cast<ElementT>(elements[i]);
-    return result;
-  }
-  template <typename OtherVectorT>
-  static VectorT fromVectorConverted (OtherVectorT source) {
-    return fromArrayConverted (source.data ());
-  }
-
-  void copyToArray (ElementT* elements) const {
-    for (int i = 0; i < DIMENSION; ++i)
-      elements[i] = derived ()[i];
-  }
-
-  DECLARE_DERIVED (VectorT)
-};
-
 
 template <int VECTOR_DIMENSION, typename ElementT>
 class Vector {
@@ -199,8 +181,7 @@ class Vector {
 
 template <typename ElementT>
 class Vector <2, ElementT> : public VectorBase              <2, ElementT>,
-                             public VectorLinearOperations  <2, Vector <2, ElementT>, ElementT>,
-                             public VectorConversations     <2, Vector <2, ElementT>, ElementT>
+                             public VectorLinearOperations  <2, Vector <2, ElementT>, ElementT>
 {
 private:
   typedef VectorBase <2, ElementT> Parent;
@@ -224,8 +205,7 @@ public:
 
 template <typename ElementT>
 class Vector <3, ElementT> : public VectorBase              <3, ElementT>,
-                             public VectorLinearOperations  <3, Vector <3, ElementT>, ElementT>,
-                             public VectorConversations     <3, Vector <3, ElementT>, ElementT>
+                             public VectorLinearOperations  <3, Vector <3, ElementT>, ElementT>
 {
 private:
   typedef VectorBase <3, ElementT> Parent;
@@ -255,8 +235,7 @@ public:
 
 template <typename ElementT>
 class Vector <4, ElementT> : public VectorBase              <4, ElementT>,
-                             public VectorLinearOperations  <4, Vector <4, ElementT>, ElementT>,
-                             public VectorConversations     <4, Vector <4, ElementT>, ElementT>
+                             public VectorLinearOperations  <4, Vector <4, ElementT>, ElementT>
 {
 private:
   typedef VectorBase <4, ElementT> Parent;
@@ -285,12 +264,6 @@ public:
 };
 
 
-// TODO: delete
-#define XY_LIST(vec__)    (vec__).x (), (vec__).y ()
-#define XYZ_LIST(vec__)   (vec__).x (), (vec__).y (), (vec__).z ()
-#define XYZW_LIST(vec__)  (vec__).x (), (vec__).y (), (vec__).z (), (vec__).w ()
-
-
 template <int DIMENSION, typename ElementT>
 ElementT dotProduct (Vector <DIMENSION, ElementT> a, Vector <DIMENSION, ElementT> b) {
   ElementT sum = 0;
@@ -299,10 +272,6 @@ ElementT dotProduct (Vector <DIMENSION, ElementT> a, Vector <DIMENSION, ElementT
   return sum;
 }
 
-template <int DIMENSION, typename ElementT>
-ElementT positiveDotProduct (Vector <DIMENSION, ElementT> a, Vector <DIMENSION, ElementT> b) {
-  return max (dotProduct (a, b), ElementT (0));
-}
 // template <int DIMENSION, typename ElementT>
 // Vector <2, ElementT> crossProduct (Vector <2, ElementT> a) {
 //   return Vector <2, ElementT> (-a.y, a.x);

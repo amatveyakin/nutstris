@@ -22,8 +22,9 @@ void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData) {
   auto matrixView = matrixutil::lookAt({0.0, 1.5, 10.5}, {0, 0, 0}, {0, 1, 0});
   auto matrixProj = matrixutil::perspective(M_PI / 2.5f, 4.0 / 3.0, 0.01f, 100.0f);
   auto VP = matrixProj * matrixView;
-  cubeMesh_->getShaderProgram().setUniform("VP", VP);
-  cubeMesh_->getShaderProgram().setUniform("textures", 0);
+  cubeMesh_->getShaderProgram().setUniform("gVP", VP);
+  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", math::Mat4x4f::identityMatrix());
+  cubeMesh_->getShaderProgram().setUniform("gBonusesTextureArray", 0);
   cubeMesh_->render(cubesData);
 }
 

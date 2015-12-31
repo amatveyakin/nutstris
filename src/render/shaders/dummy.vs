@@ -1,22 +1,32 @@
 #version 330 core
 
-layout(location = 0) in vec3 vertexPosition_modelspace;
-layout(location = 1) in vec3 vertexNormal_modelspace;
-layout(location = 2) in int  textureIndex;
-layout(location = 4) in mat4 ModelToWorld;
-layout(location = 8) in vec3 inColor;
+layout(location = 0) in vec3 positionModelIn;
+layout(location = 1) in vec3 normalModelIn;
+layout(location = 2) in int  textureIndexIn;
+layout(location = 4) in mat4 modelToWorldIn;
+layout(location = 8) in vec3 diffuseColorIn;
 
-uniform mat4 VP;
+uniform mat4 gVP;
+uniform mat4 gGlobalRotation;
 
-out vec3 vertexNormal;
-out vec3 vertexColor;
+out vec3 positionModel;
+out vec3 positionWorld;
+out vec3 normalWorld;
+out vec3 diffuseColor;
+flat out int textureIndex;
 out vec2 textureCoord;
-flat out int textureIndexFS;
 
 void main() {
-  gl_Position = VP * ModelToWorld * vec4(vertexPosition_modelspace, 1);
-  vertexNormal = (ModelToWorld * vec4(vertexNormal_modelspace, 0)).xyz;
-  vertexColor = inColor;
-  textureCoord = vertexPosition_modelspace.xy;
-  textureIndexFS = textureIndex;
+  positionModel = positionModelIn;
+
+  positionWorld = (modelToWorldIn * vec4(positionModelIn, 1)).xyz;
+  positionWorld = (gGlobalRotation * vec4(positionWorld, 1)).xyz;
+
+  normalWorld = (gGlobalRotation * modelToWorldIn * vec4(normalModelIn, 0)).xyz;
+
+  gl_Position = gVP * vec4(positionWorld, 1);
+
+  diffuseColor = diffuseColorIn;
+  textureIndex = textureIndexIn;
+  textureCoord = positionModelIn.xy;
 }

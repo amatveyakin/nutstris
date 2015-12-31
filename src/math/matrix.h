@@ -12,7 +12,7 @@ class MatrixBase {
 public:
   MatrixBase() : m_elements() {}
   explicit MatrixBase(Uninitialized) {}
-  explicit MatrixBase(const ElementT* elements)   { std::copy(elements, elements + N_ELEMENTS, m_elements); }
+  explicit MatrixBase(const ElementT* elementsFrom)   { std::copy(elementsFrom, elementsFrom + N_ELEMENTS, m_elements); }
   explicit MatrixBase(const std::array<Vector<N_COLS, ElementT>, N_ROWS>& columns) {
     for (int i = 0; i < N_ROWS; ++i) {
       for (int j = 0; j < N_COLS; ++j)

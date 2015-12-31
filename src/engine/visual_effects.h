@@ -613,12 +613,12 @@ public:
   AutoStoppingEffectType<FadingEffectType> bonusImage;
 //  bool motionBlur;
 
-  BlockImage(VisualObject* parent__, Color color__, FieldCoords position) :
+  BlockImage(VisualObject* parent__, Color color__, FieldCoords position__) :
           color(color__), bonus(Bonus::None)
   {
     parent = parent__;
     bonusImage.clear();
-    placeAt(FloatFieldCoords(position));
+    placeAt(FloatFieldCoords(position__));
   }
 
   /*void placeNewImageAt(VisualObject* parent__, Color color__, FieldCoords position)

@@ -14,7 +14,7 @@ public:
   Renderer();
   ~Renderer();
   
-  void render(const std::vector<CubeMesh::PerCubeData>& cubesData);
+  void render(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane = {});
 
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;

@@ -27,7 +27,23 @@ void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) 
       addBlocks(player->lyingBlockImages);
       addBlocks(player->fallingBlockImages);
       renderer.render(cubesData);
-      return;
+
+      for ( size_t iDisappearingLine = 0; iDisappearingLine < player->disappearingLines.size(); ++iDisappearingLine ) {
+        auto& currentLine = player->disappearingLines[iDisappearingLine];
+        math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
+                                      1.5f * ( 2.f * currentLine.progress ( now ) - 1.f)};
+        std::vector<render::CubeMesh::PerCubeData> lineCubesData;
+        for (size_t x = 0; x < engine::FIELD_WIDTH; ++x ) {
+          lineCubesData.push_back({math::Mat4x4f::translationMatrix(
+            {float( x ) - engine::FIELD_WIDTH / 2,
+             float(currentLine.row) - engine::FIELD_HEIGHT / 2,
+             0.0f}),
+            ColorToVec3(currentLine.blockColor[x]), 0});
+        }
+        renderer.render(lineCubesData, clippingPlane);
+      }
+
+      return; // TODO: Draw all players, not only first one.
     }
   }
 }

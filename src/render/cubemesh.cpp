@@ -6,6 +6,12 @@
 
 namespace render {
 
+namespace {
+const double kCubeSmoothRadius = 0.4f;
+const int    kCubeAngleSteps   = 10;
+}
+
+
 CubeMesh::CubeMesh() {
   glGenVertexArrays(1, &vertexArrayID_);
   glBindVertexArray(vertexArrayID_);
@@ -13,7 +19,7 @@ CubeMesh::CubeMesh() {
   GLuint vertexbuffer;
   glGenBuffers(1, &vertexbuffer);
   glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  auto verticesData = createVerticesPositionsAndNormals_(0.5f, 0.1f, 10);
+  auto verticesData = createVerticesPositionsAndNormals_(0.5f, kCubeSmoothRadius, kCubeAngleSteps);
   glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData[0]) * verticesData.size(), verticesData.data(), GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), nullptr);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), reinterpret_cast<GLvoid*>(12));

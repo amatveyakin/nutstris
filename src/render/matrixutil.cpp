@@ -41,8 +41,8 @@ math::Mat4x4f lookAt(math::Vec3f eye, math::Vec3f center, math::Vec3f up) {
 math::Mat4x4f perspective(float fov, float aspect, float clipNear, float clipFar) {
   math::Mat4x4f result;
   auto f = 1.0f / tan(fov / 2.0f);
-  result(0, 0) = f;
-  result(1, 1) = f / aspect;
+  result(0, 0) = f / aspect;
+  result(1, 1) = f;
   result(2, 2) = (clipFar + clipNear) / (clipNear - clipFar);
   result(3, 2) = -1.0f;
   result(2, 3) = 2.0f * clipFar * clipNear / (clipNear - clipFar);

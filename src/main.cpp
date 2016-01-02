@@ -5,10 +5,23 @@
 #include <SFML/Window.hpp>
 
 #include "render/renderer.h"
+#include "render/defs.h"
 #include "engine/engine.h"
 
 math::Vec3f ColorToVec3(engine::Color c) {
   return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f};
+}
+
+float fieldToWorldX(float fieldX) {
+  return (fieldX - (engine::FIELD_WIDTH - 1.0f) / 2.0f) * render::CUBE_SCALE;
+}
+
+float fieldToWorldY(float fieldY) {
+  return (fieldY - (engine::FIELD_HEIGHT - 1.0f) / 2.0f) * render::CUBE_SCALE;
+}
+
+math::Mat4x4f fieldPosToWorldPos(int fieldX, int fieldY) {
+  return math::Mat4x4f::translationMatrix({fieldToWorldX(fieldX), fieldToWorldY(fieldY), 0.0f});
 }
 
 // Stub.  TODO(Alexey): implement actual rendering.
@@ -21,8 +34,7 @@ void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) 
       auto addBlocks = [&cubesData, now](std::vector<engine::BlockImage>& blockImages) {
         for (auto& lyingBlock : blockImages) {
           auto pos2d = lyingBlock.position(now);
-          cubesData.push_back({math::Mat4x4f::translationMatrix({pos2d.x() - engine::FIELD_WIDTH / 2, pos2d.y() - engine::FIELD_HEIGHT / 2, 0.0f}),
-                              ColorToVec3(lyingBlock.color), 0});
+          cubesData.push_back({fieldPosToWorldPos(pos2d.x(), pos2d.y()), ColorToVec3(lyingBlock.color), 0});
         }
       };
       addBlocks(player->lyingBlockImages);
@@ -34,13 +46,8 @@ void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) 
         math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
                                       1.5f * ( 2.f * currentLine.progress ( now ) - 1.f)};
         std::vector<render::CubeMesh::PerCubeData> lineCubesData;
-        for (size_t x = 0; x < engine::FIELD_WIDTH; ++x ) {
-          lineCubesData.push_back({math::Mat4x4f::translationMatrix(
-            {float( x ) - engine::FIELD_WIDTH / 2,
-             float(currentLine.row) - engine::FIELD_HEIGHT / 2,
-             0.0f}),
-            ColorToVec3(currentLine.blockColor[x]), 0});
-        }
+        for (size_t x = 0; x < engine::FIELD_WIDTH; ++x)
+          lineCubesData.push_back({fieldPosToWorldPos(x, currentLine.row), ColorToVec3(currentLine.blockColor[x]), 0});
         renderer.render(lineCubesData, clippingPlane);
       }
     }

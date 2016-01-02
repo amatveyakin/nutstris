@@ -3,6 +3,7 @@
 #include "render/textureloader.h"
 #include "render/matrixutil.h"
 #include "render/shaderprogram.h"
+#include "render/defs.h"
 
 namespace render {
 
@@ -24,8 +25,11 @@ void Renderer::prepareToDrawPlayer ( size_t iPlayer ) {
 
 
 void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane) {
-  auto matrixView = matrixutil::lookAt({0.0, 1.5, 10.5}, {0, 0, 0}, {0, 1, 0});
-  auto matrixProj = matrixutil::perspective(M_PI / 2.5f, 4.0 / 3.0, 0.01f, 100.0f);
+  math::Vec3f eyePos = { (FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT) / 2.f, 0.0f,
+                         (EYE_TO_FIELD + CUBE_SCALE / 2.f) - (FIELD_INDENT_TOP - (HUD_HEIGHT + FIELD_INDENT_BOTTOM)) / 2.f};
+  math::Vec3f target = {(FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT) / 2.f, 0.f , (FIELD_INDENT_TOP - (HUD_HEIGHT + FIELD_INDENT_BOTTOM)) / 2.f};
+  auto matrixView = matrixutil::lookAt(eyePos, target, {0, 1, 0});
+  auto matrixProj = matrixutil::perspective(ANGLE_FOV_Y, VP_ASPECT, 1.0f, 100.0f);
   auto VP = matrixProj * matrixView;
   cubeMesh_->getShaderProgram().setUniform("gVP", VP);
   cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", math::Mat4x4f::identityMatrix());
@@ -37,6 +41,5 @@ void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData, math:
 void Renderer::updatePlayerViewports ( int nPlayers, int screenWidth, int screenHeight ) {
   playerViewports_ = createPlayerViewports(nPlayers, screenWidth, screenHeight);
 }
-
 
 }

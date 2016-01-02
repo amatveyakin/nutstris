@@ -13,6 +13,7 @@ set(srcs
     ${src_dir}/render/cubemesh.cpp
     ${src_dir}/render/textureloader.cpp
     ${src_dir}/render/matrixutil.cpp
+    ${src_dir}/render/playerviewport.cpp
     ${src_dir}/util/file.cpp
 )
 

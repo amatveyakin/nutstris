@@ -7,15 +7,16 @@
 #include "render/renderer.h"
 #include "engine/engine.h"
 
-
 math::Vec3f ColorToVec3(engine::Color c) {
   return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f};
 }
 
 // Stub.  TODO(Alexey): implement actual rendering.
 void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) {
-  for (auto* player : game.participants) {
+  for (size_t iPlayer = 0; iPlayer < game.participants.size(); ++iPlayer) {
+    auto* player = game.participants[iPlayer];
     if (player->active) {
+      renderer.prepareToDrawPlayer(iPlayer);
       std::vector<render::CubeMesh::PerCubeData> cubesData;
       auto addBlocks = [&cubesData, now](std::vector<engine::BlockImage>& blockImages) {
         for (auto& lyingBlock : blockImages) {
@@ -42,8 +43,6 @@ void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) 
         }
         renderer.render(lineCubesData, clippingPlane);
       }
-
-      return; // TODO: Draw all players, not only first one.
     }
   }
 }
@@ -71,7 +70,7 @@ int main() {
         running = false;
       }
       else if (event.type == sf::Event::Resized) {
-        glViewport(0, 0, event.size.width, event.size.height);
+        renderer.updatePlayerViewports(game.participants.size(), event.size.width, event.size.height);
       }
     }
 

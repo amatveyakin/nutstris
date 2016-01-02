@@ -17,6 +17,12 @@ Renderer::~Renderer() {
 
 }
 
+void Renderer::prepareToDrawPlayer ( size_t iPlayer ) {
+  glViewport(playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
+             playerViewports_[iPlayer].width, playerViewports_[iPlayer].height);
+}
+
+
 void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane) {
   auto matrixView = matrixutil::lookAt({0.0, 1.5, 10.5}, {0, 0, 0}, {0, 1, 0});
   auto matrixProj = matrixutil::perspective(M_PI / 2.5f, 4.0 / 3.0, 0.01f, 100.0f);
@@ -27,5 +33,10 @@ void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData, math:
   cubeMesh_->getShaderProgram().setUniform("gClipPlane", clipPlane);
   cubeMesh_->render(cubesData);
 }
+
+void Renderer::updatePlayerViewports ( int nPlayers, int screenWidth, int screenHeight ) {
+  playerViewports_ = createPlayerViewports(nPlayers, screenWidth, screenHeight);
+}
+
 
 }

@@ -7,6 +7,8 @@
 #include "render/cubemesh.h"
 #include "render/playerviewport.h"
 
+#include "engine/engine.h"
+
 namespace render {
 class TextureLoader;
 
@@ -15,11 +17,13 @@ public:
   Renderer();
   ~Renderer();
   
+  void renderGame(engine::Game& game, engine::Time now);
+
   void updatePlayerViewports(int nPlayers, int screenWidth, int screenHeight);
 
-  void prepareToDrawPlayer(size_t iPlayer);
-
-  void render(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane = {});
+private:
+  void prepareToDrawPlayer_(size_t iPlayer);
+  void renderCubes_(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane = {});
 
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;

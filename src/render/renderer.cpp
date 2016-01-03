@@ -7,6 +7,26 @@
 
 namespace render {
 
+namespace {
+  math::Vec3f ColorToVec3(engine::Color c) {
+  return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f};
+}
+
+float fieldToWorldX(float fieldX) {
+  return (fieldX - (engine::FIELD_WIDTH - 1.0f) / 2.0f) * render::CUBE_SCALE;
+}
+
+float fieldToWorldY(float fieldY) {
+  return (fieldY - (engine::FIELD_HEIGHT - 1.0f) / 2.0f) * render::CUBE_SCALE;
+}
+
+math::Mat4x4f fieldPosToWorldPos(int fieldX, int fieldY) {
+  return math::Mat4x4f::translationMatrix({fieldToWorldX(fieldX), fieldToWorldY(fieldY), 0.0f}) *
+         render::matrixutil::scale(render::CUBE_SCALE);
+}
+}
+
+
 Renderer::Renderer() {
   glewInit();
   glEnable(GL_DEPTH_TEST);
@@ -15,16 +35,49 @@ Renderer::Renderer() {
 }
 
 Renderer::~Renderer() {
-
 }
 
-void Renderer::prepareToDrawPlayer ( size_t iPlayer ) {
+void Renderer::renderGame ( engine::Game& game, engine::Time now )
+{
+  for (size_t iPlayer = 0; iPlayer < game.participants.size(); ++iPlayer) {
+    auto player = game.participants[iPlayer];
+    if (player->active) {
+      prepareToDrawPlayer_(iPlayer);
+      std::vector<render::CubeMesh::PerCubeData> cubesData;
+      auto addBlocks = [&cubesData, now](std::vector<engine::BlockImage>& blockImages) {
+        for (auto& block : blockImages) {
+          auto bonusProgress = block.bonusImage.progress(now);
+          auto bonusIndex = (bonusProgress > 0.5f) ? int(block.bonus) : 0;
+          auto cubeScale = fabs(2 * bonusProgress - 1);
+          auto scaleMatrix = render::matrixutil::scale(cubeScale);
+          auto pos2d = block.position(now);
+          cubesData.push_back({fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix, ColorToVec3(block.color), bonusIndex});
+        }
+      };
+      addBlocks(player->lyingBlockImages);
+      addBlocks(player->fallingBlockImages);
+      renderCubes_(cubesData);
+
+      for ( size_t iDisappearingLine = 0; iDisappearingLine < player->disappearingLines.size(); ++iDisappearingLine ) {
+        auto& currentLine = player->disappearingLines[iDisappearingLine];
+        math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
+                                      1.5f * ( 2.f * currentLine.progress ( now ) - 1.f)};
+        std::vector<render::CubeMesh::PerCubeData> lineCubesData;
+        for (size_t x = 0; x < engine::FIELD_WIDTH; ++x)
+          lineCubesData.push_back({fieldPosToWorldPos(x, currentLine.row), ColorToVec3(currentLine.blockColor[x]), 0});
+        renderCubes_(lineCubesData, clippingPlane);
+      }
+    }
+  }
+}
+
+void Renderer::prepareToDrawPlayer_ ( size_t iPlayer ) {
   glViewport(playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
              playerViewports_[iPlayer].width, playerViewports_[iPlayer].height);
 }
 
 
-void Renderer::render(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane) {
+void Renderer::renderCubes_(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane) {
   math::Vec3f eyePos = { (FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT) / 2.f, 0.0f,
                          (EYE_TO_FIELD + CUBE_SCALE / 2.f) - (FIELD_INDENT_TOP - (HUD_HEIGHT + FIELD_INDENT_BOTTOM)) / 2.f};
   math::Vec3f target = {(FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT) / 2.f, 0.f , (FIELD_INDENT_TOP - (HUD_HEIGHT + FIELD_INDENT_BOTTOM)) / 2.f};

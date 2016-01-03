@@ -6,23 +6,20 @@
 
 namespace render {
 
-VertexShader::VertexShader(const std::string& filename) 
-    : Shader(GL_VERTEX_SHADER, filename)
+VertexShader::VertexShader(const std::string& sourceCode)
+    : Shader(GL_VERTEX_SHADER, sourceCode)
 {
 }
 
-FragmentShader::FragmentShader(const std::string& filename) 
-    : Shader(GL_FRAGMENT_SHADER, filename)
+FragmentShader::FragmentShader(const std::string& sourceCode)
+    : Shader(GL_FRAGMENT_SHADER, sourceCode)
 {
 }
   
-Shader::Shader(GLenum shaderType, const std::string& filename)
+Shader::Shader(GLenum shaderType, const std::string& sourceCode)
     : id_(glCreateShader(shaderType)) 
 {
-  std::ifstream shaderInputStream(filename);
-  std::string shaderCode(std::istreambuf_iterator<char>(shaderInputStream), {});
-
-  auto shaderCodeCPtr = shaderCode.c_str();
+  auto shaderCodeCPtr = sourceCode.c_str();
   glShaderSource(id_, 1, &shaderCodeCPtr, nullptr);
   glCompileShader(id_);
 

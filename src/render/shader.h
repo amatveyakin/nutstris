@@ -6,7 +6,7 @@
 namespace render {
 class Shader {
 protected:
-  Shader(GLenum shaderType, const std::string& filename);
+  Shader(GLenum shaderType, const std::string& sourceCode);
   ~Shader();
 
 public:
@@ -19,12 +19,12 @@ private:
   
 class VertexShader : public Shader {
 public:
-  explicit VertexShader(const std::string& filename);
+  explicit VertexShader(const std::string& sourceCode);
 };
 
 class FragmentShader : public Shader {
 public:
-  explicit FragmentShader(const std::string& filename);
+  explicit FragmentShader(const std::string& sourceCode);
 };
 
 

@@ -6,6 +6,7 @@
 
 #include "render/renderer.h"
 #include "render/defs.h"
+#include "render/matrixutil.h"
 #include "engine/engine.h"
 
 math::Vec3f ColorToVec3(engine::Color c) {
@@ -21,7 +22,8 @@ float fieldToWorldY(float fieldY) {
 }
 
 math::Mat4x4f fieldPosToWorldPos(int fieldX, int fieldY) {
-  return math::Mat4x4f::translationMatrix({fieldToWorldX(fieldX), fieldToWorldY(fieldY), 0.0f});
+  return math::Mat4x4f::translationMatrix({fieldToWorldX(fieldX), fieldToWorldY(fieldY), 0.0f}) *
+         render::matrixutil::scale(render::CUBE_SCALE);
 }
 
 // Stub.  TODO(Alexey): implement actual rendering.

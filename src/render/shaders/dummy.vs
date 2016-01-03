@@ -28,5 +28,5 @@ void main() {
 
   diffuseColor = diffuseColorIn;
   textureIndex = textureIndexIn;
-  textureCoord = positionModelIn.xy;
+  textureCoord = positionModelIn.xy + vec2(0.5, 0.5);
 }

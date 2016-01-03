@@ -27,6 +27,14 @@ math::Mat4x4f rotation(math::Vec3f axis, float angle) {
   return createFromColumns(transformed[0], transformed[1], transformed[2], {0, 0, 0});
 }
 
+math::Mat4x4f scale ( float coeff ) {
+  math::Mat4x4f result;
+  for (int i = 0; i < 3; ++i)
+    result(i, i) = coeff;
+  result(3, 3) = 1.0f;
+  return result;
+}
+
 
 math::Mat4x4f lookAt(math::Vec3f eye, math::Vec3f center, math::Vec3f up) {
   auto eyeToCenter = math::L2::normalized(center - eye);

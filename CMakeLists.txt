@@ -10,6 +10,7 @@ set(srcs
     ${src_dir}/render/renderer.cpp
     ${src_dir}/render/shader.cpp
     ${src_dir}/render/shaderprogram.cpp
+    ${src_dir}/render/shaderprogramfactory.cpp
     ${src_dir}/render/cubemesh.cpp
     ${src_dir}/render/textureloader.cpp
     ${src_dir}/render/matrixutil.cpp

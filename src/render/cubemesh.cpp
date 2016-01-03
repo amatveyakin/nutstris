@@ -4,6 +4,7 @@
 #include "render/shader.h"
 #include "render/shaderprogram.h"
 #include "render/defs.h"
+#include "render/shaderprogramfactory.h"
 
 namespace render {
 
@@ -57,9 +58,7 @@ CubeMesh::CubeMesh() {
   glBindVertexArray(0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  auto vertexShader = VertexShader("src/render/shaders/dummy.vs");
-  auto fragmentShader = FragmentShader("src/render/shaders/dummy.fs");
-  shaderProgram_ = std::make_unique<ShaderProgram>(vertexShader, fragmentShader);
+  shaderProgram_ = ShaderProgramFactory::createBaseCubesRenderingProgram();
 }
 
 CubeMesh::~CubeMesh() {

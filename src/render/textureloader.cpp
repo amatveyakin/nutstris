@@ -9,7 +9,22 @@ namespace render {
 
 namespace
 {
-const std::map<int, std::string> kTextureNames = {{0, "NoBonus"}, {1, "Heal"}};
+const std::map<int, std::string> kTextureNames = {
+  {0, "NoBonus"},
+  {1, "EnlargeHintQueue"},
+  {2, "PieceTheft"},
+  {3, "Heal"},
+  {4, "SlowDown"},
+  {5, "ClearField"},
+  {6, "FlippedScreen"},
+  {7, "RotatingScreen"},
+  {8, "Wave"},
+  {9, "Lantern"},
+  {10, "CrazyPieces"},
+  {11, "TruncatedBlocks"},
+  {12, "NoHint"},
+  {13, "SpeedUp"}
+};
 }
 
 TextureLoader::TextureLoader(const std::string& path)

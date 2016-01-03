@@ -640,7 +640,7 @@ public:
   Time duration;
 
   // TODO: declare constants (?)
-  float progress(Time currentTime)
+  float progress(Time currentTime) const
   {
     return math::bound(0.0f, (currentTime - startTime) / duration, 1.0f);
   }

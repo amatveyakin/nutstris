@@ -22,8 +22,10 @@ public:
   void updatePlayerViewports(int nPlayers, int screenWidth, int screenHeight);
 
 private:
+  void renderPlayer_(engine::Player& player, engine::Time now);
   void prepareToDrawPlayer_(size_t iPlayer);
   void renderCubes_(const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane = {});
+  void renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, engine::Time now);
 
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;

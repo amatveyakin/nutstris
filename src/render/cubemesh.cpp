@@ -42,7 +42,7 @@ CubeMesh::CubeMesh() {
   glEnableVertexAttribArray(colorLayout);
   glVertexAttribPointer(colorLayout, 3, GL_FLOAT, false, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( offsetof(PerCubeData, color) ));
   glVertexAttribDivisor(colorLayout, 1);
-  glVertexAttribPointer(textureIDLayout, 1, GL_INT, GL_FALSE, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( offsetof(PerCubeData, textureIndex) ));
+  glVertexAttribIPointer(textureIDLayout, 1, GL_INT, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( offsetof(PerCubeData, textureIndex) ));
   glEnableVertexAttribArray(textureIDLayout);
   glVertexAttribDivisor(textureIDLayout, 1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);

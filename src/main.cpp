@@ -34,9 +34,13 @@ void drawGame(render::Renderer& renderer, engine::Game& game, engine::Time now) 
       renderer.prepareToDrawPlayer(iPlayer);
       std::vector<render::CubeMesh::PerCubeData> cubesData;
       auto addBlocks = [&cubesData, now](std::vector<engine::BlockImage>& blockImages) {
-        for (auto& lyingBlock : blockImages) {
-          auto pos2d = lyingBlock.position(now);
-          cubesData.push_back({fieldPosToWorldPos(pos2d.x(), pos2d.y()), ColorToVec3(lyingBlock.color), 0});
+        for (auto& block : blockImages) {
+          auto bonusProgress = block.bonusImage.progress(now);
+          auto bonusIndex = (bonusProgress > 0.5f) ? int(block.bonus) : 0;
+          auto cubeScale = fabs(2 * bonusProgress - 1);
+          auto scaleMatrix = render::matrixutil::scale(cubeScale);
+          auto pos2d = block.position(now);
+          cubesData.push_back({fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix, ColorToVec3(block.color), bonusIndex});
         }
       };
       addBlocks(player->lyingBlockImages);

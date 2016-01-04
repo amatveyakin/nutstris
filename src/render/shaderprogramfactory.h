@@ -10,6 +10,7 @@ class ShaderProgramFactory
 {
 public:
   static std::unique_ptr<ShaderProgram> createBaseCubesRenderingProgram();
+  static std::unique_ptr<ShaderProgram> createTexturedRenderingProgram();
 };
 
 }

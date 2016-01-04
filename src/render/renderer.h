@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 
 #include "render/cubemesh.h"
+#include "render/texturedquad.h"
 #include "render/playerviewport.h"
 
 #include "engine/engine.h"
@@ -26,9 +27,13 @@ private:
   void prepareToDrawPlayer_(size_t iPlayer);
   void renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, math::Vec4f clipPlane = {});
   void renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, engine::Time now);
+  void renderWall_(engine::Player& player);
+
+  math::Mat4x4f getViewProjection_() const;
 
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;
+  std::unique_ptr<TexturedQuad> wall_;
   std::unique_ptr<TextureLoader> textureLoader_;
 
   std::vector<PlayerViewport> playerViewports_;

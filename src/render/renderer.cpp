@@ -31,6 +31,9 @@ Renderer::Renderer() {
   glewInit();
   glEnable ( GL_DEPTH_TEST );
   cubeMesh_ = std::make_unique<CubeMesh>();
+  wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
+                                          CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
+                                          1.0f,  1.0f);
   textureLoader_ = std::make_unique<TextureLoader> ( "resources/textures/bonuses/" );
 }
 
@@ -68,6 +71,7 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   addBlocks ( player.fallingBlockImages );
   renderCubes_ ( cubesData );
   renderDisappearingLines_( player.disappearingLines, now );
+  renderWall_( player );
 }
 
 void Renderer::renderDisappearingLines_ ( const std::vector<engine::DisappearingLine>& lines, engine::Time now ) {
@@ -83,8 +87,15 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
   }
 }
 
-
 void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Vec4f clipPlane ) {
+  cubeMesh_->getShaderProgram().setUniform ( "gVP", getViewProjection_() );
+  cubeMesh_->getShaderProgram().setUniform ( "gGlobalRotation", math::Mat4x4f::identityMatrix() );
+  cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", 0 );
+  cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
+  cubeMesh_->render ( cubesData );
+}
+
+math::Mat4x4f Renderer::getViewProjection_() const {
   math::Vec3f eyePos = { ( FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT ) / 2.f, 0.0f,
                          ( EYE_TO_FIELD + CUBE_SCALE / 2.f ) - ( FIELD_INDENT_TOP - ( HUD_HEIGHT + FIELD_INDENT_BOTTOM ) ) / 2.f
                        };
@@ -92,11 +103,14 @@ void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cube
   auto matrixView = matrixutil::lookAt ( eyePos, target, {0, 1, 0} );
   auto matrixProj = matrixutil::perspective ( ANGLE_FOV_Y, VP_ASPECT, 1.0f, 100.0f );
   auto VP = matrixProj * matrixView;
-  cubeMesh_->getShaderProgram().setUniform ( "gVP", VP );
-  cubeMesh_->getShaderProgram().setUniform ( "gGlobalRotation", math::Mat4x4f::identityMatrix() );
-  cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", 0 );
-  cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
-  cubeMesh_->render ( cubesData );
+  return VP;
+}
+
+void Renderer::renderWall_ ( engine::Player& /*player*/ ) {
+  // TODO: use player to set proper background texture
+  wall_->getShaderProgram().setUniform( "gVP", getViewProjection_() );
+  wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}));
+  wall_->render();
 }
 
 void Renderer::updatePlayerViewports ( int nPlayers, int screenWidth, int screenHeight ) {

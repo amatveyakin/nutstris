@@ -48,7 +48,7 @@ CubeMesh::CubeMesh() {
   GLuint indexBuffer;
   glGenBuffers(1, &indexBuffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-  auto indicesData = createIndices_(10);
+  auto indicesData = createIndices_(kCubeAngleSteps);
   nIndices_ = indicesData.size();
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicesData[0]) * indicesData.size(), indicesData.data(), GL_STATIC_DRAW);
 

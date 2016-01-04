@@ -29,16 +29,10 @@ CubeMesh::CubeMesh() {
   glGenVertexArrays(1, &vertexArrayID_);
   glBindVertexArray(vertexArrayID_);
 
-  GLuint vertexbuffer;
-  glGenBuffers(1, &vertexbuffer);
-  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  auto verticesData = createVerticesPositionsAndNormals_(1.0 / 2.0f, kCubeSmoothRadius, kCubeAngleSteps);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(verticesData[0]) * verticesData.size(), verticesData.data(), GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), nullptr);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(std::pair<math::Vec3f, math::Vec3f>), reinterpret_cast<GLvoid*>(12));
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  cubeVerticesBuffer_.bind();
+  cubeVerticesBuffer_.setUpLayout();
+  cubeVerticesBuffer_.unbind();
+  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0 / 2.0f, kCubeSmoothRadius, kCubeAngleSteps));
 
   transformsBuffer_.bind();
   transformsBuffer_.setUpLayout();
@@ -73,9 +67,9 @@ ShaderProgram& CubeMesh::getShaderProgram() {
   return *shaderProgram_;
 }
 
-std::vector<std::pair<math::Vec3f, math::Vec3f>> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
+std::vector<dataformats::PointWithNormal> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
   auto nVertices = 8 * angleSteps * angleSteps;
-  std::vector<std::pair<math::Vec3f, math::Vec3f>> result(nVertices);
+  std::vector<dataformats::PointWithNormal> result(nVertices);
 
   for (auto i = 0; i < 2 * angleSteps; ++i)
   {
@@ -88,11 +82,11 @@ std::vector<std::pair<math::Vec3f, math::Vec3f>> CubeMesh::createVerticesPositio
       auto z = cosf(alpha) * sinf(beta);
       auto y = sinf(alpha);
 
-      result[i * 4 * angleSteps + j].first = { scale * (smoothnessRadius * x + (1 - smoothnessRadius) * math::sgn(x)),
+      result[i * 4 * angleSteps + j].point = { scale * (smoothnessRadius * x + (1 - smoothnessRadius) * math::sgn(x)),
 					       scale * (smoothnessRadius * y + (1 - smoothnessRadius) * math::sgn(y)),
                                                scale * (smoothnessRadius * z + (1 - smoothnessRadius) * math::sgn(z))  };
 
-      result[i * 4 * angleSteps + j].second = {x, y, z};
+      result[i * 4 * angleSteps + j].normal = {x, y, z};
     }
   }
 

@@ -5,6 +5,7 @@
 #include "math/vector.h"
 #include "math/matrix.h"
 #include "render/arraybuffer.h"
+#include "render/dataformats.h"
 
 namespace render {
 class ShaderProgram;
@@ -27,11 +28,14 @@ public:
   ShaderProgram& getShaderProgram();
 
 private:
-  std::vector<std::pair<math::Vec3f, math::Vec3f>> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
+  std::vector<dataformats::PointWithNormal> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
   std::vector<GLuint> createIndices_(int angleSteps) const;
 
   GLuint vertexArrayID_;
+
+  ArrayBuffer<dataformats::PointWithNormal> cubeVerticesBuffer_;
   ArrayBuffer<PerCubeData> transformsBuffer_;
+
   std::unique_ptr<ShaderProgram> shaderProgram_;
 
   size_t nIndices_;

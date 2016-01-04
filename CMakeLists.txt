@@ -12,6 +12,7 @@ set(srcs
     ${src_dir}/render/shaderprogram.cpp
     ${src_dir}/render/shaderprogramfactory.cpp
     ${src_dir}/render/cubemesh.cpp
+    ${src_dir}/render/dataformats.cpp
     ${src_dir}/render/textureloader.cpp
     ${src_dir}/render/matrixutil.cpp
     ${src_dir}/render/playerviewport.cpp

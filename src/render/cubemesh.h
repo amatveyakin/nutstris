@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include "math/vector.h"
 #include "math/matrix.h"
+#include "render/arraybuffer.h"
 
 namespace render {
 class ShaderProgram;
@@ -17,6 +18,8 @@ public:
     math::Mat4x4f modelToWorld;
     math::Vec3f   color;
     int           textureIndex;
+
+    static void setUpLayout(ArrayBuffer<PerCubeData>& buffer);
   };
 
   void render(const std::vector<PerCubeData>& cubesData);
@@ -28,7 +31,7 @@ private:
   std::vector<GLuint> createIndices_(int angleSteps) const;
 
   GLuint vertexArrayID_;
-  GLuint transformsBuffer_;
+  ArrayBuffer<PerCubeData> transformsBuffer_;
   std::unique_ptr<ShaderProgram> shaderProgram_;
 
   size_t nIndices_;

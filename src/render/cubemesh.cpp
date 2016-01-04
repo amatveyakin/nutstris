@@ -13,6 +13,17 @@ const double kCubeSmoothRadius = 0.4f;
 const int    kCubeAngleSteps   = 10;
 }
 
+void CubeMesh::PerCubeData::setUpLayout(ArrayBuffer<PerCubeData>& buffer) {
+  const int textureIDLayout = 2;
+  const int transformLayout = 4;
+  const int colorLayout = 8;
+
+  for (int i = 0; i < 4; i++)
+    buffer.setUpFloatAttribute(transformLayout + i, 4, false, sizeof(float) * 4 * i);
+
+  buffer.setUpFloatAttribute(colorLayout, 3, false, offsetof(PerCubeData, color));
+  buffer.setUpIntAttribute(textureIDLayout, 1, offsetof(PerCubeData, textureIndex));
+}
 
 CubeMesh::CubeMesh() {
   glGenVertexArrays(1, &vertexArrayID_);
@@ -29,24 +40,10 @@ CubeMesh::CubeMesh() {
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  const int textureIDLayout = 2;
-  const int transformLayout = 4;
-  const int colorLayout = 8;
-  glGenBuffers(1, &transformsBuffer_);
-  glBindBuffer(GL_ARRAY_BUFFER, transformsBuffer_);
-  for (int i = 0; i < 4; i++) {
-    glEnableVertexAttribArray(transformLayout + i);
-    glVertexAttribPointer(transformLayout + i, 4, GL_FLOAT, false,
-			  sizeof(PerCubeData), reinterpret_cast<GLvoid*>( sizeof(float) * 4 * i ));
-    glVertexAttribDivisor(transformLayout + i, 1);
-  }
-  glEnableVertexAttribArray(colorLayout);
-  glVertexAttribPointer(colorLayout, 3, GL_FLOAT, false, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( offsetof(PerCubeData, color) ));
-  glVertexAttribDivisor(colorLayout, 1);
-  glVertexAttribIPointer(textureIDLayout, 1, GL_INT, sizeof(PerCubeData), reinterpret_cast<GLvoid*>( offsetof(PerCubeData, textureIndex) ));
-  glEnableVertexAttribArray(textureIDLayout);
-  glVertexAttribDivisor(textureIDLayout, 1);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  transformsBuffer_.bind();
+  transformsBuffer_.setUpLayout();
+  transformsBuffer_.setAttributeDivisor(1);
+  transformsBuffer_.unbind();
 
   GLuint indexBuffer;
   glGenBuffers(1, &indexBuffer);
@@ -66,10 +63,7 @@ CubeMesh::~CubeMesh() {
 }
 
 void CubeMesh::render(const std::vector<PerCubeData>& cubesData) {
-  glBindBuffer(GL_ARRAY_BUFFER, transformsBuffer_);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(cubesData[0]) * cubesData.size(), cubesData.data(), GL_STATIC_DRAW);
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+  transformsBuffer_.setData(cubesData);
   shaderProgram_->makeActive();
   glBindVertexArray(vertexArrayID_);
   glDrawElementsInstanced(GL_TRIANGLES, nIndices_, GL_UNSIGNED_INT, nullptr, cubesData.size() );

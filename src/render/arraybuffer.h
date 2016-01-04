@@ -1,5 +1,6 @@
 #ifndef ARRAYBUFFER_H
 #define ARRAYBUFFER_H
+#include <vector>
 #include <unordered_set>
 #include <GL/glew.h>
 

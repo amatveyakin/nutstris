@@ -34,10 +34,10 @@ CubeMesh::CubeMesh() {
   cubeVerticesBuffer_.unbind();
   cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0 / 2.0f, kCubeSmoothRadius, kCubeAngleSteps));
 
-  transformsBuffer_.bind();
-  transformsBuffer_.setUpLayout();
-  transformsBuffer_.setAttributeDivisor(1);
-  transformsBuffer_.unbind();
+  perCubeBuffer_.bind();
+  perCubeBuffer_.setUpLayout();
+  perCubeBuffer_.setAttributeDivisor(1);
+  perCubeBuffer_.unbind();
 
   GLuint indexBuffer;
   glGenBuffers(1, &indexBuffer);
@@ -57,7 +57,7 @@ CubeMesh::~CubeMesh() {
 }
 
 void CubeMesh::render(const std::vector<PerCubeData>& cubesData) {
-  transformsBuffer_.setData(cubesData);
+  perCubeBuffer_.setData(cubesData);
   shaderProgram_->makeActive();
   glBindVertexArray(vertexArrayID_);
   glDrawElementsInstanced(GL_TRIANGLES, nIndices_, GL_UNSIGNED_INT, nullptr, cubesData.size() );

@@ -34,7 +34,7 @@ private:
   GLuint vertexArrayID_;
 
   ArrayBuffer<dataformats::PointWithNormal> cubeVerticesBuffer_;
-  ArrayBuffer<PerCubeData> transformsBuffer_;
+  ArrayBuffer<PerCubeData> perCubeBuffer_;
 
   std::unique_ptr<ShaderProgram> shaderProgram_;
 

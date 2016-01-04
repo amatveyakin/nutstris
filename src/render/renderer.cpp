@@ -1,6 +1,7 @@
 #include "render/renderer.h"
 #include "render/cubemesh.h"
-#include "render/textureloader.h"
+#include "render/texturedquad.h"
+#include "render/texturefactory.h"
 #include "render/matrixutil.h"
 #include "render/shaderprogram.h"
 #include "render/defs.h"
@@ -34,7 +35,7 @@ Renderer::Renderer() {
   wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           1.0f,  1.0f);
-  textureLoader_ = std::make_unique<TextureLoader> ( "resources/textures/bonuses/" );
+  bonusesTexture_ = TextureFactory::createBonusesTexture();
 }
 
 Renderer::~Renderer() {
@@ -90,7 +91,7 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
 void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Vec4f clipPlane ) {
   cubeMesh_->getShaderProgram().setUniform ( "gVP", getViewProjection_() );
   cubeMesh_->getShaderProgram().setUniform ( "gGlobalRotation", math::Mat4x4f::identityMatrix() );
-  cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", 0 );
+  cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex() );
   cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
   cubeMesh_->render ( cubesData );
 }

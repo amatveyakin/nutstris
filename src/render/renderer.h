@@ -4,14 +4,14 @@
 #include <memory>
 #include <GL/glew.h>
 
-#include "render/cubemesh.h"
-#include "render/texturedquad.h"
 #include "render/playerviewport.h"
-
+#include "render/dataformats.h"
 #include "engine/engine.h"
 
 namespace render {
-class TextureLoader;
+class TexturedQuad;
+class TextureArray;
+class CubeMesh;
 
 class Renderer {
 public:
@@ -34,7 +34,7 @@ private:
 private:
   std::unique_ptr<CubeMesh> cubeMesh_;
   std::unique_ptr<TexturedQuad> wall_;
-  std::unique_ptr<TextureLoader> textureLoader_;
+  std::unique_ptr<TextureArray> bonusesTexture_;
 
   std::vector<PlayerViewport> playerViewports_;
 };

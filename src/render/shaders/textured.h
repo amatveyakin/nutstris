@@ -39,15 +39,14 @@ in vec3 positionWorld;
 in vec3 normalWorld;
 in vec2 textureCoord;
 
-uniform sampler2D gDiffuseMap;
+uniform sampler2DArray gDiffuseMap;
+uniform int gDiffuseMapLayer;
 
 out vec3 color;
 
 void main() {
-  vec4 textureColor = texture(gDiffuseMap, textureCoord);
-  textureColor = vec4(0.8, 0.0, 0.0, 1.0);
+  vec4 textureColor = texture(gDiffuseMap, vec3(textureCoord, gDiffuseMapLayer));
   color = textureColor.rgb * (0.6 * max(0.0, normalize(normalWorld).z) + 0.2);
-  color = textureColor.rgb;
 }
 )";
 

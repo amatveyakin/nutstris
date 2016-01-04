@@ -35,6 +35,7 @@ private:
   std::unique_ptr<CubeMesh> cubeMesh_;
   std::unique_ptr<TexturedQuad> wall_;
   std::unique_ptr<TextureArray> bonusesTexture_;
+  std::unique_ptr<TextureArray> wallTexture_;
 
   std::vector<PlayerViewport> playerViewports_;
 };

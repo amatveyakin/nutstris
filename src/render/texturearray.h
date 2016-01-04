@@ -12,10 +12,12 @@ public:
   ~TextureArray();
 
   int getTextureSlotIndex() const;
+  size_t getTextureCount() const;
   
 private:
   GLuint id_;
   int textureSlotIndex_;
+  size_t textureCount_;
 };
 
 }

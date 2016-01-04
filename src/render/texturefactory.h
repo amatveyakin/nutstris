@@ -9,6 +9,7 @@ class TextureFactory
 {
 public:
   static std::unique_ptr<TextureArray> createBonusesTexture();
+  static std::unique_ptr<TextureArray> createWallTexture();
 };
 
 }

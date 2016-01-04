@@ -3,7 +3,8 @@
 namespace render {
 
 TextureArray::TextureArray ( int textureSlotIndex, const std::vector<sf::Image>& images ) 
-: textureSlotIndex_(textureSlotIndex)
+: textureSlotIndex_(textureSlotIndex),
+  textureCount_(images.size())
 {
     auto width = images.front().getSize().x;
     auto height = images.front().getSize().y;
@@ -24,6 +25,10 @@ TextureArray::~TextureArray() {
 
 int TextureArray::getTextureSlotIndex() const {
   return textureSlotIndex_;
+}
+
+size_t TextureArray::getTextureCount() const {
+  return textureCount_;
 }
 
 

@@ -36,6 +36,7 @@ Renderer::Renderer() {
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           1.0f,  1.0f);
   bonusesTexture_ = TextureFactory::createBonusesTexture();
+  wallTexture_ = TextureFactory::createWallTexture();
 }
 
 Renderer::~Renderer() {
@@ -107,10 +108,11 @@ math::Mat4x4f Renderer::getViewProjection_() const {
   return VP;
 }
 
-void Renderer::renderWall_ ( engine::Player& /*player*/ ) {
-  // TODO: use player to set proper background texture
+void Renderer::renderWall_ ( engine::Player& player) {
   wall_->getShaderProgram().setUniform( "gVP", getViewProjection_() );
   wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}));
+  wall_->getShaderProgram().setUniform ( "gDiffuseMap", wallTexture_->getTextureSlotIndex() );
+  wall_->getShaderProgram().setUniform ( "gDiffuseMapLayer", player.backgroundSeed % wallTexture_->getTextureCount() );
   wall_->render();
 }
 

@@ -13,18 +13,6 @@ const double kCubeSmoothRadius = 0.4f;
 const int    kCubeAngleSteps   = 10;
 }
 
-void CubeMesh::PerCubeData::setUpLayout(ArrayBuffer<PerCubeData>& buffer) {
-  const int textureIDLayout = 2;
-  const int transformLayout = 4;
-  const int colorLayout = 8;
-
-  for (int i = 0; i < 4; i++)
-    buffer.setUpFloatAttribute(transformLayout + i, 4, false, sizeof(float) * 4 * i);
-
-  buffer.setUpFloatAttribute(colorLayout, 3, false, offsetof(PerCubeData, color));
-  buffer.setUpIntAttribute(textureIDLayout, 1, offsetof(PerCubeData, textureIndex));
-}
-
 CubeMesh::CubeMesh() {
   glGenVertexArrays(1, &vertexArrayID_);
   glBindVertexArray(vertexArrayID_);
@@ -56,7 +44,7 @@ CubeMesh::~CubeMesh() {
 
 }
 
-void CubeMesh::render(const std::vector<PerCubeData>& cubesData) {
+void CubeMesh::render(const std::vector<dataformats::CubeInstance>& cubesData) {
   perCubeBuffer_.setData(cubesData);
   shaderProgram_->makeActive();
   glBindVertexArray(vertexArrayID_);
@@ -67,9 +55,9 @@ ShaderProgram& CubeMesh::getShaderProgram() {
   return *shaderProgram_;
 }
 
-std::vector<dataformats::PointWithNormal> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
+std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
   auto nVertices = 8 * angleSteps * angleSteps;
-  std::vector<dataformats::PointWithNormal> result(nVertices);
+  std::vector<dataformats::UncoloredVertex> result(nVertices);
 
   for (auto i = 0; i < 2 * angleSteps; ++i)
   {

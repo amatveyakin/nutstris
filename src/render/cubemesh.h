@@ -15,26 +15,18 @@ public:
   CubeMesh();
   ~CubeMesh();
 
-  struct PerCubeData {
-    math::Mat4x4f modelToWorld;
-    math::Vec3f   color;
-    int           textureIndex;
-
-    static void setUpLayout(ArrayBuffer<PerCubeData>& buffer);
-  };
-
-  void render(const std::vector<PerCubeData>& cubesData);
+  void render(const std::vector<dataformats::CubeInstance>& cubesData);
 
   ShaderProgram& getShaderProgram();
 
 private:
-  std::vector<dataformats::PointWithNormal> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
+  std::vector<dataformats::UncoloredVertex> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
   std::vector<GLuint> createIndices_(int angleSteps) const;
 
   GLuint vertexArrayID_;
 
-  ArrayBuffer<dataformats::PointWithNormal> cubeVerticesBuffer_;
-  ArrayBuffer<PerCubeData> perCubeBuffer_;
+  ArrayBuffer<dataformats::UncoloredVertex> cubeVerticesBuffer_;
+  ArrayBuffer<dataformats::CubeInstance> perCubeBuffer_;
 
   std::unique_ptr<ShaderProgram> shaderProgram_;
 

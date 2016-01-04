@@ -53,7 +53,7 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer ) {
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
-  std::vector<render::CubeMesh::PerCubeData> cubesData;
+  std::vector<dataformats::CubeInstance> cubesData;
   auto addBlocks = [&cubesData, now] ( std::vector<engine::BlockImage>& blockImages ) {
     for ( auto& block : blockImages ) {
       auto bonusProgress = block.bonusImage.progress ( now );
@@ -76,7 +76,7 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
     math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
                                   1.5f * ( 2.f * currentLine.progress ( now ) - 1.f )
                                 };
-    std::vector<render::CubeMesh::PerCubeData> lineCubesData;
+    std::vector<dataformats::CubeInstance> lineCubesData;
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
       lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), ColorToVec3 ( currentLine.blockColor[x] ), 0} );
     renderCubes_ ( lineCubesData, clippingPlane );
@@ -84,7 +84,7 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
 }
 
 
-void Renderer::renderCubes_ ( const std::vector<CubeMesh::PerCubeData>& cubesData, math::Vec4f clipPlane ) {
+void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Vec4f clipPlane ) {
   math::Vec3f eyePos = { ( FIELD_INDENT_RIGHT - FIELD_INDENT_LEFT ) / 2.f, 0.0f,
                          ( EYE_TO_FIELD + CUBE_SCALE / 2.f ) - ( FIELD_INDENT_TOP - ( HUD_HEIGHT + FIELD_INDENT_BOTTOM ) ) / 2.f
                        };

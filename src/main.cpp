@@ -11,7 +11,7 @@
 
 
 int main() {
-  srand(std::chrono::steady_clock::now().time_since_epoch().count());
+  srand(std::chrono::system_clock::now().time_since_epoch().count());
 
   sf::ContextSettings contextSettings;
   contextSettings.depthBits = 24;

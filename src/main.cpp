@@ -27,6 +27,7 @@ int main() {
   game.newRound(std::chrono::steady_clock::now().time_since_epoch());
 
   bool running = true;
+  renderer.updatePlayerViewports(game.participants.size(), window.getSize().x, window.getSize().y);
   while (running) {
     // handle events
     sf::Event event;

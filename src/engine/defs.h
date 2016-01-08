@@ -34,7 +34,7 @@ using FloatFieldCoords = math::Vec2f;
 using CompareFieldCoords = math::LexicographicCompareVec2i;
 
 
-using Time = std::chrono::duration<float>;  // seconds
+using Time = std::chrono::duration<double>;  // seconds
 const Time NEVER_HAPPENED = Time::min();
 const Time WILL_NEVER_HAPPEN = Time::max();
 

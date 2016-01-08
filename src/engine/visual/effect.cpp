@@ -3,8 +3,8 @@
 
 namespace engine {
 
-constexpr float SmoothEffectType::MIN_PROGRESS;
-constexpr float SmoothEffectType::MAX_PROGRESS;
-constexpr float SmoothEffectType::PROGRESS_RANGE;
+constexpr double SmoothEffectType::MIN_PROGRESS;
+constexpr double SmoothEffectType::MAX_PROGRESS;
+constexpr double SmoothEffectType::PROGRESS_RANGE;
 
 }  // namespace engine

@@ -45,8 +45,8 @@ struct DisappearingLine {
   Time duration;
 
   // TODO(Andrei): declare constants (?)
-  float progress(Time currentTime) const {
-    return math::bound(0.0f, (currentTime - startTime) / duration, 1.0f);
+  double progress(Time currentTime) const {
+    return math::bound(0.0, (currentTime - startTime) / duration, 1.0);
   }
 };
 

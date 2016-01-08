@@ -108,13 +108,13 @@ public:
 
   // TODO: update position separately, make getter constant
   virtual FloatFieldCoords relativePosition(Time currentTime) {
-    float deltaTime = (currentTime - lastUpdated_) / 1.0s;
+    double deltaTime = (currentTime - lastUpdated_) / 1.0s;
     lastUpdated_ = currentTime;
     if (!binding_)
       return position_;
     FloatFieldCoords shiftVector = binding_->absolutePosition(currentTime) - position_;
-    float deltaDistance = math::L2::norm(shiftVector);
-    float maxDistance = maxSpeed_ * deltaTime;
+    double deltaDistance = math::L2::norm(shiftVector);
+    double maxDistance = maxSpeed_ * deltaTime;
     FloatFieldCoords newPosition;
     if (deltaDistance <= maxDistance)
       newPosition = binding_->absolutePosition(currentTime);
@@ -126,7 +126,7 @@ public:
 
 protected:
   VisualObject* binding_ = nullptr;
-  Speed maxSpeed_ = 0.0f;
+  Speed maxSpeed_ = 0.0;
   Time lastUpdated_;
 };
 

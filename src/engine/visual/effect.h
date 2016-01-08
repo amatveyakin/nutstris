@@ -35,11 +35,11 @@ public:
 
 protected:
   // Remove these constants (?)
-  static constexpr float MIN_PROGRESS = 0.0f;
-  static constexpr float MAX_PROGRESS = 1.0f;
-  static constexpr float PROGRESS_RANGE = MAX_PROGRESS - MIN_PROGRESS;
+  static constexpr double MIN_PROGRESS = 0.0;
+  static constexpr double MAX_PROGRESS = 1.0;
+  static constexpr double PROGRESS_RANGE = MAX_PROGRESS - MIN_PROGRESS;
 
-  float progress_ = MIN_PROGRESS;
+  double progress_ = MIN_PROGRESS;
   Time lastUpdated_ = 0.0s;
 };
 
@@ -59,13 +59,13 @@ public:
     stoppingAcceleration_ = 0.0s;
   }
 
-  float progress(Time currentTime) {
+  double progress(Time currentTime) {
     if (!active_) {
       lastUpdated_ = currentTime;
       return MIN_PROGRESS;
     }
 
-    float progress_increment = (currentTime - lastUpdated_) / period_;
+    double progress_increment = (currentTime - lastUpdated_) / period_;
     progress_ += progress_increment;
     if (isStopping_) {
       stoppingAcceleration_ += progress_increment * STOPPING_ACCELERATION_COEFF;
@@ -108,8 +108,8 @@ public:
     active_ = false;
   }
 
-  float progress(Time currentTime) {
-    float progressChange = (currentTime - lastUpdated_) / duration_;
+  double progress(Time currentTime) {
+    double progressChange = (currentTime - lastUpdated_) / duration_;
     if (active_)
       progress_ = std::min(progress_ + progressChange, MAX_PROGRESS);
     else
@@ -135,8 +135,8 @@ public:
   // TODO(Andrei): Should SingleEffectType::disable be simply ignored?
   void disable() { }
 
-  float progress(Time currentTime) {
-    float progressChange = (currentTime - lastUpdated_) / duration_;
+  double progress(Time currentTime) {
+    double progressChange = (currentTime - lastUpdated_) / duration_;
     if (active_) {
       progress_ += progressChange;
       if (progress_ > MAX_PROGRESS)
@@ -160,15 +160,15 @@ class FlashEffectType : public SmoothEffectType
 public:
   void enable(Time newDuration) {
     active_ = true;
-    halfDuration_ = newDuration / 2.0f;
+    halfDuration_ = newDuration / 2.0;
   }
 
   void disable() {
     active_ = false;
   }
 
-  float progress(Time currentTime) {
-    float progressChange = (currentTime - lastUpdated_) / halfDuration_;
+  double progress(Time currentTime) {
+    double progressChange = (currentTime - lastUpdated_) / halfDuration_;
     if (active_) {
       progress_ += progressChange;
       if (progress_ > MAX_PROGRESS)
@@ -210,8 +210,8 @@ public:
     enable(newDuration);
   }*/
 
-  float progress(Time currentTime) {
-    float progressChange = (currentTime - lastUpdated_) / duration_;
+  double progress(Time currentTime) {
+    double progressChange = (currentTime - lastUpdated_) / duration_;
     if (active_) {
       progress_ += progressChange;
       if (progress_ > MAX_PROGRESS)
@@ -239,7 +239,7 @@ public:
     EffectT::enable();
   }
 
-  float progress(Time currentTime) {
+  double progress(Time currentTime) {
     if (currentTime > startTime_)
       enable();
     return EffectT::progress(currentTime);
@@ -263,7 +263,7 @@ public:
     EffectT::disable();
   }
 
-  float progress(Time currentTime) {
+  double progress(Time currentTime) {
     if (currentTime > stopTime_)
       disable();
     return EffectT::progress(currentTime);

@@ -80,7 +80,7 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
   for ( size_t iDisappearingLine = 0; iDisappearingLine < lines.size(); ++iDisappearingLine ) {
     auto& currentLine = lines[iDisappearingLine];
     math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
-                                  1.5f * ( 2.f * currentLine.progress ( now ) - 1.f )
+                                  1.5f * ( 2.f * float( currentLine.progress ( now ) ) - 1.f )
                                 };
     std::vector<dataformats::CubeInstance> lineCubesData;
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )

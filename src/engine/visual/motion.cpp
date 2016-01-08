@@ -22,7 +22,7 @@ bool Motion::finished(Time currentTime) const {
 }
 
 FloatFieldCoords Motion::shiftVector(Time currentTime) const {
-  float progress = math::bound(0.0f, (currentTime - movingStartTime_) / movingDuration_, 1.0f);
+  double progress = math::bound(0.0, (currentTime - movingStartTime_) / movingDuration_, 1.0);
   return aimingShiftVector_ * easingFunction_(progress);
 }
 

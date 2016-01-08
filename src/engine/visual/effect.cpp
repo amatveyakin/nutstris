@@ -1,4 +1,4 @@
-#include "engine/visual_effects.h"
+#include "engine/visual/effect.h"
 
 
 namespace engine {

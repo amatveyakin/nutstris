@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "engine/keyboard.h"
-#include "engine/visual_effects.h"
+#include "engine/visual.h"
 #include "util/containers.h"
 #include "util/file.h"
 

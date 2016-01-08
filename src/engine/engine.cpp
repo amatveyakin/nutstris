@@ -254,7 +254,7 @@ void Game::newMatch()
 void Game::newRound(Time currentTime__)
 {
   currentTime = currentTime__;
-  globalEffects.clear();
+  globalEffects = GlobalVisualEffects();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].active = players[iPlayer].participates;
   activePlayers = participants;
@@ -435,14 +435,12 @@ void Player::prepareForNewRound()
   field.clear();
   lyingBlockImages.clear();
   lyingBlockIndices.clear();
-  fallingPieceFrame.parent = NULL;  // TODO: move to initialization?
   fallingBlockImages.clear();
   disappearingLines.clear();
-  visualEffects.clear();
-  visualEffects.lantern.parent = NULL;  // TODO: move to initialization?
+  visualEffects = PlayerVisualEffects();
   visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
   visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0f) / 2.0f, (FIELD_HEIGHT - 1.0f) / 2.0f));
-  visualEffects.lantern.maxSpeed = BONUS_LANTERN_MAX_SPEED;
+  visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
   latestLineCollapse = NEVER_HAPPENED;
   victimNumber = number;
   cycleVictim();
@@ -1121,8 +1119,8 @@ bool Player::generateBonus()  // TODO: remake
         if (field(row, col).isBlocked())
         {
           field(row, col).bonus = bonus;
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonus = bonus;
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage.enable(BONUS_FADING_DURATION);
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(BONUS_FADING_DURATION);
           planBonusDisappearance(FieldCoords(col, row));
           return true;
         }
@@ -1141,7 +1139,7 @@ void Player::removeBonuses()
       if (field(row, col).isBlocked())
       {
         field(row, col).bonus = Bonus::None;
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage.disable();
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable();
       }
     }
   }
@@ -1157,7 +1155,7 @@ void Player::planBonusDisappearance(FieldCoords bonusCoords)
 {
   Time bonusDisappearTime = currentTime() + randomTimeRange(MIN_BONUS_LIFE_TIME, MAX_BONUS_LIFE_TIME);
   events.push(etBonusDisappearance, bonusDisappearTime);
-  lyingBlockImages[lyingBlockIndices[bonusCoords]].bonusImage.stopAt(
+  lyingBlockImages[lyingBlockIndices[bonusCoords]].bonusImage().stopAt(
           bonusDisappearTime - BONUS_FADING_DURATION);
 }
 

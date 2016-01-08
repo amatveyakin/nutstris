@@ -7,6 +7,7 @@ set(srcs
     ${src_dir}/main.cpp
     ${src_dir}/engine/engine.cpp
     ${src_dir}/engine/keyboard.cpp
+    ${src_dir}/engine/visual_effects.cpp
     ${src_dir}/render/renderer.cpp
     ${src_dir}/render/shader.cpp
     ${src_dir}/render/shaderprogram.cpp

@@ -63,8 +63,8 @@ std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNo
   {
     for (auto j = 0; j < 4 * angleSteps; ++j)
     {
-      auto alpha = ((i - angleSteps + 0.5) * (M_PI / 2)) / angleSteps;
-      auto beta  = ((j + 0.5) * (M_PI / 2)) / angleSteps;
+      auto alpha = ((i - angleSteps + 0.5) * (math::kPi / 2)) / angleSteps;
+      auto beta  = ((j + 0.5) * (math::kPi / 2)) / angleSteps;
 
       auto x = cosf(alpha) * cosf(beta);
       auto z = cosf(alpha) * sinf(beta);

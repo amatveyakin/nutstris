@@ -67,7 +67,7 @@ extern const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME;
 extern const Time   PLAYER_KEY_REACTIVATION_TIME[];
 
 
-static const int N_GLOBAL_KEYS = 0;
+static const int N_GLOBAL_KEYS = 1;
 
 enum GlobalKey { };
 

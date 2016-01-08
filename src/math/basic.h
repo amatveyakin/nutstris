@@ -6,6 +6,8 @@
 
 namespace math {
 
+static double constexpr kPi = 3.141592653589793238463;
+
 template <typename NumericT>
 NumericT min (NumericT x, NumericT y) {
   return (x < y) ? x : y;

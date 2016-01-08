@@ -85,7 +85,7 @@ const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
 };
 
 
-const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = {};
+const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = {Time()};
 
 
 //=================================== Field ====================================

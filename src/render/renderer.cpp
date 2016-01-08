@@ -21,7 +21,7 @@ float fieldToWorldY ( float fieldY ) {
   return ( fieldY - ( engine::FIELD_HEIGHT - 1.0f ) / 2.0f ) * render::CUBE_SCALE;
 }
 
-math::Mat4x4f fieldPosToWorldPos ( int fieldX, int fieldY ) {
+math::Mat4x4f fieldPosToWorldPos ( float fieldX, float fieldY ) {
   return math::Mat4x4f::translationMatrix ( {fieldToWorldX ( fieldX ), fieldToWorldY ( fieldY ), 0.0f} ) *
          render::matrixutil::scale ( render::CUBE_SCALE );
 }

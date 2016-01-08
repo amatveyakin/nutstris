@@ -28,14 +28,32 @@ include_directories(${src_dir})
 
 add_executable(${executable_name}  ${srcs})
 
-set(CMAKE_MODULE_PATH "/usr/share/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
+if(WIN32)
+  set(CMAKE_PREFIX_PATH "$ENV{programfiles}/glew" ${CMAKE_PREFIX_PATH})
+  set(CMAKE_LIBRARY_PATH "$ENV{programfiles}/glew/lib/Release/x64" ${CMAKE_LIBRARY_PATH})
+  set(SFML_ROOT "$ENV{ProgramW6432}/SFML")
+  set(CMAKE_MODULE_PATH "${SFML_ROOT}/cmake/Modules" ${CMAKE_MODULE_PATH})
+else()
+  set(CMAKE_MODULE_PATH "/usr/share/SFML/cmake/Modules" ${CMAKE_MODULE_PATH})
+endif()
+
 find_package(SFML 2 REQUIRED system window graphics network audio)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+
+if(WIN32)
+  include_directories(${GLEW_INCLUDE_DIRS})
+  include_directories(${SFML_INCLUDE_DIR})
+else()
+endif()
+
 target_link_libraries(${executable_name} ${SFML_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES})
 
 add_definitions("-std=c++14 -fext-numeric-literals")
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wcast-align -Wunused -Wformat=2 -Wcast-qual -Wold-style-cast -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+if(WIN32)
+else()
+  set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wcast-align -Wunused -Wformat=2 -Wcast-qual -Wold-style-cast -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror")
+  set(CMAKE_CXX_FLAGS_DEBUG "-g")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+endif()

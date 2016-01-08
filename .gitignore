@@ -2,4 +2,5 @@
 /*.user
 /*.user.*
 *.kdev4*
+/vsproj
 /Settings

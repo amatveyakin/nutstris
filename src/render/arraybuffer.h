@@ -1,5 +1,5 @@
-#ifndef ARRAYBUFFER_H
-#define ARRAYBUFFER_H
+#pragma once
+
 #include <vector>
 #include <unordered_set>
 #include <GL/glew.h>
@@ -32,5 +32,3 @@ private:
 }
 
 #include "render/arraybuffer.hpp"
-
-#endif // ARRAYBUFFER_H

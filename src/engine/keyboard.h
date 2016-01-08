@@ -1,5 +1,4 @@
-#ifndef ENGINE_KEYBOARD_H
-#define ENGINE_KEYBOARD_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -15,5 +14,3 @@ std::string getKeyboardKeyName(Keyboard::Key key);
 bool parseKeyboardKeyName(Keyboard::Key key, std::string& result);
 
 }  // namespace engine
-
-#endif  // ENGINE_KEYBOARD_H

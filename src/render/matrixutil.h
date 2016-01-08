@@ -1,5 +1,5 @@
-#ifndef MATRIXUTIL_H
-#define MATRIXUTIL_H
+#pragma once
+
 #include <math/matrix.h>
 
 namespace render {
@@ -14,5 +14,3 @@ namespace matrixutil {
   math::Mat4x4f perspective(float fov, float aspect, float clipNear, float clipFar);
 }
 }
-
-#endif // MATRIXUTIL_H

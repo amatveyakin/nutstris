@@ -1,5 +1,4 @@
-#ifndef RENDERER_H
-#define RENDERER_H
+#pragma once
 
 #include <memory>
 #include <GL/glew.h>
@@ -41,5 +40,3 @@ private:
 };
 
 }
-
-#endif // RENDERER_H

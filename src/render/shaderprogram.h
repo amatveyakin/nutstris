@@ -1,7 +1,8 @@
-#ifndef SHADERPROGRAM_H
-#define SHADERPROGRAM_H
+#pragma once
+
 #include <string>
 #include <GL/glew.h>
+
 #include "math/matrix.h"
 #include "math/vector.h"
 
@@ -26,4 +27,3 @@ private:
 };
 
 }
-#endif // SHADERPROGRAM_H

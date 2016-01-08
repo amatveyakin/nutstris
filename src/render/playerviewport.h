@@ -1,5 +1,5 @@
-#ifndef PLAYERVIEWPORT_H
-#define PLAYERVIEWPORT_H
+#pragma once
+
 #include <vector>
 
 
@@ -15,5 +15,3 @@ struct PlayerViewport {
 std::vector<PlayerViewport> createPlayerViewports(int nPlayers, int screenWidth, int screenHeight);
 
 }
-
-#endif // PLAYERVIEWPORT_H

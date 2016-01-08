@@ -12,8 +12,7 @@
 
 // TODO: game speed up formula -- ?
 
-#ifndef ENGINE_ENGINE_H
-#define ENGINE_ENGINE_H
+#pragma once
 
 #include <climits>
 #include <map>
@@ -724,5 +723,3 @@ private:
 };
 
 }  // namespace engine
-
-#endif  // ENGINE_ENGINE_H

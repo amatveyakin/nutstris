@@ -1,5 +1,4 @@
-#ifndef UTIL_FILE_H
-#define UTIL_FILE_H
+#pragma once
 
 #include <cassert>
 #include <cstdio>
@@ -38,5 +37,3 @@ private:
 void skipWhitespace(FILE* file);
 
 }  // namespace util
-
-#endif // UTIL_FILE_H

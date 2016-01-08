@@ -1,5 +1,4 @@
-#ifndef MATH_METRIC_H
-#define MATH_METRIC_H
+#pragma once
 
 #include "math/vector.h"
 
@@ -90,5 +89,3 @@ namespace LInf {
 }  // namespace LInf
 
 }  // namespace math
-
-#endif  // MATH_METRIC_H

@@ -2,8 +2,7 @@
 
 // TODO(Andrei): User-defind literals for time in seconds
 
-#ifndef ENGINE_DEFS_H
-#define ENGINE_DEFS_H
+#pragma once
 
 #include <chrono>
 #include <limits>
@@ -101,5 +100,3 @@ enum class PlayerKey
 };
 
 }  // namespace engine
-
-#endif  // ENGINE_DEFS_H

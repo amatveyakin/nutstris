@@ -1,5 +1,5 @@
-#ifndef TEXTUREARRAY_H
-#define TEXTUREARRAY_H
+#pragma once
+
 #include <vector>
 #include <GL/glew.h>
 #include <SFML/Graphics/Image.hpp>
@@ -21,5 +21,3 @@ private:
 };
 
 }
-
-#endif // TEXTUREARRAY_H

@@ -1,5 +1,4 @@
-#ifndef MATH_BASIC_H
-#define MATH_BASIC_H
+#pragma once
 
 #include <cstdlib>
 #include <limits>
@@ -102,5 +101,3 @@ inline double randomRange(double minValue, double maxValue) {
 }
 
 }  // namespace math
-
-#endif  // MATH_BASIC_H

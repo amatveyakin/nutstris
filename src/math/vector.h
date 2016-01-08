@@ -1,5 +1,4 @@
-#ifndef MATH_VECTOR_H
-#define MATH_VECTOR_H
+#pragma once
 
 #include <cassert>
 #include <cstddef>
@@ -331,5 +330,3 @@ struct LexicographicCompareVec3i : LexicographicCompareVectors <3, int> { };
 struct LexicographicCompareVec4i : LexicographicCompareVectors <4, int> { };
 
 }  // namespace math
-
-#endif  // MATH_VECTOR_H

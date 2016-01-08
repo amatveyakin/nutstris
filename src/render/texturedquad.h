@@ -1,5 +1,5 @@
-#ifndef TEXTUREDQUAD_H
-#define TEXTUREDQUAD_H
+#pragma once
+
 #include <memory>
 
 #include <GL/glew.h>
@@ -25,5 +25,3 @@ private:
 };
 
 }
-
-#endif // TEXTUREDQUAD_H

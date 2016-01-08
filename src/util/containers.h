@@ -1,5 +1,4 @@
-#ifndef ENGINE_DEFS_
-#define ENGINE_DEFS_H
+#pragma once
 
 #include <bitset>
 #include <cassert>
@@ -91,5 +90,3 @@ private:
 };
 
 }  // namespace util
-
-#endif  // ENGINE_DEFS_H

@@ -3,8 +3,7 @@
 // TODO: stop ignoring such OOP features as virtual functions and abandon these template tricks (?)
 //       (if it will get us close to KISS principle)
 
-#ifndef ENGINE_VISUALEFFECTS_H
-#define ENGINE_VISUALEFFECTS_H
+#pragma once
 
 #include <cstring>
 #include <list>
@@ -647,5 +646,3 @@ public:
 };
 
 }  // namespace engine
-
-#endif  // ENGINE_VISUALEFFECTS_H

@@ -1,7 +1,8 @@
-#ifndef CUBEMESH_H
-#define CUBEMESH_H
+#pragma once
+
 #include <memory>
 #include <GL/glew.h>
+
 #include "math/vector.h"
 #include "math/matrix.h"
 #include "render/arraybuffer.h"
@@ -34,4 +35,3 @@ private:
 };
 
 }
-#endif // CUBEMESH_H

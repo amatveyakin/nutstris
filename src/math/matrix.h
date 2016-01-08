@@ -1,6 +1,7 @@
-#ifndef MATH_MATRIX_H
-#define MATH_MATRIX_H
+#pragma once
+
 #include <array>
+
 #include "math/vector.h"
 
 
@@ -127,5 +128,3 @@ typedef Matrix <3, 3, double> Mat3x3d;
 typedef Matrix <4, 4, double> Mat4x4d;
 
 }  // namespace math
-
-#endif // MATH_MATRIX_H

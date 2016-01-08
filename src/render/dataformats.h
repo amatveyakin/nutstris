@@ -1,5 +1,5 @@
-#ifndef DATAFORMATS_H
-#define DATAFORMATS_H
+#pragma once
+
 #include "math/vector.h"
 #include "math/matrix.h"
 #include "render/arraybuffer.h"
@@ -35,4 +35,3 @@ struct CubeInstance
  
 }
 }
-#endif // DATAFORMATS_H

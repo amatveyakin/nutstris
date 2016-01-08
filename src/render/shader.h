@@ -1,5 +1,5 @@
-#ifndef SHADER_H
-#define SHADER_H
+#pragma once
+
 #include <string>
 #include <GL/glew.h>
 
@@ -29,6 +29,3 @@ public:
 
 
 }
-
-
-#endif // SHADER_H

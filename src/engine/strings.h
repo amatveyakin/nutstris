@@ -1,5 +1,4 @@
-#ifndef ENGINE_STRINGS_H
-#define ENGINE_STRINGS_H
+#pragma once
 
 #include <string>
 
@@ -67,5 +66,3 @@ std::string getPlayerKeyName(PlayerKey key) {
 };
 
 }  // namespace engine
-
-#endif  // ENGINE_STRINGS_H

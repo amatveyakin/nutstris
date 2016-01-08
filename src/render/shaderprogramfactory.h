@@ -1,5 +1,5 @@
-#ifndef SHADERPROGRAMFACTORY_H
-#define SHADERPROGRAMFACTORY_H
+#pragma once
+
 #include <memory>
 
 namespace render {
@@ -14,5 +14,3 @@ public:
 };
 
 }
-
-#endif // SHADERPROGRAMFACTORY_H

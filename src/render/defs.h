@@ -1,5 +1,5 @@
-#ifndef RENDER_DEFS_H
-#define RENDER_DEFS_H
+#pragma once
+
 #include "engine/defs.h"
 
 namespace render {
@@ -22,4 +22,3 @@ const float DIST_TO_SEARCHLIGHT = SEARCHLIGHT_RADIUS / tan(SEARCH_BETA);
 const float EYE_TO_FIELD = 0.5f * VP_WORLD_HEIGHT / tan(ANGLE_FOV_Y / 2.0f);
 
 }
-#endif//RENDER_DEFS_H

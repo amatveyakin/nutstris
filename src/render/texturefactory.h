@@ -1,6 +1,7 @@
-#ifndef TEXTUREFACTORY_H
-#define TEXTUREFACTORY_H
+#pragma once
+
 #include <memory>
+
 #include "render/texturearray.h"
 
 namespace render {
@@ -13,5 +14,3 @@ public:
 };
 
 }
-
-#endif // TEXTUREFACTORY_H

@@ -1,39 +1,36 @@
 #pragma once
 
+#include <memory>
+
 #include "engine/defs.h"
-#include "math/basic.h"
 
 
 namespace engine {
 
-class LinearMotion
+// Function specifying the rate of change of a parameter over time.
+// Argument must be within [0.0, 1.0] interval. Result may be outside of this interval!
+using EasingFunction = float(*)(float);
+
+float easeLinear(float v);
+float easeInOutQuad(float v);
+float easeInOutQuart(float v);
+float easeOutBounce(float v);
+
+class Motion
 {
 public:
-  LinearMotion(FloatFieldCoords aimingShiftVector__, Time movingStartTime__, Time movingDuration__)
-      : aimingShiftVector_(aimingShiftVector__)
-      , movingStartTime_(movingStartTime__)
-      , movingDuration_(movingDuration__)
-  {
-    assert(movingDuration__ > 0.0s);
-  }
+  Motion(EasingFunction easingFunction__, FloatFieldCoords aimingShiftVector__, Time movingStartTime__, Time movingDuration__);
 
-  bool begun(Time currentTime) const {
-    return currentTime >= movingStartTime_;
-  }
+  bool started(Time currentTime) const;
+  bool finished(Time currentTime) const;
 
-  bool finished(Time currentTime) const {
-    return currentTime >= movingStartTime_ + movingDuration_;
-  }
-
-  FloatFieldCoords shiftVector(Time currentTime) const {
-    float multiplier = math::bound(0.0f, (currentTime - movingStartTime_) / movingDuration_, 1.0f);
-    return aimingShiftVector_ * multiplier;
-  }
+  FloatFieldCoords shiftVector(Time currentTime) const;
 
 private:
+  EasingFunction easingFunction_ = nullptr;
   FloatFieldCoords aimingShiftVector_;
-  Time movingStartTime_;
-  Time movingDuration_;
+  Time movingStartTime_ = 0.0s;
+  Time movingDuration_ = 0.0s;
 };
 
 }  // namespace engine

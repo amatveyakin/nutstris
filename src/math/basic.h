@@ -50,6 +50,14 @@ template <typename NumericT>
 NumericT sqr (NumericT x) {
   return x * x;
 }
+template <typename NumericT>
+NumericT cube (NumericT x) {
+  return x * x * x;
+}
+template <typename NumericT>
+NumericT quart (NumericT x) {
+  return x * x * x * x;
+}
 
 template <typename NumericT>
 NumericT sgn (NumericT x) {

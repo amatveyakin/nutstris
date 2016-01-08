@@ -58,10 +58,10 @@ class MovingObject : public AffixmentPointObject
 public:
   using AffixmentPointObject::AffixmentPointObject;
 
-  std::vector<LinearMotion> motions;
+  std::vector<Motion> motions;
 
   void addMotion(FloatFieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration) {
-    motions.push_back(LinearMotion(aimingShiftVector, movingStartTime, movingDuration));
+    motions.push_back(Motion(&easeInOutQuad, aimingShiftVector, movingStartTime, movingDuration));
   }
 
   virtual void placeAt(FloatFieldCoords newPosition) {

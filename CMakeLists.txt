@@ -9,6 +9,7 @@ set(srcs
     ${src_dir}/engine/keyboard.cpp
     ${src_dir}/engine/visual/effect.cpp
     ${src_dir}/engine/visual/motion.cpp
+    ${src_dir}/math/easing.cpp
     ${src_dir}/render/renderer.cpp
     ${src_dir}/render/shader.cpp
     ${src_dir}/render/shaderprogram.cpp

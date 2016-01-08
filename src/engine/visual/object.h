@@ -61,7 +61,7 @@ public:
   std::vector<Motion> motions;
 
   void addMotion(FloatFieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration) {
-    motions.push_back(Motion(&easeInOutQuad, aimingShiftVector, movingStartTime, movingDuration));
+    motions.push_back(Motion(&math::easeInOutQuad, aimingShiftVector, movingStartTime, movingDuration));
   }
 
   virtual void placeAt(FloatFieldCoords newPosition) {

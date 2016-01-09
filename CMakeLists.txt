@@ -11,6 +11,8 @@ set(srcs
     ${src_dir}/engine/keyboard.cpp
     ${src_dir}/engine/keyboard.h
     ${src_dir}/engine/strings.h
+    ${src_dir}/engine/units.cpp
+    ${src_dir}/engine/units.h
     ${src_dir}/engine/visual.h
     ${src_dir}/engine/visual/effect.cpp
     ${src_dir}/engine/visual/effect.h

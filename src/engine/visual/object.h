@@ -108,7 +108,7 @@ public:
 
   // TODO: update position separately, make getter constant
   virtual FloatFieldCoords relativePosition(Time currentTime) {
-    double deltaTime = (currentTime - lastUpdated_) / 1.0s;
+    Time deltaTime = currentTime - lastUpdated_;
     lastUpdated_ = currentTime;
     if (!binding_)
       return position_;
@@ -126,7 +126,7 @@ public:
 
 protected:
   VisualObject* binding_ = nullptr;
-  Speed maxSpeed_ = 0.0;
+  Speed maxSpeed_ = Speed::zero();
   Time lastUpdated_;
 };
 

@@ -99,7 +99,7 @@ void Game::init()
   loadAccounts();
   loadSettings();
   for (int key = 0; key < N_GLOBAL_KEYS; ++key)
-    nextGlobalKeyActivationTable[key] = NEVER_HAPPENED;
+    nextGlobalKeyActivationTable[key] = Time::min();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].init(this, iPlayer);
 }
@@ -370,7 +370,7 @@ void Player::init(Game* game__, int number__)
   game = game__;
   number = number__;
   for (int key = 0; key < N_PLAYER_KEYS; ++key)
-    nextKeyActivationTable[key] = NEVER_HAPPENED;
+    nextKeyActivationTable[key] = Time::min();
 }
 
 void Player::loadAccountInfo(int newAccount)
@@ -405,7 +405,7 @@ void Player::prepareForNewRound()
   visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
   visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
   visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
-  latestLineCollapse = NEVER_HAPPENED;
+  latestLineCollapse = Time::min();
   victimNumber = number;
   cycleVictim();
   speed = STARTING_SPEED;

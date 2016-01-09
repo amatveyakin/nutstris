@@ -235,7 +235,7 @@ public:
   }
 
   void enable(Time newDuration) {
-    startTime_ = WILL_NEVER_HAPPEN;
+    startTime_ = Time::max();
     EffectT::enable();
   }
 
@@ -246,7 +246,7 @@ public:
   }
 
 protected:
-  Time startTime_ = WILL_NEVER_HAPPEN;
+  Time startTime_ = Time::max();
 };
 
 
@@ -259,7 +259,7 @@ public:
   }
 
   void disable() {
-    stopTime_ = WILL_NEVER_HAPPEN;
+    stopTime_ = Time::max();
     EffectT::disable();
   }
 
@@ -270,7 +270,7 @@ public:
   }
 
 protected:
-  Time stopTime_ = WILL_NEVER_HAPPEN;
+  Time stopTime_ = Time::max();
 };
 
 

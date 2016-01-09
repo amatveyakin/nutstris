@@ -1,15 +1,13 @@
 // TODO(Andrei): Clean up SFML functions from other files
 
-// TODO(Andrei): User-defind literals for time in seconds
-
 #pragma once
 
-#include <chrono>
 #include <limits>
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Window/Keyboard.hpp>
 
+#include "engine/units.h"
 #include "math/vector.h"
 
 
@@ -29,14 +27,6 @@ const int    MAX_PLAYERS = 4;
 using FieldCoords = math::Vec2i;
 using FloatFieldCoords = math::Vec2d;
 using CompareFieldCoords = math::LexicographicCompareVec2i;
-
-
-using Time = std::chrono::duration<double>;  // seconds
-const Time NEVER_HAPPENED = Time::min();
-const Time WILL_NEVER_HAPPEN = Time::max();
-
-// TODO(Andrei): Adequate Speed type
-using Speed = double;
 
 
 using Color = sf::Color;

@@ -1,5 +1,5 @@
 #include "engine/engine.h"
-
+#include <fstream>
 #include <cstdio>
 
 #include "engine/strings.h"
@@ -155,18 +155,17 @@ void Game::loadDefaultAccounts()
 
 void Game::loadSettings()
 {
-  util::SmartFileHandler settingsFile(SETTINGS_FILE, "r");
-  if (settingsFile.get() == NULL)
+  std::ifstream settingsFile(SETTINGS_FILE);
+  if (!settingsFile.good())
   {
       loadDefaultSettings();
       return;
   }
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
-    fscanf(settingsFile.get(), "%d\n", &players[iPlayer].accountNumber);
-//    fscanf(settingsFile.get(), "%d\n", &players[iPlayer].participates);
+    settingsFile >> players[iPlayer].accountNumber;
     int tmp;
-    fscanf(settingsFile.get(), "%d\n", &tmp);
+    settingsFile >> tmp;
     switch (tmp)
     {
     case 0:
@@ -180,7 +179,7 @@ void Game::loadSettings()
     }
     for (int iKey = 0; iKey < N_PLAYER_KEYS; ++iKey) {
       int keyValue = 0;
-      fscanf(settingsFile.get(), "%d\n", &keyValue);
+      settingsFile >> keyValue;
       players[iPlayer].controls.keyArray[iKey] = static_cast<Keyboard::Key>(keyValue);
     }
   }
@@ -188,15 +187,15 @@ void Game::loadSettings()
 
 void Game::saveSettings()
 {
-  util::SmartFileHandler settingsFile(SETTINGS_FILE, "w");
-  if (settingsFile.get() == NULL)
+  std::ofstream settingsFile(SETTINGS_FILE);
+  if (!settingsFile.good())
     throw std::runtime_error(ERR_FILE_WRITE_ERROR);   // TODO: format
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
-    fprintf(settingsFile.get(), "%d\n", players[iPlayer].accountNumber);
-    fprintf(settingsFile.get(), "%d\n", players[iPlayer].participates ? 1 : 0);
+    settingsFile << players[iPlayer].accountNumber << " ";
+    settingsFile << (players[iPlayer].participates ? 1 : 0) << " ";
     for (int key = 0; key < N_PLAYER_KEYS; ++key)
-      fprintf(settingsFile.get(), "%d\n", players[iPlayer].controls.keyArray[key]);
+      settingsFile << players[iPlayer].controls.keyArray[key] << " ";
   }
 }
 
@@ -329,31 +328,27 @@ void Game::onTimer(Time currentTime__)
 
 void Game::loadPieces()   // TODO: rewrite it cleaner
 {
-  util::SmartFileHandler piecesFile(PIECE_TEMPLATES_FILE, "r");
-  if (piecesFile.get() == NULL)
+  std::ifstream piecesFile(PIECE_TEMPLATES_FILE);
+  if (!piecesFile.good())
     throw std::runtime_error(ERR_FILE_NOT_FOUND);   // TODO: format
 
   pieceTemplates.clear();
-  char pieceBlock[MAX_PIECE_SIZE][MAX_PIECE_SIZE + 1];
+  std::vector<std::string> pieceBlock(MAX_PIECE_SIZE);
   int nPieceTemplates;
-  fscanf(piecesFile.get(), "%d", &nPieceTemplates);
+  piecesFile >> nPieceTemplates;
   pieceTemplates.resize(nPieceTemplates);
 
   for (int iPiece = 0; iPiece < nPieceTemplates; ++iPiece)
   {
-    fscanf(piecesFile.get(), "%d", &pieceTemplates[iPiece].chance);
-    util::skipWhitespace(piecesFile.get());
+    piecesFile >> pieceTemplates[iPiece].chance;
     double r, g, b;
-    fscanf(piecesFile.get(), "(%lf,%lf,%lf)", &r, &g, &b);
+    piecesFile >> r >> g >> b;
     pieceTemplates[iPiece].color = colorFromFloat(r, g, b, 1.f);
 
     for (int rotationState = 0; rotationState < N_PIECE_ROTATION_STATES; ++rotationState)
     {
       for (int row = MAX_PIECE_SIZE - 1; row >= 0; --row)
-      {
-        util::skipWhitespace(piecesFile.get());
-        fgets(&pieceBlock[row][0], MAX_PIECE_SIZE + 1, piecesFile.get());
-      }
+        piecesFile >> pieceBlock[row];
 
       int nBlockInCurrentPiece = 0;
       int maxBlockNumber = -1;

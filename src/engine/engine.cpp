@@ -396,7 +396,7 @@ void Player::prepareForNewRound()
   fieldLocks.clear();
   buffs.clear();
   debuffs.clear();
-  field.clear();
+  field = Field();
   lyingBlockImages.clear();
   lyingBlockIndices.clear();
   fallingBlockImages.clear();
@@ -545,7 +545,7 @@ void Player::beginClearField()
 {
   //  TODO: also handle a case when the bonus is taken somehow but a piece is still falling (?)
   fieldLocks.isBeingCleared = true;
-  field.clear();
+  field = Field();
   visualEffects.fieldCleaning.enable(BONUS_CLEAR_FIELD_DURATION);
   events.push(etEndClearField, currentTime() + BONUS_CLEAR_FIELD_DURATION);
 }
@@ -712,7 +712,7 @@ int Player::highestNonemptyRow() const
 {
   for (int row = FIELD_HEIGHT - 1; row >= 0; --row)
     for (int col = 0; col < FIELD_WIDTH; ++col)
-      if (field(row, col).blocked())
+      if (field({col, row}).blocked())
         return row;
   return -1;
 }
@@ -823,7 +823,7 @@ void Player::setUpPiece()
       return;
     }
 
-    field(cell).setBlock(fallingPiece.color());
+    field.mutableCell(cell).setBlock(fallingPiece.color());
 
     // TODO: copy images from one array to another with motion (?)
 
@@ -924,7 +924,7 @@ bool Player::removeFullLines()
     bool rowIsFull = true;
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      if (!field(row, col).blocked())
+      if (!field({col, row}).blocked())
       {
         rowIsFull = false;
         break;
@@ -942,14 +942,14 @@ bool Player::removeFullLines()
       disappearingLines.back().row = row;
       for (int col = 0; col < FIELD_WIDTH; ++col)
       {
-        if (field(row, col).bonus() != Bonus::None)
+        if (field({col, row}).bonus() != Bonus::None)
         {
-          takesBonus(field(row, col).bonus());
+          takesBonus(field({col, row}).bonus());
           events.eraseEventType(etBonusDisappearance);
           planBonusAppearance();
         }
-        disappearingLines.back().blockColor[col] = field(row, col).color();
-        field(row, col).clear();
+        disappearingLines.back().blockColor[col] = field({col, row}).color();
+        field.mutableCell({col, row}).clear();
 
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
         // TODO: No, *that* was not the point of  lyingBlockIndices !
@@ -982,8 +982,8 @@ void Player::collapseLine(int row)  // TODO: optimize
   {
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      field(curRow, col) = field(curRow + 1, col);
-      if (field(curRow, col).blocked())
+      field.mutableCell({col, curRow}) = field({col, curRow + 1});
+      if (field({col, curRow}).blocked())
         moveLyingBlockImage(FieldCoords(col, curRow + 1), FieldCoords(col, curRow), LINE_COLLAPSE_ANIMATION_TIME);
     }
   }
@@ -1080,9 +1080,9 @@ bool Player::generateBonus()  // TODO: remake
       for (int colIter = 0; colIter < N_BONUS_ONE_ROW_ATTEMPTS; ++colIter)
       {
         int col = rand() % FIELD_WIDTH;
-        if (field(row, col).blocked())
+        if (field({col, row}).blocked())
         {
-          field(row, col).setBonus(bonus);
+          field.mutableCell({col, row}).setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(BONUS_FADING_DURATION);
           planBonusDisappearance(FieldCoords(col, row));
@@ -1100,9 +1100,9 @@ void Player::removeBonuses()
   {
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      if (field(row, col).blocked())
+      if (field({col, row}).blocked())
       {
-        field(row, col).setBonus(Bonus::None);
+        field.mutableCell({col, row}).setBonus(Bonus::None);
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable();
       }
     }

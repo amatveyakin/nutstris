@@ -1,14 +1,12 @@
 #pragma once
 
+#include <array>
+
 #include "engine/defs.h"
 #include "util/containers.h"
 
 
 namespace engine {
-
-const int    SKY_HEIGHT = MAX_PIECE_SIZE;
-// MAX_PIECE_SIZE / 2  is enough for  WALL_WIDTH  in most cases, but that's perfectly safe
-const int    WALL_WIDTH = MAX_PIECE_SIZE - 1;  // TODO: may be, abadon walls and modify Field::operator(int, int)  ?
 
 class FieldCell {
 public:
@@ -36,42 +34,44 @@ public:
 
 private:
   bool blocked_ = false;
-  Color color_;
-  Bonus bonus_;
+  Color color_ = COLORLESS;
+  Bonus bonus_ = Bonus::None;
 };
 
 
-struct Field : public util::Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                                         FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>
-{
-  Field();
-
-  // TODO: swap and rename arguments
-  FieldCell& operator()(int row, int col)
-  {
-    return Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                        FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>::
-                        operator()(row, col);
+struct Field {
+public:
+  Field() {
+    blockedCell_.setBlock(COLORLESS);
   }
 
-  const FieldCell& operator()(int row, int col) const
-  {
-    return Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                        FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>::
-                        operator()(row, col);
+  const FieldCell& operator()(FieldCoords position) const {
+    if (insideField_(position))
+      return cells_[index_(position)];
+    else if (overField_(position))
+      return freeCell_;
+    else
+      return blockedCell_;
+  }
+  FieldCell& mutableCell(FieldCoords position) {
+    assert(insideField_(position));
+    return cells_[index_(position)];
   }
 
-  FieldCell& operator()(FieldCoords position)
-  {
-    return operator()(position.y(), position.x());
-  }
+private:
+  std::array<FieldCell, FIELD_WIDTH * FIELD_HEIGHT> cells_;
+  FieldCell blockedCell_;
+  FieldCell freeCell_;
 
-  const FieldCell& operator()(FieldCoords position) const
-  {
-    return operator()(position.y(), position.x());
+  bool insideField_(FieldCoords position) const {
+    return 0 <= position.x() && position.x() < FIELD_WIDTH &&
+           0 <= position.y() && position.y() < FIELD_HEIGHT;
   }
-
-  void clear();
+  bool overField_(FieldCoords position) const {
+    return 0 <= position.x() && position.x() < FIELD_WIDTH &&
+           FIELD_HEIGHT <= position.y();
+  }
+  size_t index_(FieldCoords position) const { return position.x() * FIELD_HEIGHT + position.y(); }
 };
 
 }  // namespace engine

@@ -232,11 +232,6 @@ const int    CENTRAL_PIECE_ROW = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?
 const int    CENTRAL_PIECE_COL = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?)
 const int    N_PIECE_ROTATION_STATES = 4;
 
-const int    BORDERED_FIELD_ROW_BEGIN = -WALL_WIDTH;
-const int    BORDERED_FIELD_ROW_END   = FIELD_HEIGHT + SKY_HEIGHT;
-const int    BORDERED_FIELD_COL_BEGIN = -WALL_WIDTH;
-const int    BORDERED_FIELD_COL_END   = FIELD_WIDTH + WALL_WIDTH;
-
 const int    NO_BLOCK_IMAGE = -1;
 const int    NO_CHANGE = -2;
 

@@ -18,11 +18,11 @@ namespace {
 
 // Continuous mode
 
-/*const float  STARTING_SPEED = 1.0;
-const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
+/*const double STARTING_SPEED = 1.0;
+const double ROUTINE_SPEED_UP_VALUE = 0.007f;
 const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
-const float  NORMAL_SPEED_LIMIT = 5.0;
-const float  ABSOLUTE_SPEED_LIMIT = 10.0;
+const double NORMAL_SPEED_LIMIT = 5.0;
+const double ABSOLUTE_SPEED_LIMIT = 10.0;
 
 const Time   AUTO_LOWERING_TIME = 0.8s;
 const Time   DROPPING_PIECE_LOWERING_TIME = 0.04s;
@@ -40,11 +40,11 @@ const Time   HINT_MATERIALIZATION_TIME = 0.2s;
 const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;*/
 
 
-const float  STARTING_SPEED = 1.0;
-const float  ROUTINE_SPEED_UP_VALUE = 0.007f;
+const double STARTING_SPEED = 1.0;
+const double ROUTINE_SPEED_UP_VALUE = 0.007f;
 const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
-const float  NORMAL_SPEED_LIMIT = 5.0;
-const float  ABSOLUTE_SPEED_LIMIT = 10.0;
+const double NORMAL_SPEED_LIMIT = 5.0;
+const double ABSOLUTE_SPEED_LIMIT = 10.0;
 
 const Time   AUTO_LOWERING_TIME = 0.8s;
 const Time   DROPPING_PIECE_LOWERING_TIME = 0.02s;
@@ -343,8 +343,8 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
   {
     fscanf(piecesFile.get(), "%d", &pieceTemplates[iPiece].chance);
     util::skipWhitespace(piecesFile.get());
-    float r, g, b;
-    fscanf(piecesFile.get(), "(%f,%f,%f)", &r, &g, &b);
+    double r, g, b;
+    fscanf(piecesFile.get(), "(%lf,%lf,%lf)", &r, &g, &b);
     pieceTemplates[iPiece].color = colorFromFloat(r, g, b, 1.f);
 
     for (int rotationState = 0; rotationState < N_PIECE_ROTATION_STATES; ++rotationState)
@@ -1111,7 +1111,7 @@ bool Player::generateBonus()  // TODO: remake
   {
     for (int row = highestNonemptyRow(); row >= 0; --row)
     {
-      if (float(rand()) / RAND_MAX > BONUS_ONE_ROW_CHANCE)
+      if (double(rand()) / RAND_MAX > BONUS_ONE_ROW_CHANCE)
         continue;
       for (int colIter = 0; colIter < N_BONUS_ONE_ROW_ATTEMPTS; ++colIter)
       {
@@ -1214,7 +1214,7 @@ void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, T
 
 void Player::routineSpeedUp()
 {
-  float maxSpeed = std::max(NORMAL_SPEED_LIMIT, speed);
+  double maxSpeed = std::max(NORMAL_SPEED_LIMIT, speed);
   speed += ROUTINE_SPEED_UP_VALUE;
   speed = std::min(speed, maxSpeed);
   events.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);

@@ -31,11 +31,11 @@ namespace engine {
 
 //================================ Time & speed ================================
 
-extern const float  STARTING_SPEED;
-extern const float  ROUTINE_SPEED_UP_VALUE;
+extern const double STARTING_SPEED;
+extern const double ROUTINE_SPEED_UP_VALUE;
 extern const Time   ROUTINE_SPEED_UP_INTERVAL;
-extern const float  NORMAL_SPEED_LIMIT;
-extern const float  ABSOLUTE_SPEED_LIMIT;
+extern const double NORMAL_SPEED_LIMIT;
+extern const double ABSOLUTE_SPEED_LIMIT;
 
 extern const Time   AUTO_LOWERING_TIME;
 // Time necessary for a dropping piece to move one line down
@@ -150,8 +150,8 @@ const int    BONUS_CHANCES[N_BONUSES] =
 const int    BONUS_ENLARGED_HINT_QUEUE_SIZE = 7;
 const Time   BONUS_FADING_DURATION = 0.5s;
 
-const float  BONUS_SPEED_UP_VALUE = 0.8f;
-const float  BONUS_SLOW_DOWN_VALUE = 1.0f;
+const double BONUS_SPEED_UP_VALUE = 0.8f;
+const double BONUS_SLOW_DOWN_VALUE = 1.0f;
 
 const Time   BONUS_FLIPPING_SCREEN_DURATION = 0.8s;
 const Time   BONUS_ROTATING_SCREEN_PERIOD = 10.0s;
@@ -170,12 +170,12 @@ const Time   MAX_BONUS_LIFE_TIME = 25.0s;
 
 /*const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
 const int    N_BONUS_GENERATION_ATTEMPTS = 5;
-const float  BONUS_ONE_ROW_CHANCE = 0.3f;
+const double BONUS_ONE_ROW_CHANCE = 0.3f;
 const int    N_BONUS_ONE_ROW_ATTEMPTS = 2;*/
 
 const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
 const int    N_BONUS_GENERATION_ATTEMPTS = 5;
-const float  BONUS_ONE_ROW_CHANCE = 0.4f;
+const double BONUS_ONE_ROW_CHANCE = 0.4f;
 const int    N_BONUS_ONE_ROW_ATTEMPTS = 1;
 
 const int    BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL = FIELD_HEIGHT / 2;
@@ -453,7 +453,7 @@ public:
   Controls      controls;       // S
   Statistics    statistics;     // R
 
-  float         speed;          // R
+  double        speed;          // R
   Field         field;          // C (boders) / R (content)
   FieldLocks    fieldLocks;     // R
   Time          latestLineCollapse; // R

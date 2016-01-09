@@ -39,14 +39,14 @@ const Time NEVER_HAPPENED = Time::min();
 const Time WILL_NEVER_HAPPEN = Time::max();
 
 // TODO(Andrei): Adequate Speed type
-using Speed = float;
+using Speed = double;
 
 
 using Color = sf::Color;
 const Color COLORLESS = Color::Transparent;
 
-inline Color colorFromFloat(float r, float g, float b, float a) {
-  auto component = [](float v){ return math::bound(0, static_cast<int>(v * 255), 255); };
+inline Color colorFromFloat(double r, double g, double b, double a) {
+  auto component = [](double v){ return math::bound(0, static_cast<int>(v * 255), 255); };
   return Color(component(r), component(g), component(b), component(a));
 }
 

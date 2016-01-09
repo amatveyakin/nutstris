@@ -4,6 +4,7 @@
 
 #include "engine/bonus.h"
 #include "engine/defs.h"
+#include "engine/input/control.h"
 #include "util/file.h"
 
 
@@ -53,15 +54,15 @@ inline std::string getBonusName(Bonus bonus) {
   abort();
 };
 
-inline std::string getPlayerKeyName(PlayerKey key) {
+inline std::string getPlayerControlName(PlayerControl key) {
   switch (key) {
-    case PlayerKey::Left:         return "Left";
-    case PlayerKey::Right:        return "Right";
-    case PlayerKey::RotateCCW:    return "Rotate CCW";
-    case PlayerKey::RotateCW:     return "Rotate CW";
-    case PlayerKey::Down:         return "Down";
-    case PlayerKey::Drop:         return "Drop";
-    case PlayerKey::NextVictim:   return "Next Victim";
+    case PlayerControl::Left:         return "Left";
+    case PlayerControl::Right:        return "Right";
+    case PlayerControl::RotateCCW:    return "Rotate CCW";
+    case PlayerControl::RotateCW:     return "Rotate CW";
+    case PlayerControl::Down:         return "Down";
+    case PlayerControl::Drop:         return "Drop";
+    case PlayerControl::NextVictim:   return "Next Victim";
   }
   abort();
 };

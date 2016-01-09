@@ -23,7 +23,7 @@
 #include "engine/bonus.h"
 #include "engine/event.h"
 #include "engine/field.h"
-#include "engine/keyboard.h"
+#include "engine/input/control.h"
 #include "engine/visual.h"
 #include "util/containers.h"
 #include "util/file.h"
@@ -55,54 +55,6 @@ extern const Time   PIECE_ROTATING_ANIMATION_TIME;
 extern const Time   HINT_APPERAING_TIME;
 extern const Time   HINT_MATERIALIZATION_TIME;
 extern const Time   PLAYER_DYING_ANIMATION_TIME;
-
-
-//================================== Keyboard ==================================
-
-// TODO: find optimal value for KEY_REACTIVATION_TIMEs
-extern const Time   MOVE_KEY_REACTIVATION_TIME;
-extern const Time   ROTATE_KEY_REACTIVATION_TIME;
-//extern const Time   DOWN_KEY_REACTIVATION_TIME;
-extern const Time   DOWN_KEY_REACTIVATION_TIME;
-extern const Time   DROP_KEY_REACTIVATION_TIME;
-extern const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME;
-
-extern const Time   PLAYER_KEY_REACTIVATION_TIME[];
-
-
-static const int N_GLOBAL_KEYS = 1;
-
-enum GlobalKey { };
-
-extern const Time   GLOBAL_KEY_REACTIVATION_TIME[];
-
-
-struct PlayerKeyList
-{
-  Keyboard::Key keyLeft;
-  Keyboard::Key keyRight;
-  Keyboard::Key keyRotateCCW;
-  Keyboard::Key keyRotateCW;
-  Keyboard::Key keyDown;
-  Keyboard::Key keyDrop;
-  Keyboard::Key keyNextVictim;
-};
-
-union Controls
-{
-  PlayerKeyList keyByName;
-  Keyboard::Key keyArray[N_PLAYER_KEYS];
-};
-
-
-struct GlobalKeyList { };
-
-union GlobalControls
-{
-  GlobalKeyList keyByName;
-//  Keyboard::Key keyArray[N_GLOBAL_KEYS];
-  Keyboard::Key keyArray[1];
-};
 
 
 //================================== Bonuses ===================================
@@ -293,7 +245,7 @@ public:
   bool          participates;   // S
   bool          active;         // R (in Game::newRound)
   int           score;          // M
-  Controls      controls;       // S
+  PlayerControls controls;      // S
   Statistics    statistics;     // R
 
   double        speed;          // R
@@ -317,7 +269,7 @@ public:
   std::vector<DisappearingLine>                   disappearingLines;  // R
   PlayerVisualEffects                             visualEffects;      // R
 
-  std::array<Time, N_PLAYER_KEYS> nextKeyActivationTable; // C
+  std::array<Time, kNumPlayerControls> nextKeyActivationTable; // C
 
   void          init(Game* game__, int number__);
   void          loadAccountInfo(int newAccount);
@@ -338,7 +290,7 @@ public:
   void          heal();  // make private (?)
   void          kill();
 
-  void          onKeyPress(PlayerKey key);
+  void          onKeyPress(PlayerControl key);
   void          onTimer();
 
   void          stealPiece();  // (!) make private
@@ -410,8 +362,7 @@ public:
   Time          currentTime;
   GlobalVisualEffects   globalEffects;
 
-//  std::array<Time, N_GLOBAL_KEYS> nextGlobalKeyActivationTable;
-  std::array<Time, 1> nextGlobalKeyActivationTable;
+  std::array<Time, kNumGlobalControls> nextGlobalKeyActivationTable;
   GlobalControls globalControls;
 
   void          init();
@@ -423,7 +374,7 @@ public:
   void          newRound(Time currentTime__);
   void          endRound();
 
-  void          onGlobalKeyPress(GlobalKey key);
+  void          onGlobalKeyPress(GlobalControl key);
   void          onTimer(Time currentTime);
 
 private:

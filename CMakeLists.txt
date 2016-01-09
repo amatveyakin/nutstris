@@ -10,8 +10,10 @@ set(srcs
     ${src_dir}/engine/engine.cpp
     ${src_dir}/engine/engine.h
     ${src_dir}/engine/field.h
-    ${src_dir}/engine/keyboard.cpp
-    ${src_dir}/engine/keyboard.h
+    ${src_dir}/engine/input/control.cpp
+    ${src_dir}/engine/input/control.h
+    ${src_dir}/engine/input/keyboard.cpp
+    ${src_dir}/engine/input/keyboard.h
     ${src_dir}/engine/strings.h
     ${src_dir}/engine/units.cpp
     ${src_dir}/engine/units.h

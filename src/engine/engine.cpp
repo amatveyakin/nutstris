@@ -1,4 +1,6 @@
 #include "engine/engine.h"
+
+#include <iostream>
 #include <fstream>
 #include <cstdio>
 
@@ -63,42 +65,17 @@ const Time   HINT_MATERIALIZATION_TIME = 0.2s;
 const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 
 
-//================================== Keyboard ==================================
-
-// TODO: find optimal value for KEY_REACTIVATION_TIMEs
-const Time   MOVE_KEY_REACTIVATION_TIME = 0.12s;
-const Time   ROTATE_KEY_REACTIVATION_TIME = 0.15s;
-//const Time   DOWN_KEY_REACTIVATION_TIME = 0.08s;
-const Time   DOWN_KEY_REACTIVATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;
-const Time   DROP_KEY_REACTIVATION_TIME = 0.25s;
-const Time   CHANGE_VICTIM_KEY_REACTIVATION_TIME = 0.2s;
-
-const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
-{
-  MOVE_KEY_REACTIVATION_TIME,
-  MOVE_KEY_REACTIVATION_TIME,
-  ROTATE_KEY_REACTIVATION_TIME,
-  ROTATE_KEY_REACTIVATION_TIME,
-  DOWN_KEY_REACTIVATION_TIME,
-  DROP_KEY_REACTIVATION_TIME,
-  CHANGE_VICTIM_KEY_REACTIVATION_TIME
-};
-
-
-const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = {Time()};
-
-
 //==================================== Game ====================================
 
 void Game::init()
 {
-  assert(PIECE_FORCED_LOWERING_ANIMATION_TIME <= DOWN_KEY_REACTIVATION_TIME);
+  assert(PIECE_FORCED_LOWERING_ANIMATION_TIME <= playerControlCooldown(PlayerControl::Down));
 
   loadPieces();
   loadBonuses();
   loadAccounts();
   loadSettings();
-  for (int key = 0; key < N_GLOBAL_KEYS; ++key)
+  for (int key = 0; key < kNumGlobalControls; ++key)
     nextGlobalKeyActivationTable[key] = Time::min();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].init(this, iPlayer);
@@ -146,10 +123,10 @@ void Game::loadSettings()
     default:
       throw std::runtime_error(ERR_FILE_CORRUPTED); // TODO: format
     }
-    for (int iKey = 0; iKey < N_PLAYER_KEYS; ++iKey) {
+    for (int iKey = 0; iKey < kNumPlayerControls; ++iKey) {
       int keyValue = 0;
       settingsFile >> keyValue;
-      players[iPlayer].controls.keyArray[iKey] = static_cast<Keyboard::Key>(keyValue);
+      players[iPlayer].controls[iKey] = static_cast<Keyboard::Key>(keyValue);
     }
   }
 }
@@ -163,52 +140,55 @@ void Game::saveSettings()
   {
     settingsFile << players[iPlayer].accountNumber << " ";
     settingsFile << (players[iPlayer].participates ? 1 : 0) << " ";
-    for (int key = 0; key < N_PLAYER_KEYS; ++key)
-      settingsFile << players[iPlayer].controls.keyArray[key] << " ";
+    for (int key = 0; key < kNumPlayerControls; ++key)
+      settingsFile << players[iPlayer].controls[key] << " ";
   }
 }
 
 void Game::loadDefaultSettings()
 {
+  // TODO(Andrei): save/load global keys
+  globalControls[SayHi] = Keyboard::F1;
+
   players[0].participates = true;
   players[0].accountNumber = 0;
-  players[0].controls.keyByName.keyLeft = Keyboard::A;
-  players[0].controls.keyByName.keyRight = Keyboard::D;
-  players[0].controls.keyByName.keyRotateCCW = Keyboard::W;
-  players[0].controls.keyByName.keyRotateCW = Keyboard::E;
-  players[0].controls.keyByName.keyDown = Keyboard::S;
-  players[0].controls.keyByName.keyDrop = Keyboard::Tab;
-  players[0].controls.keyByName.keyNextVictim = Keyboard::Q;
+  players[0].controls[Left] = Keyboard::A;
+  players[0].controls[Right] = Keyboard::D;
+  players[0].controls[RotateCCW] = Keyboard::W;
+  players[0].controls[RotateCW] = Keyboard::E;
+  players[0].controls[Down] = Keyboard::S;
+  players[0].controls[Drop] = Keyboard::Tab;
+  players[0].controls[NextVictim] = Keyboard::Q;
 
   players[1].participates = false;
   players[1].accountNumber = 1;
-  players[1].controls.keyByName.keyLeft = Keyboard::H;
-  players[1].controls.keyByName.keyRight = Keyboard::K;
-  players[1].controls.keyByName.keyRotateCCW = Keyboard::U;
-  players[1].controls.keyByName.keyRotateCW = Keyboard::I;
-  players[1].controls.keyByName.keyDown = Keyboard::J;
-  players[1].controls.keyByName.keyDrop = Keyboard::Space;
-  players[1].controls.keyByName.keyNextVictim = Keyboard::L;
+  players[1].controls[Left] = Keyboard::H;
+  players[1].controls[Right] = Keyboard::K;
+  players[1].controls[RotateCCW] = Keyboard::U;
+  players[1].controls[RotateCW] = Keyboard::I;
+  players[1].controls[Down] = Keyboard::J;
+  players[1].controls[Drop] = Keyboard::Space;
+  players[1].controls[NextVictim] = Keyboard::L;
 
   players[2].participates = true;
   players[2].accountNumber = 2;
-  players[2].controls.keyByName.keyLeft = Keyboard::Left;
-  players[2].controls.keyByName.keyRight = Keyboard::Right;
-  players[2].controls.keyByName.keyRotateCCW = Keyboard::Up;
-  players[2].controls.keyByName.keyRotateCW = Keyboard::Delete;
-  players[2].controls.keyByName.keyDown = Keyboard::Down;
-  players[2].controls.keyByName.keyDrop = Keyboard::RShift;
-  players[2].controls.keyByName.keyNextVictim = Keyboard::RControl;
+  players[2].controls[Left] = Keyboard::Left;
+  players[2].controls[Right] = Keyboard::Right;
+  players[2].controls[RotateCCW] = Keyboard::Up;
+  players[2].controls[RotateCW] = Keyboard::Delete;
+  players[2].controls[Down] = Keyboard::Down;
+  players[2].controls[Drop] = Keyboard::RShift;
+  players[2].controls[NextVictim] = Keyboard::RControl;
 
   players[3].participates = false;
   players[3].accountNumber = 3;
-  players[3].controls.keyByName.keyLeft = Keyboard::Numpad4;
-  players[3].controls.keyByName.keyRight = Keyboard::Numpad6;
-  players[3].controls.keyByName.keyRotateCCW = Keyboard::Numpad8;
-  players[3].controls.keyByName.keyRotateCW = Keyboard::Numpad9;
-  players[3].controls.keyByName.keyDown = Keyboard::Numpad5;
-  players[3].controls.keyByName.keyDrop = Keyboard::Numpad0;
-  players[3].controls.keyByName.keyNextVictim = Keyboard::Add;
+  players[3].controls[Left] = Keyboard::Numpad4;
+  players[3].controls[Right] = Keyboard::Numpad6;
+  players[3].controls[RotateCCW] = Keyboard::Numpad8;
+  players[3].controls[RotateCW] = Keyboard::Numpad9;
+  players[3].controls[Down] = Keyboard::Numpad5;
+  players[3].controls[Drop] = Keyboard::Numpad0;
+  players[3].controls[NextVictim] = Keyboard::Add;
 }
 
 void Game::newMatch()
@@ -236,35 +216,41 @@ void Game::endRound()
   exit(0);
 }
 
-void Game::onGlobalKeyPress(GlobalKey /*key*/) { }
+void Game::onGlobalKeyPress(GlobalControl key) {
+  switch (key) {
+  case GlobalControl::SayHi:
+    std::cout << "Hi!" << std::endl;
+    break;
+  }
+}
 
 void Game::onTimer(Time currentTime__)
 {
   currentTime = currentTime__;
 
-  for (int key = 0; key < N_GLOBAL_KEYS; ++key)
+  for (int key = 0; key < kNumGlobalControls; ++key)
   {
-    if (Keyboard::isKeyPressed(globalControls.keyArray[key]) &&
+    if (Keyboard::isKeyPressed(globalControls[key]) &&
         (currentTime >= nextGlobalKeyActivationTable[key]))
     {
-      onGlobalKeyPress(GlobalKey(key));
-      nextGlobalKeyActivationTable[key] = currentTime + GLOBAL_KEY_REACTIVATION_TIME[key];
+      onGlobalKeyPress(GlobalControl(key));
+      nextGlobalKeyActivationTable[key] = currentTime + globalControlCooldown(GlobalControl(key));
     }
-    else if (!Keyboard::isKeyPressed(globalControls.keyArray[key]))
+    else if (!Keyboard::isKeyPressed(globalControls[key]))
       nextGlobalKeyActivationTable[key]  = currentTime;
   }
 
   for (size_t iPlayer = 0; iPlayer < activePlayers.size(); ++iPlayer)
   {
-    for (int key = 0; key < N_PLAYER_KEYS; ++key)
+    for (int key = 0; key < kNumPlayerControls; ++key)
     {
-      if (Keyboard::isKeyPressed(activePlayers[iPlayer]->controls.keyArray[key]) &&
+      if (Keyboard::isKeyPressed(activePlayers[iPlayer]->controls[key]) &&
           (currentTime >= activePlayers[iPlayer]->nextKeyActivationTable[key]))
       {
-        activePlayers[iPlayer]->onKeyPress(PlayerKey(key));
-        activePlayers[iPlayer]->nextKeyActivationTable[key] = currentTime + PLAYER_KEY_REACTIVATION_TIME[key];
+        activePlayers[iPlayer]->onKeyPress(PlayerControl(key));
+        activePlayers[iPlayer]->nextKeyActivationTable[key] = currentTime + playerControlCooldown(PlayerControl(key));
       }
-      else if (!Keyboard::isKeyPressed(activePlayers[iPlayer]->controls.keyArray[key]))
+      else if (!Keyboard::isKeyPressed(activePlayers[iPlayer]->controls[key]))
         activePlayers[iPlayer]->nextKeyActivationTable[key] = currentTime;
     }
   }
@@ -276,7 +262,7 @@ void Game::onTimer(Time currentTime__)
   {
     if (players[iPlayer].active)
     {
-      for (int key = 0; key < N_PLAYER_KEYS; ++key)
+      for (int key = 0; key < kNumPlayerControls; ++key)
       {
         if (Keyboard::isKeyPressed(players[iPlayer].controls.keyArray[key]) &&
             (currentTime >= players[iPlayer].nextKeyActivationTable[key]))
@@ -369,7 +355,7 @@ void Player::init(Game* game__, int number__)
 {
   game = game__;
   number = number__;
-  for (int key = 0; key < N_PLAYER_KEYS; ++key)
+  for (int key = 0; key < kNumPlayerControls; ++key)
     nextKeyActivationTable[key] = Time::min();
 }
 
@@ -546,29 +532,29 @@ void Player::kill()
   active = false;
 }
 
-void Player::onKeyPress(PlayerKey key)
+void Player::onKeyPress(PlayerControl key)
 {
   switch (key) {
-  case PlayerKey::Left:
+  case PlayerControl::Left:
     movePiece(-1);
     break;
-  case PlayerKey::Right:
+  case PlayerControl::Right:
     movePiece(1);
     break;
-  case PlayerKey::RotateCW:
+  case PlayerControl::RotateCW:
     rotatePiece(-1);
     break;
-  case PlayerKey::RotateCCW:
+  case PlayerControl::RotateCCW:
     rotatePiece(1);
     break;
-  case PlayerKey::Down:
+  case PlayerControl::Down:
     events.eraseEventType(etPieceLowering);
     lowerPiece(true /* forced */);
     break;
-  case PlayerKey::Drop:
+  case PlayerControl::Drop:
     dropPiece();
     break;
-  case PlayerKey::NextVictim:
+  case PlayerControl::NextVictim:
     cycleVictim();
     break;
   }

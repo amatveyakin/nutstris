@@ -37,18 +37,4 @@ inline Color colorFromFloat(double r, double g, double b, double a) {
   return Color(component(r), component(g), component(b), component(a));
 }
 
-
-const int N_PLAYER_KEYS = 7;
-
-enum class PlayerKey
-{
-  Left,
-  Right,
-  RotateCCW,
-  RotateCW,
-  Down,
-  Drop,
-  NextVictim,
-};
-
 }  // namespace engine

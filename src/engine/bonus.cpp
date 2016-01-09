@@ -1,6 +1,7 @@
 #include "bonus.h"
 
 #include <map>
+#include "units.h"
 
 
 namespace engine {
@@ -16,6 +17,8 @@ enum Desirability {
 };
 
 struct BonusProperties {
+  BonusProperties(Lifetime lifetime__, Desirability desirability__, int frequency__)
+    : lifetime(lifetime__), desirability(desirability__), frequency(frequency__) {}
   Lifetime lifetime = {};
   Desirability desirability = {};
   int frequency = 0;

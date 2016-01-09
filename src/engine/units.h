@@ -16,11 +16,11 @@ public:
 
   constexpr static Speed zero() { return Speed(); }
 
-  constexpr double operator*(Time t)                  { return t * numerator_ / kDenominator_; }
-  constexpr friend double operator*(Time t, Speed s)  { return s * t; }
+  constexpr double operator*(Time t) const            { return t * numerator_ / kDenominator_; }
+  constexpr friend double operator*(Time t, Speed s)  { return s.operator*(t); }
 
-  constexpr Speed operator*(double c)                 { return Speed(numerator_ / c); }
-  constexpr Speed operator/(double c)                 { return Speed(numerator_ / c); }
+  constexpr Speed operator*(double c) const           { return Speed(numerator_ / c); }
+  constexpr Speed operator/(double c) const           { return Speed(numerator_ / c); }
   constexpr friend Speed operator*(double c, Speed s) { return s * c; }
 
   constexpr friend Speed operator/(double d, Time t);

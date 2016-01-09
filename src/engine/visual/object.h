@@ -114,7 +114,7 @@ public:
       return position_;
     FloatFieldCoords shiftVector = binding_->absolutePosition(currentTime) - position_;
     double deltaDistance = math::L2::norm(shiftVector);
-    double maxDistance = maxSpeed_ * deltaTime;
+    double maxDistance = maxSpeed_.operator*(deltaTime);
     FloatFieldCoords newPosition;
     if (deltaDistance <= maxDistance)
       newPosition = binding_->absolutePosition(currentTime);

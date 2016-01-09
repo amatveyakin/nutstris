@@ -4,57 +4,57 @@ project(Nutstris)
 set(executable_name nutstris)
 set(src_dir ${CMAKE_SOURCE_DIR}/src)
 set(srcs
-    ${src_dir}/main.cpp
+    ${src_dir}/engine/defs.h
+    ${src_dir}/engine/engine.cpp
     ${src_dir}/engine/engine.h
-	${src_dir}/engine/engine.cpp
+    ${src_dir}/engine/keyboard.cpp
     ${src_dir}/engine/keyboard.h
-	${src_dir}/engine/keyboard.cpp
-	${src_dir}/engine/defs.h
-	${src_dir}/engine/strings.h
-	${src_dir}/engine/visual.h
+    ${src_dir}/engine/strings.h
+    ${src_dir}/engine/visual.h
+    ${src_dir}/engine/visual/effect.cpp
     ${src_dir}/engine/visual/effect.h
-	${src_dir}/engine/visual/effect.cpp
+    ${src_dir}/engine/visual/misc.h
+    ${src_dir}/engine/visual/motion.cpp
     ${src_dir}/engine/visual/motion.h
-	${src_dir}/engine/visual/motion.cpp
-	${src_dir}/engine/visual/misc.h
-	${src_dir}/engine/visual/object.h
-	${src_dir}/math/basic.h
-	${src_dir}/math/vector.h
-	${src_dir}/math/matrix.h
-	${src_dir}/math/metric.h
-	${src_dir}/math/easing.h
+    ${src_dir}/engine/visual/object.h
+    ${src_dir}/main.cpp
+    ${src_dir}/math/basic.h
     ${src_dir}/math/easing.cpp
+    ${src_dir}/math/easing.h
+    ${src_dir}/math/matrix.h
+    ${src_dir}/math/metric.h
+    ${src_dir}/math/vector.h
     ${src_dir}/render/arraybuffer.h
-	${src_dir}/render/arraybuffer.hpp
-	${src_dir}/render/defs.h
-	${src_dir}/render/renderer.h
-	${src_dir}/render/renderer.cpp
-    ${src_dir}/render/shader.h
-	${src_dir}/render/shader.cpp
-    ${src_dir}/render/shaderprogram.h
-	${src_dir}/render/shaderprogram.cpp
-    ${src_dir}/render/shaderprogramfactory.h
-	${src_dir}/render/shaderprogramfactory.cpp
+    ${src_dir}/render/arraybuffer.hpp
+    ${src_dir}/render/cubemesh.cpp
     ${src_dir}/render/cubemesh.h
-	${src_dir}/render/cubemesh.cpp
-    ${src_dir}/render/texturedquad.h
-	${src_dir}/render/texturedquad.cpp
+    ${src_dir}/render/dataformats.cpp
     ${src_dir}/render/dataformats.h
-	${src_dir}/render/dataformats.cpp
-    ${src_dir}/render/texturearray.h
-	${src_dir}/render/texturearray.cpp
-    ${src_dir}/render/texturefactory.h
-	${src_dir}/render/texturefactory.cpp
+    ${src_dir}/render/defs.h
+    ${src_dir}/render/matrixutil.cpp
     ${src_dir}/render/matrixutil.h
-	${src_dir}/render/matrixutil.cpp
+    ${src_dir}/render/playerviewport.cpp
     ${src_dir}/render/playerviewport.h
-	${src_dir}/render/playerviewport.cpp
-	${src_dir}/render/shaders/basecubes.h
-	${src_dir}/render/shaders/textured.h
+    ${src_dir}/render/renderer.cpp
+    ${src_dir}/render/renderer.h
+    ${src_dir}/render/shader.cpp
+    ${src_dir}/render/shader.h
+    ${src_dir}/render/shaderprogram.cpp
+    ${src_dir}/render/shaderprogram.h
+    ${src_dir}/render/shaderprogramfactory.cpp
+    ${src_dir}/render/shaderprogramfactory.h
+    ${src_dir}/render/shaders/basecubes.h
+    ${src_dir}/render/shaders/textured.h
+    ${src_dir}/render/texturearray.cpp
+    ${src_dir}/render/texturearray.h
+    ${src_dir}/render/texturedquad.cpp
+    ${src_dir}/render/texturedquad.h
+    ${src_dir}/render/texturefactory.cpp
+    ${src_dir}/render/texturefactory.h
+    ${src_dir}/util/containers.h
+    ${src_dir}/util/file.cpp
     ${src_dir}/util/file.h
-	${src_dir}/util/file.cpp
-	${src_dir}/util/containers.h
-	${src_dir}/util/macro.h
+    ${src_dir}/util/macro.h
 )
 
 include_directories(${src_dir})

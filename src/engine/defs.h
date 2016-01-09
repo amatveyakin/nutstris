@@ -20,11 +20,8 @@ using namespace std::chrono_literals;
 // TODO(Andrei): Fix naming
 const int    FIELD_WIDTH = 10;
 const int    FIELD_HEIGHT = 20;
-const int    MAX_BLOCKS = FIELD_WIDTH * FIELD_HEIGHT;
-const int    MAX_BLOCK_IMAGES = MAX_BLOCKS;
 
 const int    MAX_PIECE_SIZE = 4;
-const int    MAX_BLOCKS_IN_PIECE = MAX_PIECE_SIZE * MAX_PIECE_SIZE;
 
 const int    MAX_PLAYERS = 4;
 

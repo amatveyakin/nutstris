@@ -63,7 +63,7 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
     for ( auto& block : blockImages ) {
       float bonusProgress = float(block.bonusImage().progress ( now ));
       auto bonusIndex = ( bonusProgress > 0.5f ) ? int ( block.bonus() ) : 0;
-      auto cubeScale = abs( 2.f * bonusProgress - 1 );
+      auto cubeScale = math::abs( 2.f * bonusProgress - 1.f );
       auto scaleMatrix = render::matrixutil::scale ( cubeScale );
       auto pos2d = block.absolutePosition ( now );
       cubesData.push_back ( {fieldPosToWorldPos ( pos2d.x(), pos2d.y() ) * scaleMatrix, ColorToVec3 ( block.color() ), bonusIndex} );

@@ -52,6 +52,16 @@ target_link_libraries(${executable_name} ${SFML_LIBRARIES} ${OPENGL_LIBRARIES} $
 add_definitions("-std=c++14 -fext-numeric-literals")
 
 if(WIN32)
+  file(GLOB SFMLDlls "${SFML_ROOT}/bin/*.dll")
+  file(COPY ${SFMLDlls} DESTINATION "${CMAKE_SOURCE_DIR}/vsproj/Debug/")
+  file(COPY ${SFMLDlls} DESTINATION "${CMAKE_SOURCE_DIR}/vsproj/Release/")
+
+  set(GlewDll "${GLEW_INCLUDE_DIRS}/../bin/Release/x64/glew32.dll")
+  file(COPY ${GlewDll} DESTINATION "${CMAKE_SOURCE_DIR}/vsproj/Debug/")
+  file(COPY ${GlewDll} DESTINATION "${CMAKE_SOURCE_DIR}/vsproj/Release/")
+endif()
+
+if(WIN32)
 else()
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wcast-align -Wunused -Wformat=2 -Wcast-qual -Wold-style-cast -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror")
   set(CMAKE_CXX_FLAGS_DEBUG "-g")

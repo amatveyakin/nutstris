@@ -6,26 +6,6 @@
 
 namespace util {
 
-template <typename T, int size>
-class FixedZeroBasedArray {
-public:
-  T& operator[](int index) {
-    assert(0 <= index);
-    assert(index < size);
-    return elements_[index];
-  }
-
-  const T& operator[](int index) const {
-    assert(0 <= index);
-    assert(index < size);
-    return elements_[index];
-  }
-
-protected:
-  T elements_[size];
-};
-
-
 template <typename T, int firstRow, int firstCol, int lastRow, int lastCol>
 class Fixed2DArray {
 public:

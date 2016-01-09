@@ -408,7 +408,7 @@ public:
   std::vector<DisappearingLine>                   disappearingLines;  // R
   PlayerVisualEffects                             visualEffects;      // R
 
-  util::FixedZeroBasedArray<Time, N_PLAYER_KEYS> nextKeyActivationTable; // C
+  std::array<Time, N_PLAYER_KEYS> nextKeyActivationTable; // C
 
   void          init(Game* game__, int number__);
   void          loadAccountInfo(int newAccount);
@@ -489,7 +489,7 @@ public:
   std::vector<AccountInfo> accounts;
 
   // TODO: participants array (to speed up booting)
-  util::FixedZeroBasedArray<Player, MAX_PLAYERS> players;
+  std::array<Player, MAX_PLAYERS> players;
   std::vector<Player*> participants;
   std::vector<Player*> activePlayers;
 
@@ -501,8 +501,8 @@ public:
   Time          currentTime;
   GlobalVisualEffects   globalEffects;
 
-//  FixedZeroBasedArray<Time, N_GLOBAL_KEYS> nextGlobalKeyActivationTable;
-  util::FixedZeroBasedArray<Time, 1> nextGlobalKeyActivationTable;
+//  std::array<Time, N_GLOBAL_KEYS> nextGlobalKeyActivationTable;
+  std::array<Time, 1> nextGlobalKeyActivationTable;
   GlobalControls globalControls;
 
   void          init();

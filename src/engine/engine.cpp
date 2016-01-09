@@ -355,8 +355,8 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
 
 void Game::loadBonuses()
 {
-  for (Bonus bonus = FIRST_REAL_BONUS; bonus <= LAST_REAL_BONUS; bonus = static_cast<Bonus>(static_cast<int>(bonus) + 1)) {
-    for (int i = 0; i < BONUS_CHANCES[static_cast<int>(bonus)]; ++i)
+  for (Bonus bonus : ForEachBonus()) {
+    for (int i = 0; i < bonusFrequency(bonus); ++i)
       randomBonusTable.push_back(bonus);
   }
 }
@@ -394,8 +394,7 @@ void Player::prepareForNewRound()
   statistics.clear();
   events.clear();
   fieldLocks.clear();
-  buffs.clear();
-  debuffs.clear();
+  bonuces.clear();
   field = Field();
   lyingBlockImages.clear();
   lyingBlockIndices.clear();
@@ -459,20 +458,18 @@ void Player::applyBonus(Bonus bonus)
       break;
     case Bonus::PieceTheft:
       break;
-    SKIP_ALL_BUT_BUFFS;
     default: break;  // TODO(Andrei): handle all values
     }
-    buffs.add(bonus);
+    bonuces.add(bonus);
   }
   else if (isDebuff(bonus))
   {
     switch (bonus)
     {
     // ...
-    SKIP_ALL_BUT_DEBUFFS;
     default: break;  // TODO(Andrei): handle all values
     }
-    debuffs.add(bonus);
+    bonuces.add(bonus);
   }
   else
   {
@@ -494,7 +491,6 @@ void Player::applyBonus(Bonus bonus)
 //    case Bonus::FlipField:
 //      // ...
 //      break;
-    SKIP_ALL_BUT_SORCERIES;
     default: break;  // TODO(Andrei): handle all values
     }
   }
@@ -503,7 +499,7 @@ void Player::applyBonus(Bonus bonus)
 
 void Player::disenchant(Bonus bonus)
 {
-  assert(isEnchantment(bonus));
+  assert(isPermanent(bonus));
   if (isBuff(bonus))
   {
     switch (bonus)
@@ -515,30 +511,28 @@ void Player::disenchant(Bonus bonus)
       // ...
       break;
     // ...
-    SKIP_ALL_BUT_BUFFS;
     default: break;  // TODO(Andrei): handle all values
     }
-    buffs.remove(bonus);
+    bonuces.remove(bonus);
   }
   else if (isDebuff(bonus))
   {
     switch (bonus)
     {
     // ...
-    SKIP_ALL_BUT_DEBUFFS;
     default: break;  // TODO(Andrei): handle all values
     }
-    debuffs.remove(bonus);
+    bonuces.remove(bonus);
   }
   disableBonusVisualEffect(bonus);
 }
 
 void Player::heal()
 {
-  // optimize disabling all effects (?)
-  for (Bonus i = FIRST_DEBUFF; i <= LAST_DEBUFF; i = static_cast<Bonus>(static_cast<int>(i) + 1))
-    if (debuffs.test(i))
-      disenchant(i);
+  for (Bonus bonus : ForEachBonus()) {
+    if (isDebuff(bonus) && bonuces.test(bonus))
+      disenchant(bonus);
+  }
 }
 
 void Player::beginClearField()
@@ -752,15 +746,18 @@ bool Player::bonusIsUseful(Bonus bonus) const
 {
   // TODO: process all debuffs uniformly  (may be, they are just always useful?)
   if (isBuff(bonus))
-    return !buffs.test(bonus);
+    return !bonuces.test(bonus);
 
   switch (bonus)
   {
   case Bonus::None:
     return false;
   case Bonus::Heal:
-    return debuffs.any();
-    break;
+    for (Bonus b : ForEachBonus()) {
+      if (isDebuff(b) && bonuces.test(b))
+        return true;
+    }
+    return false;
   case Bonus::SlowDown:
     return speed > STARTING_SPEED + BONUS_SLOW_DOWN_VALUE;  // (?)
     break;
@@ -794,7 +791,7 @@ bool Player::bonusIsUseful(Bonus bonus) const
     // ...
     break;
 
-  SKIP_BUFFS;
+  default: break;  // TODO(Andrei): handle all values
   }
 
   return true;

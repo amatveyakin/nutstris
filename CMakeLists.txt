@@ -4,6 +4,8 @@ project(Nutstris)
 set(executable_name nutstris)
 set(src_dir ${CMAKE_SOURCE_DIR}/src)
 set(srcs
+    ${src_dir}/engine/bonus.cpp
+    ${src_dir}/engine/bonus.h
     ${src_dir}/engine/defs.h
     ${src_dir}/engine/engine.cpp
     ${src_dir}/engine/engine.h

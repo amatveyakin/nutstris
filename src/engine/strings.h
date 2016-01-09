@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "engine/bonus.h"
 #include "engine/defs.h"
 #include "util/file.h"
 

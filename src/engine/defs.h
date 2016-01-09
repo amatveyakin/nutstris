@@ -38,41 +38,6 @@ inline Color colorFromFloat(double r, double g, double b, double a) {
 }
 
 
-enum class Bonus {
-  // no bonus
-  None,
-
-  // buffs
-  EnlargeHintQueue,
-  PieceTheft,
-
-  // kind sorceries
-  Heal,
-  SlowDown,
-  ClearField,
-
-  // debuffs
-  FlippedScreen,
-  RotatingScreen,
-  Wave,
-  Lantern,
-  CrazyPieces,
-  TruncatedBlocks,
-  NoHint,
-
-  // evil sorceries
-  SpeedUp,
-//  FlipField,
-};
-
-const Bonus  FIRST_BONUS = Bonus::None;
-const Bonus  FIRST_REAL_BONUS = Bonus::EnlargeHintQueue;
-const Bonus  LAST_BONUS = Bonus::SpeedUp;
-const Bonus  LAST_REAL_BONUS = Bonus::SpeedUp;
-const int    N_BONUSES = static_cast<int>(LAST_BONUS) - static_cast<int>(FIRST_BONUS) + 1;
-const int    N_REAL_BONUSES = static_cast<int>(LAST_REAL_BONUS) - static_cast<int>(FIRST_REAL_BONUS) + 1;
-
-
 const int N_PLAYER_KEYS = 7;
 
 enum class PlayerKey

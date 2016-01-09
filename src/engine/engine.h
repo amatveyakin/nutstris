@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "engine/bonus.h"
 #include "engine/event.h"
 #include "engine/field.h"
 #include "engine/keyboard.h"
@@ -106,48 +107,6 @@ union GlobalControls
 
 //================================== Bonuses ===================================
 
-#define SKIP_BUFFS          case Bonus::EnlargeHintQueue:  case Bonus::PieceTheft:
-
-#define SKIP_KIND_SORCERIES case Bonus::Heal:  case Bonus::SlowDown:  case Bonus::ClearField:
-
-#define SKIP_DEBUFFS        case Bonus::FlippedScreen:  case Bonus::CrazyPieces: \
-                            case Bonus::TruncatedBlocks:  case Bonus::NoHint:
-
-#define SKIP_EVIL_SORCERIES case Bonus::SpeedUp:  // case Bonus::FlipField:
-
-#define SKIP_ENCHANTMENTS  SKIP_BUFFS  SKIP_DEBUFFS
-
-#define SKIP_SORCERIES  SKIP_KIND_SORCERIES  SKIP_EVIL_SORCERIES
-
-#define SKIP_ALL_BUT_SORCERIES  SKIP_ENCHANTMENTS  case Bonus::None:
-
-#define SKIP_ALL_BUT_ENCHANTMENTS  SKIP_SORCERIES  case Bonus::None:
-
-#define SKIP_ALL_BUT_BUFFS  SKIP_ALL_BUT_ENCHANTMENTS  SKIP_DEBUFFS
-
-#define SKIP_ALL_BUT_DEBUFFS  SKIP_ALL_BUT_ENCHANTMENTS  SKIP_BUFFS
-
-
-
-const int    BONUS_CHANCES[N_BONUSES] =
-{
-  0,  // Bonus::None
-  0,  // Bonus::EnlargeHintQueue
-  0,  // Bonus::PieceTheft
-  10, // Bonus::Heal
-  4,  // Bonus::SlowDown
-  2,  // Bonus::ClearField
-  4,  // Bonus::FlippedScreen
-  3,  // Bonus::RotatingScreen
-  4,  // Bonus::Wave
-  3,  // Bonus::Lantern
-  0,  // Bonus::CrazyPieces
-  4,  // Bonus::TruncatedBlocks
-  0,  // Bonus::NoHint
-  4   // Bonus::SpeedUp
-//  2   // Bonus::FlipField
-};
-
 const int    BONUS_ENLARGED_HINT_QUEUE_SIZE = 7;
 const Time   BONUS_FADING_DURATION = 0.5s;
 
@@ -180,50 +139,6 @@ const double BONUS_ONE_ROW_CHANCE = 0.4;
 const int    N_BONUS_ONE_ROW_ATTEMPTS = 1;
 
 const int    BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL = FIELD_HEIGHT / 2;
-
-
-
-const Bonus  FIRST_BUFF         = Bonus::EnlargeHintQueue;
-const Bonus  LAST_BUFF          = Bonus::PieceTheft;
-
-const Bonus  FIRST_DEBUFF       = Bonus::FlippedScreen;
-const Bonus  LAST_DEBUFF        = Bonus::NoHint;
-
-const Bonus  FIRST_KIND_BONUS   = FIRST_BUFF;
-const Bonus  LAST_KIND_BONUS    = Bonus::ClearField;
-
-const Bonus  FIRST_EVIL_BONUS   = FIRST_DEBUFF;
-const Bonus  LAST_EVIl_BONUS    = Bonus::SpeedUp;
-
-inline bool isKind(Bonus bonus)
-{
-  return (FIRST_KIND_BONUS <= bonus) && (bonus <= LAST_KIND_BONUS);
-}
-
-inline bool isEvil(Bonus bonus)
-{
-  return (FIRST_EVIL_BONUS <= bonus) && (bonus <= LAST_EVIl_BONUS);
-}
-
-inline bool isBuff(Bonus bonus)
-{
-  return (FIRST_BUFF <= bonus) && (bonus <= LAST_BUFF);
-}
-
-inline bool isDebuff(Bonus bonus)
-{
-  return (FIRST_DEBUFF <= bonus) && (bonus <= LAST_DEBUFF);
-}
-
-inline bool isEnchantment(Bonus bonus)  // (?) Is it necessary?
-{
-  return isBuff(bonus) || isDebuff(bonus);
-}
-
-typedef util::StronglyTypedBitSet<Bonus, FIRST_BUFF, LAST_BUFF> Buffs;
-
-typedef util::StronglyTypedBitSet<Bonus, FIRST_DEBUFF, LAST_DEBUFF> Debuffs;
-
 
 
 //=============================== Pieces & Field ===============================
@@ -390,8 +305,7 @@ public:
   Piece               fallingPiece;       // R
   std::vector<Piece>  nextPieces;         // R
 
-  Buffs         buffs;          // R
-  Debuffs       debuffs;        // R
+  BonusesBitSet bonuces;        // R
   int           victimNumber;   // R
 
   EventSet      events;         // R

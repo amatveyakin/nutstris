@@ -449,81 +449,48 @@ void Player::takesBonus(Bonus bonus)
 
 void Player::applyBonus(Bonus bonus)
 {
-  if (isBuff(bonus))
+  switch (bonus)
   {
-    switch (bonus)
-    {
-    case Bonus::EnlargeHintQueue:
-      resizePieceQueue(BONUS_ENLARGED_HINT_QUEUE_SIZE);
-      break;
-    case Bonus::PieceTheft:
-      break;
-    default: break;  // TODO(Andrei): handle all values
-    }
+  case Bonus::EnlargeHintQueue:
+    resizePieceQueue(BONUS_ENLARGED_HINT_QUEUE_SIZE);
+    break;
+  case Bonus::PieceTheft:
+    break;
+  case Bonus::Heal:
+    events.push(etHeal, currentTime());
+//    heal();
+    break;
+  case Bonus::SlowDown:
+    bonusSlowDown();
+    break;
+  case Bonus::ClearField:
+    events.push(etBeginClearField, currentTime());
+    break;
+  case Bonus::SpeedUp:
+    bonusSpeedUp();
+    break;
+  default: break;  // TODO(Andrei): handle all values
+  }
+  if (isPermanent(bonus))
     bonuces.add(bonus);
-  }
-  else if (isDebuff(bonus))
-  {
-    switch (bonus)
-    {
-    // ...
-    default: break;  // TODO(Andrei): handle all values
-    }
-    bonuces.add(bonus);
-  }
-  else
-  {
-    switch (bonus)
-    {
-    case Bonus::Heal:
-      events.push(etHeal, currentTime());
-//      heal();
-      break;
-    case Bonus::SlowDown:
-      bonusSlowDown();
-      break;
-    case Bonus::ClearField:
-      events.push(etBeginClearField, currentTime());
-      break;
-    case Bonus::SpeedUp:
-      bonusSpeedUp();
-      break;
-//    case Bonus::FlipField:
-//      // ...
-//      break;
-    default: break;  // TODO(Andrei): handle all values
-    }
-  }
   enableBonusVisualEffect(bonus);
 }
 
 void Player::disenchant(Bonus bonus)
 {
   assert(isPermanent(bonus));
-  if (isBuff(bonus))
+  switch (bonus)
   {
-    switch (bonus)
-    {
-    case Bonus::EnlargeHintQueue:
-      resizePieceQueue(NORMAL_HINT_QUEUE_SIZE);
-      break;
-    case Bonus::PieceTheft:
-      // ...
-      break;
+  case Bonus::EnlargeHintQueue:
+    resizePieceQueue(NORMAL_HINT_QUEUE_SIZE);
+    break;
+  case Bonus::PieceTheft:
     // ...
-    default: break;  // TODO(Andrei): handle all values
-    }
-    bonuces.remove(bonus);
+    break;
+  // ...
+  default: break;  // TODO(Andrei): handle all values
   }
-  else if (isDebuff(bonus))
-  {
-    switch (bonus)
-    {
-    // ...
-    default: break;  // TODO(Andrei): handle all values
-    }
-    bonuces.remove(bonus);
-  }
+  bonuces.remove(bonus);
   disableBonusVisualEffect(bonus);
 }
 

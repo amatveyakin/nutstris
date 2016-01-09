@@ -30,7 +30,7 @@ const int    MAX_PLAYERS = 4;
 
 
 using FieldCoords = math::Vec2i;
-using FloatFieldCoords = math::Vec2f;
+using FloatFieldCoords = math::Vec2d;
 using CompareFieldCoords = math::LexicographicCompareVec2i;
 
 

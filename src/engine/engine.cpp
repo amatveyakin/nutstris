@@ -19,7 +19,7 @@ Time randomTimeRange(Time minValue, Time maxValue) {
 // Continuous mode
 
 /*const double STARTING_SPEED = 1.0;
-const double ROUTINE_SPEED_UP_VALUE = 0.007f;
+const double ROUTINE_SPEED_UP_VALUE = 0.007;
 const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
 const double NORMAL_SPEED_LIMIT = 5.0;
 const double ABSOLUTE_SPEED_LIMIT = 10.0;
@@ -41,7 +41,7 @@ const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;*/
 
 
 const double STARTING_SPEED = 1.0;
-const double ROUTINE_SPEED_UP_VALUE = 0.007f;
+const double ROUTINE_SPEED_UP_VALUE = 0.007;
 const Time   ROUTINE_SPEED_UP_INTERVAL = 2.0s;
 const double NORMAL_SPEED_LIMIT = 5.0;
 const double ABSOLUTE_SPEED_LIMIT = 10.0;
@@ -403,7 +403,7 @@ void Player::prepareForNewRound()
   disappearingLines.clear();
   visualEffects = PlayerVisualEffects();
   visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
-  visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0f) / 2.0f, (FIELD_HEIGHT - 1.0f) / 2.0f));
+  visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
   visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
   latestLineCollapse = NEVER_HAPPENED;
   victimNumber = number;

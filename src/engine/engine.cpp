@@ -9,9 +9,9 @@
 namespace engine {
 
 namespace {
-  Time randomTimeRange(Time minValue, Time maxValue) {
-    return 1.0s * math::randomRange(minValue / 1.0s, maxValue / 1.0s);
-  }
+Time randomTimeRange(Time minValue, Time maxValue) {
+  return 1.0s * math::randomRange(minValue / 1.0s, maxValue / 1.0s);
+}
 }  // namespace
 
 //================================ Time & speed ================================

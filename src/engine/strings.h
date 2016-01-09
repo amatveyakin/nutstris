@@ -32,7 +32,7 @@ const std::string  ERR_FILE_WRITE_ERROR = "Cannot write file: \"%s\".";
 
 //==================================== Misc ====================================
 
-std::string getBonusName(Bonus bonus) {
+inline std::string getBonusName(Bonus bonus) {
   switch (bonus) {
     case Bonus::None:             return "NoBonus";
     case Bonus::EnlargeHintQueue: return "EnlargeHintQueue";
@@ -52,7 +52,7 @@ std::string getBonusName(Bonus bonus) {
   abort();
 };
 
-std::string getPlayerKeyName(PlayerKey key) {
+inline std::string getPlayerKeyName(PlayerKey key) {
   switch (key) {
     case PlayerKey::Left:         return "Left";
     case PlayerKey::Right:        return "Right";

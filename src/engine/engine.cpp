@@ -88,37 +88,6 @@ const Time   PLAYER_KEY_REACTIVATION_TIME[N_PLAYER_KEYS] =
 const Time   GLOBAL_KEY_REACTIVATION_TIME[N_GLOBAL_KEYS] = {Time()};
 
 
-//=================================== Field ====================================
-
-Field::Field()
-{
-  // ``Floor''
-  for (int row = BORDERED_FIELD_ROW_BEGIN; row < 0; ++row)
-    for (int col = BORDERED_FIELD_COL_BEGIN; col < BORDERED_FIELD_COL_END; ++col)
-      operator()(row, col).setBlock(COLORLESS);
-  // ``Walls''
-  for (int row = BORDERED_FIELD_ROW_BEGIN; row < BORDERED_FIELD_ROW_END; ++row)
-  {
-    for (int col = BORDERED_FIELD_COL_BEGIN; col < 0; ++col)
-      operator()(row, col).setBlock(COLORLESS);
-    for (int col = FIELD_WIDTH; col < BORDERED_FIELD_COL_END; ++col)
-      operator()(row, col).setBlock(COLORLESS);
-  }
-  // ``Sky''
-  for (int row = FIELD_HEIGHT; row < BORDERED_FIELD_ROW_END; ++row)
-    for (int col = 0; col < FIELD_WIDTH; ++col)
-      operator()(row, col).clear();
-}
-
-void Field::clear()
-{
-  for (int row = 0; row < FIELD_HEIGHT; ++row)
-    for (int col = 0; col < FIELD_WIDTH; ++col)
-      operator()(row, col).clear();
-}
-
-
-
 //==================================== Game ====================================
 
 void Game::init()
@@ -743,7 +712,7 @@ int Player::highestNonemptyRow() const
 {
   for (int row = FIELD_HEIGHT - 1; row >= 0; --row)
     for (int col = 0; col < FIELD_WIDTH; ++col)
-      if (field(row, col).isBlocked())
+      if (field(row, col).blocked())
         return row;
   return -1;
 }
@@ -751,7 +720,7 @@ int Player::highestNonemptyRow() const
 bool Player::canDisposePiece(FieldCoords position, const BlockStructure& piece) const
 {
   for (size_t i = 0; i < piece.blocks.size(); ++i)
-    if (field(position + piece.blocks[i]).isBlocked())
+    if (field(position + piece.blocks[i]).blocked())
       return false;
   return true;
 }
@@ -955,7 +924,7 @@ bool Player::removeFullLines()
     bool rowIsFull = true;
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      if (field(row, col).isFree())
+      if (!field(row, col).blocked())
       {
         rowIsFull = false;
         break;
@@ -973,13 +942,13 @@ bool Player::removeFullLines()
       disappearingLines.back().row = row;
       for (int col = 0; col < FIELD_WIDTH; ++col)
       {
-        if (field(row, col).bonus != Bonus::None)
+        if (field(row, col).bonus() != Bonus::None)
         {
-          takesBonus(field(row, col).bonus);
+          takesBonus(field(row, col).bonus());
           events.eraseEventType(etBonusDisappearance);
           planBonusAppearance();
         }
-        disappearingLines.back().blockColor[col] = field(row, col).color;
+        disappearingLines.back().blockColor[col] = field(row, col).color();
         field(row, col).clear();
 
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
@@ -1014,7 +983,7 @@ void Player::collapseLine(int row)  // TODO: optimize
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
       field(curRow, col) = field(curRow + 1, col);
-      if (field(curRow, col).isBlocked())
+      if (field(curRow, col).blocked())
         moveLyingBlockImage(FieldCoords(col, curRow + 1), FieldCoords(col, curRow), LINE_COLLAPSE_ANIMATION_TIME);
     }
   }
@@ -1111,9 +1080,9 @@ bool Player::generateBonus()  // TODO: remake
       for (int colIter = 0; colIter < N_BONUS_ONE_ROW_ATTEMPTS; ++colIter)
       {
         int col = rand() % FIELD_WIDTH;
-        if (field(row, col).isBlocked())
+        if (field(row, col).blocked())
         {
-          field(row, col).bonus = bonus;
+          field(row, col).setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(BONUS_FADING_DURATION);
           planBonusDisappearance(FieldCoords(col, row));
@@ -1131,9 +1100,9 @@ void Player::removeBonuses()
   {
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      if (field(row, col).isBlocked())
+      if (field(row, col).blocked())
       {
-        field(row, col).bonus = Bonus::None;
+        field(row, col).setBonus(Bonus::None);
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable();
       }
     }

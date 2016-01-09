@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "engine/event.h"
+#include "engine/field.h"
 #include "engine/keyboard.h"
 #include "engine/visual.h"
 #include "util/containers.h"
@@ -231,10 +232,6 @@ const int    CENTRAL_PIECE_ROW = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?
 const int    CENTRAL_PIECE_COL = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?)
 const int    N_PIECE_ROTATION_STATES = 4;
 
-const int    SKY_HEIGHT = MAX_PIECE_SIZE;
-// MAX_PIECE_SIZE / 2  is enough for  WALL_WIDTH  in most cases, but that's perfectly safe
-const int    WALL_WIDTH = MAX_PIECE_SIZE - 1;  // TODO: may be, abadon walls and modify Field::operator(int, int)  ?
-
 const int    BORDERED_FIELD_ROW_BEGIN = -WALL_WIDTH;
 const int    BORDERED_FIELD_ROW_END   = FIELD_HEIGHT + SKY_HEIGHT;
 const int    BORDERED_FIELD_COL_BEGIN = -WALL_WIDTH;
@@ -330,70 +327,6 @@ struct Piece
   {
     return relativeCoords(index) + position;
   }
-};
-
-
-struct FieldCell
-{
-  bool blocked;
-  Color color;
-  Bonus bonus;
-
-  void clear()
-  {
-    blocked = false;
-  }
-
-  void setBlock(Color color__, Bonus bonus__ = Bonus::None)
-  {
-    blocked = true;
-    color = color__;
-    bonus = bonus__;
-  }
-
-  bool isFree() const
-  {
-    return !blocked;
-  }
-
-  bool isBlocked() const
-  {
-    return blocked;
-  }
-};
-
-
-struct Field : public util::Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                                         FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>
-{
-  Field();
-
-  // TODO: swap and rename arguments
-  FieldCell& operator()(int row, int col)
-  {
-    return Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                        FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>::
-                        operator()(row, col);
-  }
-
-  const FieldCell& operator()(int row, int col) const
-  {
-    return Fixed2DArray<FieldCell, -WALL_WIDTH, -WALL_WIDTH,
-                        FIELD_HEIGHT + SKY_HEIGHT, FIELD_WIDTH + WALL_WIDTH>::
-                        operator()(row, col);
-  }
-
-  FieldCell& operator()(FieldCoords position)
-  {
-    return operator()(position.y(), position.x());
-  }
-
-  const FieldCell& operator()(FieldCoords position) const
-  {
-    return operator()(position.y(), position.x());
-  }
-
-  void clear();
 };
 
 

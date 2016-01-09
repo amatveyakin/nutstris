@@ -98,7 +98,7 @@ if(WIN32)
 endif()
 
 if(WIN32)
-  set(CMAKE_CXX_FLAGS "/EHsc /W3")
+  set(CMAKE_CXX_FLAGS "/EHsc /W3 /wd4267 /wd4244 /WX")
 else()
   set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wcast-align -Wunused -Wformat=2 -Wcast-qual -Wold-style-cast -Woverloaded-virtual -Wshadow -Wnon-virtual-dtor -Werror")
   set(CMAKE_CXX_FLAGS_DEBUG "-g")

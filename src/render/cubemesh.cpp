@@ -9,7 +9,7 @@
 namespace render {
 
 namespace {
-const double kCubeSmoothRadius = 0.4f;
+const float  kCubeSmoothRadius = 0.4f;
 const int    kCubeAngleSteps   = 10;
 }
 
@@ -20,7 +20,7 @@ CubeMesh::CubeMesh() {
   cubeVerticesBuffer_.bind();
   cubeVerticesBuffer_.setUpLayout();
   cubeVerticesBuffer_.unbind();
-  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0 / 2.0f, kCubeSmoothRadius, kCubeAngleSteps));
+  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0f / 2.0f, kCubeSmoothRadius, kCubeAngleSteps));
 
   perCubeBuffer_.bind();
   perCubeBuffer_.setUpLayout();
@@ -63,8 +63,8 @@ std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNo
   {
     for (auto j = 0; j < 4 * angleSteps; ++j)
     {
-      auto alpha = ((i - angleSteps + 0.5) * (math::kPi / 2)) / angleSteps;
-      auto beta  = ((j + 0.5) * (math::kPi / 2)) / angleSteps;
+      auto alpha = ((i - angleSteps + 0.5f) * (float(math::kPi) / 2)) / angleSteps;
+      auto beta  = ((j + 0.5f) * (float(math::kPi) / 2)) / angleSteps;
 
       auto x = cosf(alpha) * cosf(beta);
       auto z = cosf(alpha) * sinf(beta);

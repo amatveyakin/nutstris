@@ -13,15 +13,15 @@ math::Vec3f ColorToVec3 ( engine::Color c ) {
   return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f};
 }
 
-float fieldToWorldX ( float fieldX ) {
-  return ( fieldX - ( engine::FIELD_WIDTH - 1.0f ) / 2.0f ) * render::CUBE_SCALE;
+float fieldToWorldX (double fieldX ) {
+  return ( float(fieldX) - (engine::FIELD_WIDTH - 1.0f) / 2.0f) * render::CUBE_SCALE;
 }
 
-float fieldToWorldY ( float fieldY ) {
-  return ( fieldY - ( engine::FIELD_HEIGHT - 1.0f ) / 2.0f ) * render::CUBE_SCALE;
+float fieldToWorldY (double fieldY ) {
+  return ( float(fieldY) - ( engine::FIELD_HEIGHT - 1.0f ) / 2.0f ) * render::CUBE_SCALE;
 }
 
-math::Mat4x4f fieldPosToWorldPos ( float fieldX, float fieldY ) {
+math::Mat4x4f fieldPosToWorldPos ( double fieldX, double fieldY ) {
   return math::Mat4x4f::translationMatrix ( {fieldToWorldX ( fieldX ), fieldToWorldY ( fieldY ), 0.0f} ) *
          render::matrixutil::scale ( render::CUBE_SCALE );
 }
@@ -61,9 +61,9 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   std::vector<dataformats::CubeInstance> cubesData;
   auto addBlocks = [&cubesData, now] ( std::vector<engine::BlockImage>& blockImages ) {
     for ( auto& block : blockImages ) {
-      auto bonusProgress = block.bonusImage().progress ( now );
+      float bonusProgress = float(block.bonusImage().progress ( now ));
       auto bonusIndex = ( bonusProgress > 0.5f ) ? int ( block.bonus() ) : 0;
-      auto cubeScale = fabs ( 2 * bonusProgress - 1 );
+      auto cubeScale = abs( 2.f * bonusProgress - 1 );
       auto scaleMatrix = render::matrixutil::scale ( cubeScale );
       auto pos2d = block.absolutePosition ( now );
       cubesData.push_back ( {fieldPosToWorldPos ( pos2d.x(), pos2d.y() ) * scaleMatrix, ColorToVec3 ( block.color() ), bonusIndex} );

@@ -49,7 +49,7 @@ std::string getBonusName(Bonus bonus) {
     case Bonus::NoHint:           return "NoHint";
     case Bonus::SpeedUp:          return "SpeedUp";
   }
-  assert(false);
+  abort();
 };
 
 std::string getPlayerKeyName(PlayerKey key) {
@@ -62,7 +62,7 @@ std::string getPlayerKeyName(PlayerKey key) {
     case PlayerKey::Drop:         return "Drop";
     case PlayerKey::NextVictim:   return "Next Victim";
   }
-  assert(false);
+  abort();
 };
 
 }  // namespace engine

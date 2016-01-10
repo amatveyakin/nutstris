@@ -63,6 +63,7 @@ set(srcs
     ${src_dir}/render/shaderprogramfactory.h
     ${src_dir}/render/shaders/basecubes.h
     ${src_dir}/render/shaders/textured.h
+    ${src_dir}/render/shaders/lighting.h
     ${src_dir}/render/texturearray.cpp
     ${src_dir}/render/texturearray.h
     ${src_dir}/render/texturedquad.cpp

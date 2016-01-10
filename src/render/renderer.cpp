@@ -9,8 +9,16 @@
 namespace render {
 
 namespace {
-math::Vec3f ColorToVec3 ( engine::Color c ) {
-  return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f};
+math::Vec4f getDiffuseColor ( engine::Color c ) {
+  return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f};
+}
+
+const math::Vec4f kWhiteColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+math::Vec4f getSpecularColor(engine::Color c) {
+  auto specularColor = (getDiffuseColor(c) + kWhiteColor) / 2.0f;
+  specularColor.w() = 128.0f;
+  return specularColor;
 }
 
 float fieldToWorldX (double fieldX ) {
@@ -59,7 +67,15 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
                playerViewports_[iPlayer].width, playerViewports_[iPlayer].height );
   cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
 
-  lightsSettingsBuffer_->setData({ {{0.0, 0.0, 1.0}} });
+  dataformats::LightsSettings l;
+  l.ambientColor  = math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
+  l.diffuseColor  = math::Vec4f(0.8f, 0.8f, 0.8f, 0.8f);
+  l.specularColor = math::Vec4f(0.6f, 0.6f, 0.6f, 100.0f);
+  l.direction     = math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f);
+  l.lightType = 1;
+  l.brightness = 1.0f;
+  lightsSettingsBuffer_->setData({ l });
+
   cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
 }
 
@@ -72,7 +88,8 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
       auto cubeScale = math::abs( 2.f * bonusProgress - 1.f );
       auto scaleMatrix = render::matrixutil::scale ( cubeScale );
       auto pos2d = block.absolutePosition ( now );
-      cubesData.push_back ( {fieldPosToWorldPos ( pos2d.x(), pos2d.y() ) * scaleMatrix, ColorToVec3 ( block.color() ), bonusIndex} );
+      cubesData.push_back ( {fieldPosToWorldPos ( pos2d.x(), pos2d.y() ) * scaleMatrix, 
+                           getDiffuseColor(block.color()), getSpecularColor(block.color()), bonusIndex} );
     }
   };
   addBlocks ( player.lyingBlockImages );
@@ -91,7 +108,8 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
                                 };
     std::vector<dataformats::CubeInstance> lineCubesData;
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
-      lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), ColorToVec3 ( currentLine.blockColor[x] ), 0} );
+      lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), 
+                               getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0} );
     renderCubes_ ( lineCubesData, globalRotation, clippingPlane );
   }
 }

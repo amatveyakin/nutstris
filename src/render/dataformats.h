@@ -26,16 +26,26 @@ struct TexturedVertex
 struct CubeInstance
 {
   math::Mat4x4f modelToWorld;
-  math::Vec3f   color;
+  math::Vec4f   diffuseColor;
+  math::Vec4f   specularColor;
   int           textureIndex;
 
   static void setUpLayout(ArrayBuffer<CubeInstance>& buffer);
 };
 
 struct LightsSettings {
-  math::Vec3f   direction;
+  math::Vec4f position;
+  math::Vec4f direction;
+  math::Vec4f ambientColor;
+  math::Vec4f diffuseColor;
+  math::Vec4f specularColor;
+  math::Vec3f att;
+  float spotPower;
+  float range;
+  int   lightType;  //0 - off, 1 - parallel, 2 - point, 3 - spot 
+  float brightness;
 };
 
- 
+
 }
 }

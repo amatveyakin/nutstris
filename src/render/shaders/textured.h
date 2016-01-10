@@ -1,12 +1,10 @@
-#ifndef SHADERS_TEXTURED_H
-#define SHADERS_TEXTURED_H
+#pragma once
+#include <string>
 
 namespace render {
 namespace shaders {
 
-const char* cTexturedVertexShader = R"(
-#version 330 core
-
+std::string kTexturedVertexShader = R"(
 layout(location = 0) in vec3 positionModelIn;
 layout(location = 1) in vec3 normalModelIn;
 layout(location = 2) in vec2 textureCoordIn;
@@ -31,9 +29,7 @@ void main() {
 }
 )";
  
-const char* cTexturedFragmentShader = R"(
-#version 330 core
-
+const char* kTexturedFragmentShader = R"(
 in vec3 positionModel;
 in vec3 positionWorld;
 in vec3 normalWorld;
@@ -52,5 +48,3 @@ void main() {
 
 }
 }
-
-#endif//SHADERS_TEXTURED_H

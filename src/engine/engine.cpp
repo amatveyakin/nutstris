@@ -239,7 +239,6 @@ void Player::prepareForNewMatch()
 
 void Player::prepareForNewRound()
 {
-  statistics.clear();
   events.clear();
   fieldLocks.clear();
   bonuces.clear();
@@ -705,7 +704,6 @@ bool Player::removeFullLines()
     if (rowIsFull)
     {
       fullLinesExisted = true;
-      ++statistics.lineCleared;
 
       disappearingLines.resize(disappearingLines.size() + 1);
       disappearingLines.back().startTime = currentTime();

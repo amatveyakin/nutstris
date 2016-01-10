@@ -200,16 +200,6 @@ const int    NORMAL_HINT_QUEUE_SIZE = 1;
 
 class Game;
 
-struct Statistics
-{
-  int lineCleared;
-
-  void clear()
-  {
-    lineCleared = 0;
-  }
-};
-
 // TODO: make sove variabes private
 // Initialize at:  [N]ever, on [C]reation, new [M]atch, new [R]ound, game [S]ettings change
 class Player
@@ -223,7 +213,6 @@ public:
   bool          active;         // R (in Game::newRound)
   int           score;          // M
   PlayerControls controls;      // S
-  Statistics    statistics;     // R
 
   double        speed;          // R
   Field         field;          // C (boders) / R (content)

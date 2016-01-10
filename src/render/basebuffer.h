@@ -19,7 +19,7 @@ public:
   
   void setData(const std::vector<DataType>& data);
   
-private:
+protected:
   GLHandle id_;
 };
 

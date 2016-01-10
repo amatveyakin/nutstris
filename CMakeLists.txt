@@ -65,6 +65,7 @@ set(srcs
     ${src_dir}/render/texturedquad.h
     ${src_dir}/render/texturefactory.cpp
     ${src_dir}/render/texturefactory.h
+    ${src_dir}/render/uniformbuffer.h
     ${src_dir}/util/containers.h
     ${src_dir}/util/file.cpp
     ${src_dir}/util/file.h

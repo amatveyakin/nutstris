@@ -15,6 +15,7 @@ layout(location = 8) in vec3 diffuseColorIn;
 
 uniform mat4 gVP;
 uniform mat4 gGlobalRotation;
+uniform float gWaveProgress;
 
 out vec3 positionModel;
 out vec3 positionWorld;
@@ -27,6 +28,7 @@ void main() {
   positionModel = positionModelIn;
 
   positionWorld = (modelToWorldIn * vec4(positionModelIn, 1)).xyz;
+  positionWorld.x += sin(gWaveProgress) * sin(4 * positionWorld.y)  * 0.2 * cos(abs(positionWorld.x / 0.7));
   positionWorld = (gGlobalRotation * vec4(positionWorld, 1)).xyz;
 
   normalWorld = (gGlobalRotation * modelToWorldIn * vec4(normalModelIn, 0)).xyz;

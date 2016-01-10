@@ -16,6 +16,7 @@
 #include "engine/event.h"
 #include "engine/field.h"
 #include "engine/input/control.h"
+#include "engine/piece.h"
 #include "engine/visual.h"
 #include "util/containers.h"
 #include "util/file.h"
@@ -78,109 +79,7 @@ const int    N_BONUS_ONE_ROW_ATTEMPTS = 1;
 const int    BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL = FIELD_HEIGHT / 2;
 
 
-//=============================== Pieces & Field ===============================
-
-const int    CENTRAL_PIECE_ROW = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?)
-const int    CENTRAL_PIECE_COL = (MAX_PIECE_SIZE - 1) / 2; // is it necessary (?)
-const int    N_PIECE_ROTATION_STATES = 4;
-
-const int    NO_BLOCK_IMAGE = -1;
-const int    NO_CHANGE = -2;
-
-
-
-struct Bounds
-{
-  int bottom;
-  int top;
-  int left;
-  int right;
-};
-
-
-struct BlockStructure
-{
-  std::vector<FieldCoords> blocks;
-  Bounds bounds;
-
-  void setBounds()
-  {
-    if (blocks.empty())
-      throw std::runtime_error("Empty piece found");
-    bounds.bottom = blocks[0].y();
-    bounds.top = blocks[0].y();
-    bounds.left = blocks[0].x();
-    bounds.right = blocks[0].x();
-    for (auto& b : blocks)
-    {
-      if (b.y() < bounds.bottom)
-        bounds.bottom = b.y();
-      if (b.y() > bounds.top)
-        bounds.top = b.y();
-      if (b.x() < bounds.left)
-        bounds.left = b.x();
-      if (b.x() > bounds.right)
-        bounds.right = b.x();
-    }
-  }
-};
-
-
-struct PieceTemplate
-{
-  Color color;
-  int chance;
-  BlockStructure structure[N_PIECE_ROTATION_STATES];
-};
-
-
-struct Piece
-{
-  PieceTemplate* pieceTemplate;
-  int rotationState;
-  FieldCoords position;   // ``center'' coordinates
-
-  void clear()
-  {
-    pieceTemplate = NULL;
-  }
-
-  bool empty()
-  {
-    return pieceTemplate == NULL;
-  }
-
-  Color color()
-  {
-    return pieceTemplate->color;
-  }
-
-  const BlockStructure& currentStructure()
-  {
-    return pieceTemplate->structure[rotationState];
-  }
-
-  size_t nBlocks()
-  {
-    return currentStructure().blocks.size();
-  }
-
-  FieldCoords relativeCoords(int index)
-  {
-    return currentStructure().blocks[index];
-  }
-
-  FieldCoords absoluteCoords(int index)
-  {
-    return relativeCoords(index) + position;
-  }
-};
-
-
-enum FallingPieceState { psAbsent, psNormal, psDropping };
-
-const char   PIECE_TEMPLATE_FREE_CHAR  = '.';
-
+//=================================== Field ====================================
 
 struct FieldLocks
 {
@@ -329,8 +228,8 @@ public:
 private:
   void          checkInvariants() const;
 
-  void          loadPieces();
-  void          loadBonuses();
+  void          initPieces();
+  void          initBonuses();
 };
 
 }  // namespace engine

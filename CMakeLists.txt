@@ -14,6 +14,8 @@ set(srcs
     ${src_dir}/engine/input/control.h
     ${src_dir}/engine/input/keyboard.cpp
     ${src_dir}/engine/input/keyboard.h
+    ${src_dir}/engine/piece.cpp
+    ${src_dir}/engine/piece.h
     ${src_dir}/engine/settings.cpp
     ${src_dir}/engine/settings.h
     ${src_dir}/engine/strings.h

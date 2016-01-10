@@ -1,7 +1,6 @@
 #include "engine/engine.h"
 
 #include <iostream>
-#include <fstream>
 #include <cstdio>
 
 #include "engine/strings.h"
@@ -70,8 +69,8 @@ const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 void Game::init()
 {
   checkInvariants();
-  loadPieces();
-  loadBonuses();
+  initPieces();
+  initBonuses();
   for (int key = 0; key < kNumGlobalControls; ++key)
     nextGlobalKeyActivationTable[key] = Time::min();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
@@ -153,57 +152,9 @@ void Game::checkInvariants() const {
   assert(BONUS_LANTERN_MAX_SPEED >= 1.0 / DROPPING_PIECE_LOWERING_TIME);
 }
 
-void Game::loadPieces()   // TODO: rewrite it cleaner
+void Game::initPieces()
 {
-  std::ifstream piecesFile(PIECE_TEMPLATES_FILE);
-  if (!piecesFile.good())
-    throw std::runtime_error(ERR_FILE_NOT_FOUND);
-
-  pieceTemplates.clear();
-  std::vector<std::string> pieceBlock(MAX_PIECE_SIZE);
-  int nPieceTemplates;
-  piecesFile >> nPieceTemplates;
-  pieceTemplates.resize(nPieceTemplates);
-
-  for (int iPiece = 0; iPiece < nPieceTemplates; ++iPiece)
-  {
-    piecesFile >> pieceTemplates[iPiece].chance;
-    double r, g, b;
-    piecesFile >> r >> g >> b;
-    pieceTemplates[iPiece].color = colorFromFloat(r, g, b, 1.f);
-
-    for (int rotationState = 0; rotationState < N_PIECE_ROTATION_STATES; ++rotationState)
-    {
-      for (int row = MAX_PIECE_SIZE - 1; row >= 0; --row)
-        piecesFile >> pieceBlock[row];
-
-      int nBlockInCurrentPiece = 0;
-      int maxBlockNumber = -1;
-      for (int row = 0; row < MAX_PIECE_SIZE; ++row)
-      {
-        for (int col = 0; col < MAX_PIECE_SIZE; ++col)
-        {
-          if (pieceBlock[row][col] != PIECE_TEMPLATE_FREE_CHAR)
-          {
-            if ((pieceBlock[row][col] < '0') || (pieceBlock[row][col] > '9'))
-              throw std::runtime_error(ERR_FILE_CORRUPTED);
-            maxBlockNumber = math::max(maxBlockNumber, pieceBlock[row][col] - '0');
-            ++nBlockInCurrentPiece;
-          }
-        }
-      }
-      if (maxBlockNumber + 1 != nBlockInCurrentPiece)
-        throw std::runtime_error(ERR_FILE_CORRUPTED);
-
-      pieceTemplates[iPiece].structure[rotationState].blocks.resize(nBlockInCurrentPiece);
-      for (int row = 0; row < MAX_PIECE_SIZE; ++row)
-        for (int col = 0; col < MAX_PIECE_SIZE; ++col)
-          if (pieceBlock[row][col] != PIECE_TEMPLATE_FREE_CHAR)
-            pieceTemplates[iPiece].structure[rotationState].blocks[pieceBlock[row][col] - '0'] =
-                    FieldCoords(col - CENTRAL_PIECE_COL, row - CENTRAL_PIECE_ROW);
-      pieceTemplates[iPiece].structure[rotationState].setBounds();
-    }
-  }
+  pieceTemplates = loadPieces();
 
   randomPieceTable.clear();
   for (size_t iPiece = 0; iPiece < pieceTemplates.size(); ++iPiece)
@@ -211,7 +162,7 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
       randomPieceTable.push_back(iPiece);
 }
 
-void Game::loadBonuses()
+void Game::initBonuses()
 {
   for (Bonus bonus : ForEachBonus()) {
     for (int i = 0; i < bonusFrequency(bonus); ++i)
@@ -494,8 +445,8 @@ bool Player::canDisposePiece(FieldCoords position, const BlockStructure& piece) 
 
 bool Player::fallingPieceCannotReachSky() const
 {
-  for (int i = 0; i < N_PIECE_ROTATION_STATES; ++i)
-    if (fallingPiece.pieceTemplate->structure[i].bounds.top + fallingPiece.position.y() >= FIELD_HEIGHT)
+  for (int i = 0; i < fallingPiece.nRotationStates(); ++i)
+    if (fallingPiece.pieceTemplate()->structure[i].bounds.top + fallingPiece.position().y() >= FIELD_HEIGHT)
       return false;
   return true;
 }
@@ -507,11 +458,11 @@ bool Player::canSendNewPiece() const
 
 Piece Player::randomPiece() const
 {
-  Piece piece;
-  piece.pieceTemplate = &game->pieceTemplates[game->randomPieceTable[rand() % game->randomPieceTable.size()]];
-  piece.rotationState = rand() % N_PIECE_ROTATION_STATES;
-  piece.position.y() = FIELD_HEIGHT - piece.currentStructure().bounds.bottom;
-  piece.position.x() = MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE); // TODO: modify the formula
+  int pieceTemplatesIndex = game->randomPieceTable[rand() % game->randomPieceTable.size()];
+  Piece piece(&game->pieceTemplates[pieceTemplatesIndex]);
+  piece.setRotationState(rand() % piece.nRotationStates());
+  piece.moveTo({MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE),  // TODO: modify the formula
+                FIELD_HEIGHT - piece.currentStructure().bounds.bottom});
   return piece;
 }
 
@@ -588,7 +539,6 @@ void Player::setUpPiece()
     FieldCoords cell = fallingPiece.absoluteCoords(i);
     if (cell.y() >= FIELD_HEIGHT)
     {
-      // Don't let the field borders to get spoilt!
       events.push(etKill, currentTime());
       return;
     }
@@ -633,13 +583,13 @@ bool Player::sendNewPiece()
     return false;
 
   fallingPiece = nextPieces[0];
-  assert(!fallingPiece.empty());
+  assert(fallingPiece.valid());
 
   visualEffects.hint.disable();
   visualEffects.hintMaterialization.disable();
 
   fallingPieceState = psNormal;
-  fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece.position));
+  fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece.position()));
   for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
     fallingBlockImages.push_back(BlockImage(&fallingPieceFrame, fallingPiece.color(), fallingPiece.relativeCoords(i)));
 //  visualEffects.lantern.bindTo(&fallingPieceFrame);
@@ -658,18 +608,18 @@ void Player::lowerPiece(bool forced)
   if (fallingPieceState == psAbsent)
     return;
 
-  FieldCoords newPosition = fallingPiece.position + FieldCoords(0, -1);
+  FieldCoords newPosition = fallingPiece.position() + FieldCoords(0, -1);
   // We should not forget about the case when a piece gets stuck as the result of
   // field modification. Such pieces should not continue falling.
-  if (canDisposePiece(fallingPiece.position, fallingPiece.currentStructure()) &&
-      canDisposePiece(newPosition,           fallingPiece.currentStructure()))
+  if (canDisposePiece(fallingPiece.position(), fallingPiece.currentStructure()) &&
+      canDisposePiece(newPosition,             fallingPiece.currentStructure()))
   {
     Time loweringTime = (fallingPieceState == psDropping) ? DROPPING_PIECE_LOWERING_TIME :
                         (forced ? PIECE_FORCED_LOWERING_ANIMATION_TIME :
                                   PIECE_AUTO_LOWERING_ANIMATION_TIME);
-    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position), currentTime(), loweringTime);
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position()), currentTime(), loweringTime);
 
-    fallingPiece.position = newPosition;
+    fallingPiece.moveTo(newPosition);
 
     if (fallingPieceCannotReachSky())
       visualEffects.hint.enable(HINT_APPERAING_TIME);
@@ -779,11 +729,11 @@ void Player::movePiece(int direction)
 {
   if (fallingPieceState != psNormal)
     return;
-  FieldCoords newPosition = fallingPiece.position + FieldCoords(direction, 0);
+  FieldCoords newPosition = fallingPiece.position() + FieldCoords(direction, 0);
   if (canDisposePiece(newPosition, fallingPiece.currentStructure()))
   {
-    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position), currentTime(), PIECE_MOVING_ANIMATION_TIME);
-    fallingPiece.position = newPosition;
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position()), currentTime(), PIECE_MOVING_ANIMATION_TIME);
+    fallingPiece.moveTo(newPosition);
   }
 }
 
@@ -802,34 +752,33 @@ void Player::rotatePiece(int direction)
     return;
 
   // TODO: simply create a  Piece  copy instead (?)
-  FieldCoords oldPosition = fallingPiece.position;
-  int oldRotationState = fallingPiece.rotationState;
-  int newFallingPieceRotationState = (fallingPiece.rotationState + N_PIECE_ROTATION_STATES + direction) %
-                                     N_PIECE_ROTATION_STATES;
+  FieldCoords oldPosition = fallingPiece.position();
+  int oldRotationState = fallingPiece.rotationState();
+  int newFallingPieceRotationState = math::modFloored(fallingPiece.rotationState() + direction, fallingPiece.nRotationStates());
 
-  if (canDisposePiece(fallingPiece.position,
-      fallingPiece.pieceTemplate->structure[newFallingPieceRotationState]))
+  if (canDisposePiece(fallingPiece.position(),
+      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.rotationState = newFallingPieceRotationState;
+    fallingPiece.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position + FieldCoords(1, 0),  // TODO: optimize
-      fallingPiece.pieceTemplate->structure[newFallingPieceRotationState]))
+  else if (canDisposePiece(fallingPiece.position() + FieldCoords(1, 0),  // TODO: optimize
+      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.position += FieldCoords(1, 0);
-    fallingPiece.rotationState = newFallingPieceRotationState;
+    fallingPiece.moveBy({1, 0});
+    fallingPiece.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position - FieldCoords(1, 0),  // TODO: optimize
-      fallingPiece.pieceTemplate->structure[newFallingPieceRotationState]))
+  else if (canDisposePiece(fallingPiece.position() - FieldCoords(1, 0),  // TODO: optimize
+      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.position -= FieldCoords(1, 0);
-    fallingPiece.rotationState = newFallingPieceRotationState;
+    fallingPiece.moveBy({-1, 0});
+    fallingPiece.setRotationState(newFallingPieceRotationState);
   }
 
   for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
   {
     fallingBlockImages[i].addMotion(
             FloatFieldCoords(fallingPiece.absoluteCoords(i) -
-                             (oldPosition + fallingPiece.pieceTemplate->structure[oldRotationState].blocks[i])),
+                             (oldPosition + fallingPiece.pieceTemplate()->structure[oldRotationState].blocks[i])),
             currentTime(), PIECE_ROTATING_ANIMATION_TIME);
   }
 }

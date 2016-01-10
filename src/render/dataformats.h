@@ -32,6 +32,10 @@ struct CubeInstance
   static void setUpLayout(ArrayBuffer<CubeInstance>& buffer);
 };
 
+struct LightsSettings {
+  math::Vec3f   direction;
+};
+
  
 }
 }

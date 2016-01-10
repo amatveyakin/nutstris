@@ -3,9 +3,10 @@
 #include <memory>
 #include <GL/glew.h>
 
-#include "render/playerviewport.h"
-#include "render/dataformats.h"
 #include "engine/engine.h"
+#include "render/dataformats.h"
+#include "render/playerviewport.h"
+#include "render/uniformbuffer.h"
 
 namespace render {
 class TexturedQuad;
@@ -39,6 +40,8 @@ private:
   std::unique_ptr<TextureArray> wallTexture_;
 
   std::vector<PlayerViewport> playerViewports_;
+
+  std::unique_ptr<UniformBuffer<dataformats::LightsSettings>> lightsSettingsBuffer_;
 };
 
 }

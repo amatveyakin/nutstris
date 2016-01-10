@@ -37,6 +37,8 @@ Renderer::Renderer() {
                                           1.0f,  1.0f);
   bonusesTexture_ = TextureFactory::createBonusesTexture();
   wallTexture_ = TextureFactory::createWallTexture();
+
+  lightsSettingsBuffer_ = std::make_unique<UniformBuffer<dataformats::LightsSettings>>();
 }
 
 Renderer::~Renderer() {
@@ -56,6 +58,9 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
   glViewport ( playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
                playerViewports_[iPlayer].width, playerViewports_[iPlayer].height );
   cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
+
+  lightsSettingsBuffer_->setData({ {{0.0, 0.0, 1.0}} });
+  cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {

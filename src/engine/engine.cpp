@@ -101,7 +101,7 @@ void Game::loadSettings()
       players[iPlayer].participates = true;
       break;
     default:
-      throw std::runtime_error(ERR_FILE_CORRUPTED); // TODO: format
+      throw std::runtime_error(ERR_FILE_CORRUPTED);
     }
     for (int iKey = 0; iKey < kNumPlayerControls; ++iKey) {
       int keyValue = 0;
@@ -232,26 +232,6 @@ void Game::onTimer(Time currentTime__)
 
   for (size_t iPlayer = 0; iPlayer < activePlayers.size(); ++iPlayer)
     activePlayers[iPlayer]->onTimer();
-
-  /*for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
-  {
-    if (players[iPlayer].active)
-    {
-      for (int key = 0; key < kNumPlayerControls; ++key)
-      {
-        if (Keyboard::isKeyPressed(players[iPlayer].controls.keyArray[key]) &&
-            (currentTime >= players[iPlayer].nextKeyActivationTable[key]))
-        {
-          players[iPlayer].onKeyPress(PlayerKey(key));
-          players[iPlayer].nextKeyActivationTable[key] = currentTime + PLAYER_KEY_REACTIVATION_TIME[key];
-        }
-      }
-    }
-  }
-
-  for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
-    if (players[iPlayer].active)
-      players[iPlayer].onTimer();*/
 }
 
 
@@ -260,7 +240,7 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
 {
   std::ifstream piecesFile(PIECE_TEMPLATES_FILE);
   if (!piecesFile.good())
-    throw std::runtime_error(ERR_FILE_NOT_FOUND);   // TODO: format
+    throw std::runtime_error(ERR_FILE_NOT_FOUND);
 
   pieceTemplates.clear();
   std::vector<std::string> pieceBlock(MAX_PIECE_SIZE);
@@ -289,14 +269,14 @@ void Game::loadPieces()   // TODO: rewrite it cleaner
           if (pieceBlock[row][col] != PIECE_TEMPLATE_FREE_CHAR)
           {
             if ((pieceBlock[row][col] < '0') || (pieceBlock[row][col] > '9'))
-              throw std::runtime_error(ERR_FILE_CORRUPTED);    // TODO: format
+              throw std::runtime_error(ERR_FILE_CORRUPTED);
             maxBlockNumber = math::max(maxBlockNumber, pieceBlock[row][col] - '0');
             ++nBlockInCurrentPiece;
           }
         }
       }
       if (maxBlockNumber + 1 != nBlockInCurrentPiece)
-        throw std::runtime_error(ERR_FILE_CORRUPTED);    // TODO: format
+        throw std::runtime_error(ERR_FILE_CORRUPTED);
 
       pieceTemplates[iPiece].structure[rotationState].blocks.resize(nBlockInCurrentPiece);
       for (int row = 0; row < MAX_PIECE_SIZE; ++row)
@@ -524,47 +504,6 @@ void Player::onKeyPress(PlayerControl key)
     break;
   }
 }
-
-/*void Player::onTimer()
-{
-  while ((!events.empty()) && (currentTime() >= events.top().activationTime))
-  {
-    EventSet::iterator curentEvent = events.topIterator();
-    bool eventDelayed = false;
-    switch (events.top().type)
-    {
-    case etPieceLowering:
-      lowerPiece(false / auto /);
-      break;
-    case etLineCollapse:
-      collapseLine(events.top().parameters.lineCollapse.row);
-      break;
-    case etNewPiece:
-      if (!sendNewPiece())
-        eventDelayed = true;
-//      if (canSendNewPiece())
-//        sendNewPiece();
-//      else
-//        eventDelayed = true;
-      break;
-    case etRoutineSpeedUp:   // TODO: [FIXED?] why is it called in the very beginning?
-      routineSpeedUp();
-      break;
-    case etBonusAppearance:
-      if (!generateBonus())
-        eventDelayed = true;
-      break;
-    case etBonusDisappearance:
-      removeBonuses();  // TODO: remove only one (?)
-      break;
-    }
-    if (eventDelayed)
-      events.delay(curentEvent);
-    else
-      events.erase(curentEvent);
-  }
-  redraw();
-}*/
 
 void Player::onTimer()
 {
@@ -1038,51 +977,6 @@ void Player::planBonusDisappearance(FieldCoords bonusCoords)
           bonusDisappearTime - BONUS_FADING_DURATION);
 }
 
-/*void Player::applyBlockImagesMovements(vector<BlockImage>& imageArray)
-{
-  for (int row = BORDERED_FIELD_ROW_BEGIN; row < BORDERED_FIELD_ROW_END; ++row)
-    for (int col = BORDERED_FIELD_COL_BEGIN; col < BORDERED_FIELD_COL_END; ++col)
-      if (field(row, col).iNewBlockImage != NO_CHANGE)
-      {
-        field(row, col).iBlockImage = field(row, col).iNewBlockImage;
-        field(row, col).iNewBlockImage = NO_CHANGE;
-      }
-}
-
-void Player::addStandingBlockImage(vector<BlockImage>& imageArray, VisualObject* parent,
-                                   Color color, FieldCoords position)
-{
-  imageArray.resize(imageArray.size() + 1);
-  imageArray.back().placeNewImageAt(parent, color, position);
-  field(position).iBlockImage = imageArray.size() - 1;
-}
-
-void Player::moveBlockImage(vector<BlockImage>& imageArray, FieldCoords movingFrom,
-                            FieldCoords movingTo, Time movingDuration)
-{
-  if (movingFrom == movingTo)
-    return;
-  imageArray[field(movingFrom).iBlockImage].moveTo(movingTo, currentTime(), movingDuration);
-  field(movingTo).iNewBlockImage = field(movingFrom).iBlockImage;
-  if (field(movingFrom).iNewBlockImage == NO_CHANGE)
-    field(movingFrom).iNewBlockImage = NO_BLOCK_IMAGE;
-}
-
-void Player::removeBlockImage(vector<BlockImage>& imageArray, FieldCoords position)
-{
-  if (field(position).iBlockImage == imageArray.size() - 1)
-  {
-    field(position).iBlockImage = NO_BLOCK_IMAGE;
-  }
-  else
-  {
-    imageArray[field(position).iBlockImage] = imageArray.back();
-    field(imageArray.back().bindingCell).iBlockImage = field(position).iBlockImage;
-    field(position).iBlockImage = NO_BLOCK_IMAGE;
-  }
-  imageArray.erase(imageArray.end() - 1);
-}*/
-
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
   if (movingFrom == movingTo)
     return;
@@ -1222,11 +1116,6 @@ void Player::stealPiece()
   pieceTheftEffect.target = victimNumber;
   game->globalEffects.pieceThefts.push_back(pieceTheftEffect);
   visualEffects.pieceTheftPtr = &game->globalEffects.pieceThefts.back();
-}
-
-void Player::flipBlocks()
-{
-  // TODO: implement  Player::flipBlocks()  OR  remove it
 }
 
 }  // ENGINE_ENGINE_H

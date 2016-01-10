@@ -12,8 +12,6 @@ namespace engine {
 
 //=============================== Resource files ===============================
 
-// TODO: add ..._NAME to file name constants
-
 const std::string RECOURCE_FOLDER = "resources";
 const std::string PIECE_TEMPLATES_FILE = util::joinPath(RECOURCE_FOLDER, "Pieces");
 const std::string SETTINGS_FILE = "Settings";
@@ -24,6 +22,7 @@ const std::string BONUS_IMAGES_FOLDER = util::joinPath(TEXTURES_FOLDER, "Bonuses
 
 //=============================== Error messages ===============================
 
+// TODO(Andrei): Format error messages, try to use ``Internal error'' less often
 const std::string  ERR_INTERNAL_ERROR = "Internal error: \"%s\"";
 const std::string  ERR_FILE_NOT_FOUND = "File not found: \"%s\".";
 const std::string  ERR_FILE_CORRUPTED = "File is corrupt: \"%s\".";

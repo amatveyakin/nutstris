@@ -61,6 +61,7 @@ public:
   std::vector<Motion> motions;
 
   void addMotion(FloatFieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration) {
+    // TODO(Andrei): Choose correct easing for each case
     motions.push_back(Motion(&math::easeInOutQuad, aimingShiftVector, movingStartTime, movingDuration));
   }
 

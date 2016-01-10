@@ -1,11 +1,3 @@
-// TODO: add  #error  commands
-
-// TODO: make more animations nonlinear
-
-// TODO: change active player list
-
-// TODO: use more throw's instead of assertions
-
 // TODO: Implement  field.lock() / field.unlock():  the field may be made immutable for some time
 //       add all events that what to change the field are delayed  (?)
 // No, looks like it's better to check specific conditions before any change
@@ -40,12 +32,10 @@ extern const double NORMAL_SPEED_LIMIT;
 extern const double ABSOLUTE_SPEED_LIMIT;
 
 extern const Time   AUTO_LOWERING_TIME;
-// Time necessary for a dropping piece to move one line down
 extern const Time   DROPPING_PIECE_LOWERING_TIME;
 extern const Time   LINE_DISAPPEAR_TIME;
 extern const Time   LINE_COLLAPSE_TIME;
 
-//extern const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME;
 extern const Time   PIECE_AUTO_LOWERING_ANIMATION_TIME;
 extern const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME;
 extern const Time   LINE_COLLAPSE_ANIMATION_TIME;
@@ -79,11 +69,6 @@ const Time   MIN_BONUS_APPEAR_TIME = 4.0s;
 const Time   MAX_BONUS_APPEAR_TIME = 6.0s;
 const Time   MIN_BONUS_LIFE_TIME = 20.0s;
 const Time   MAX_BONUS_LIFE_TIME = 25.0s;
-
-/*const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
-const int    N_BONUS_GENERATION_ATTEMPTS = 5;
-const double BONUS_ONE_ROW_CHANCE = 0.3;
-const int    N_BONUS_ONE_ROW_ATTEMPTS = 2;*/
 
 const int    N_BONUS_CHOOSE_ATTEMPTS = 10;
 const int    N_BONUS_GENERATION_ATTEMPTS = 5;
@@ -273,7 +258,6 @@ public:
   std::string   name() const;
   Player*       victim() const;
 
-  // TODO: standardize terminology:  fantasy  OR  formal (?)
   void          takesBonus(Bonus bonus);
   void          applyBonus(Bonus bonus);
   void          disenchant(Bonus bonus);
@@ -299,7 +283,6 @@ private:
   void          setUpPiece();
   void          initPieceQueue(int size);
   void          resizePieceQueue(int newSize);
-//  void          sendNewPiece();
   bool          sendNewPiece();
   void          lowerPiece(bool forced);
   bool          removeFullLines();
@@ -313,11 +296,6 @@ private:
   void          planBonusAppearance();
   void          planBonusDisappearance(FieldCoords bonusCoords);
 
-  /*void          addStandingBlockImage(vector<BlockImage>& imageArray, VisualObject* parent,
-                                      Color color, FieldCoords position);  // name (?)
-  void          moveBlockImage(vector<BlockImage>& imageArray, FieldCoords movingFrom,
-                               FieldCoords movingTo, Time movingDuration);
-  void          removeBlockImage(vector<BlockImage>& imageArray, FieldCoords position);*/
   void          moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration);
 
   void          routineSpeedUp();
@@ -327,8 +305,6 @@ private:
 
   void          enableBonusVisualEffect(Bonus bonus);
   void          disableBonusVisualEffect(Bonus bonus);
-//  void          stealPiece();
-  void          flipBlocks();
 };
 
 
@@ -337,7 +313,6 @@ private:
 class Game
 {
 public:
-  // TODO: participants array (to speed up booting)
   std::array<Player, MAX_PLAYERS> players;
   std::vector<Player*> participants;
   std::vector<Player*> activePlayers;

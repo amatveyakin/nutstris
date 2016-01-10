@@ -44,7 +44,7 @@ Renderer::~Renderer() {
 
 void Renderer::renderGame ( engine::Game& game, engine::Time now ) {
   for ( size_t iPlayer = 0; iPlayer < game.participants.size(); ++iPlayer ) {
-    auto player = *game.participants[iPlayer];
+    auto& player = *game.participants[iPlayer];
     if ( player.active ) {
       prepareToDrawPlayer_ ( iPlayer, player, now );
       renderPlayer_ ( player, now );

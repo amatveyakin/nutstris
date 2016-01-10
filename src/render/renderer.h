@@ -3,7 +3,7 @@
 #include <memory>
 #include <GL/glew.h>
 
-#include "engine/engine.h"
+#include "engine/game.h"
 #include "render/dataformats.h"
 #include "render/playerviewport.h"
 #include "render/uniformbuffer.h"

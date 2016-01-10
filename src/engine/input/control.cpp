@@ -1,6 +1,6 @@
 #include "control.h"
 
-#include "engine/engine.h"
+#include "engine/game.h"
 
 
 namespace engine {

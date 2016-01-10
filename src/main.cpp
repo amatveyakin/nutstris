@@ -7,7 +7,7 @@
 #include "render/renderer.h"
 #include "render/defs.h"
 #include "render/matrixutil.h"
-#include "engine/engine.h"
+#include "engine/game.h"
 #include "engine/settings.h"
 
 

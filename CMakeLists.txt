@@ -7,15 +7,17 @@ set(srcs
     ${src_dir}/engine/bonus.cpp
     ${src_dir}/engine/bonus.h
     ${src_dir}/engine/defs.h
-    ${src_dir}/engine/engine.cpp
-    ${src_dir}/engine/engine.h
     ${src_dir}/engine/field.h
+    ${src_dir}/engine/game.cpp
+    ${src_dir}/engine/game.h
     ${src_dir}/engine/input/control.cpp
     ${src_dir}/engine/input/control.h
     ${src_dir}/engine/input/keyboard.cpp
     ${src_dir}/engine/input/keyboard.h
     ${src_dir}/engine/piece.cpp
     ${src_dir}/engine/piece.h
+    ${src_dir}/engine/player.cpp
+    ${src_dir}/engine/player.h
     ${src_dir}/engine/settings.cpp
     ${src_dir}/engine/settings.h
     ${src_dir}/engine/strings.h

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cstdio>
 
-#include "engine/engine.h"
+#include "engine/game.h"
 #include "engine/strings.h"
 #include "util/file.h"
 

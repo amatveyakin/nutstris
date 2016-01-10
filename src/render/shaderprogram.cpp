@@ -54,6 +54,13 @@ void ShaderProgram::setUniform(const std::string& name, int value) {
   glUniform1i(id, value);
 }
 
+void ShaderProgram::setUniform(const std::string& name, float value) {
+  makeActive();
+  auto id = glGetUniformLocation(id_, name.c_str());
+  assert(id != -1);
+  glUniform1f(id, value);
+}
+
 void ShaderProgram::makeActive() {
   glUseProgram(id_);
 }

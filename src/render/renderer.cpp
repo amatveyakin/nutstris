@@ -120,7 +120,7 @@ void Renderer::renderWall_ ( engine::Player& player) {
   wall_->getShaderProgram().setUniform( "gVP", getViewProjection_() );
   wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}));
   wall_->getShaderProgram().setUniform ( "gDiffuseMap", wallTexture_->getTextureSlotIndex() );
-  wall_->getShaderProgram().setUniform ( "gDiffuseMapLayer", player.backgroundSeed % wallTexture_->getTextureCount() );
+  wall_->getShaderProgram().setUniform ( "gDiffuseMapLayer", player.backgroundSeed % int(wallTexture_->getTextureCount()) );
   wall_->render();
 }
 

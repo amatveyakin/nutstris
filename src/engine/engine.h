@@ -330,8 +330,6 @@ public:
 
   void          init();
 
-  void          saveSettings();
-
   void          newMatch();
   void          newRound(Time currentTime__);
   void          endRound();
@@ -344,8 +342,6 @@ private:
 
   void          loadPieces();
   void          loadBonuses();
-  void          loadSettings();
-  void          loadDefaultSettings();
 };
 
 }  // namespace engine

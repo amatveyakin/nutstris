@@ -72,97 +72,10 @@ void Game::init()
   checkInvariants();
   loadPieces();
   loadBonuses();
-  loadSettings();
   for (int key = 0; key < kNumGlobalControls; ++key)
     nextGlobalKeyActivationTable[key] = Time::min();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].init(this, iPlayer);
-}
-
-void Game::loadSettings()
-{
-  std::ifstream settingsFile(SETTINGS_FILE);
-  if (!settingsFile.good())
-  {
-      loadDefaultSettings();
-      return;
-  }
-  for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
-  {
-    int tmp;
-    settingsFile >> tmp;
-    switch (tmp)
-    {
-    case 0:
-      players[iPlayer].participates = false;
-      break;
-    case 1:
-      players[iPlayer].participates = true;
-      break;
-    default:
-      throw std::runtime_error(ERR_FILE_CORRUPTED);
-    }
-    for (int iKey = 0; iKey < kNumPlayerControls; ++iKey) {
-      int keyValue = 0;
-      settingsFile >> keyValue;
-      players[iPlayer].controls[iKey] = static_cast<Keyboard::Key>(keyValue);
-    }
-  }
-}
-
-void Game::saveSettings()
-{
-  std::ofstream settingsFile(SETTINGS_FILE);
-  if (!settingsFile.good())
-    throw std::runtime_error(ERR_FILE_WRITE_ERROR);   // TODO: format
-  for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
-  {
-    settingsFile << (players[iPlayer].participates ? 1 : 0) << " ";
-    for (int key = 0; key < kNumPlayerControls; ++key)
-      settingsFile << players[iPlayer].controls[key] << " ";
-  }
-}
-
-void Game::loadDefaultSettings()
-{
-  // TODO(Andrei): save/load global keys
-  globalControls[SayHi] = Keyboard::F1;
-
-  players[0].participates = true;
-  players[0].controls[Left] = Keyboard::A;
-  players[0].controls[Right] = Keyboard::D;
-  players[0].controls[RotateCCW] = Keyboard::W;
-  players[0].controls[RotateCW] = Keyboard::E;
-  players[0].controls[Down] = Keyboard::S;
-  players[0].controls[Drop] = Keyboard::Tab;
-  players[0].controls[NextVictim] = Keyboard::Q;
-
-  players[1].participates = false;
-  players[1].controls[Left] = Keyboard::H;
-  players[1].controls[Right] = Keyboard::K;
-  players[1].controls[RotateCCW] = Keyboard::U;
-  players[1].controls[RotateCW] = Keyboard::I;
-  players[1].controls[Down] = Keyboard::J;
-  players[1].controls[Drop] = Keyboard::Space;
-  players[1].controls[NextVictim] = Keyboard::L;
-
-  players[2].participates = true;
-  players[2].controls[Left] = Keyboard::Left;
-  players[2].controls[Right] = Keyboard::Right;
-  players[2].controls[RotateCCW] = Keyboard::Up;
-  players[2].controls[RotateCW] = Keyboard::Delete;
-  players[2].controls[Down] = Keyboard::Down;
-  players[2].controls[Drop] = Keyboard::RShift;
-  players[2].controls[NextVictim] = Keyboard::RControl;
-
-  players[3].participates = false;
-  players[3].controls[Left] = Keyboard::Numpad4;
-  players[3].controls[Right] = Keyboard::Numpad6;
-  players[3].controls[RotateCCW] = Keyboard::Numpad8;
-  players[3].controls[RotateCW] = Keyboard::Numpad9;
-  players[3].controls[Down] = Keyboard::Numpad5;
-  players[3].controls[Drop] = Keyboard::Numpad0;
-  players[3].controls[NextVictim] = Keyboard::Add;
 }
 
 void Game::newMatch()

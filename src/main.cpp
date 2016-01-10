@@ -8,6 +8,7 @@
 #include "render/defs.h"
 #include "render/matrixutil.h"
 #include "engine/engine.h"
+#include "engine/settings.h"
 
 
 int main() {
@@ -23,6 +24,7 @@ int main() {
   render::Renderer renderer;
 
   game.init();
+  engine::loadSettings(&game);
   game.newMatch();
   game.newRound(std::chrono::steady_clock::now().time_since_epoch());
 
@@ -50,7 +52,7 @@ int main() {
     window.display();  // swap the front and back buffers
   }
 
-  game.saveSettings();
+  engine::saveSettings(&game);
 
   return 0;
 }

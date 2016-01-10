@@ -4,9 +4,9 @@
 namespace render {
 
 TextureArray::TextureArray(int textureSlotIndex, const std::vector<sf::Image>& images)
-  : textureSlotIndex_(textureSlotIndex),
-  textureCount_(images.size()),
-  id_(glfactory::genTexture())
+  : id_(glfactory::genTexture()),
+  textureSlotIndex_(textureSlotIndex),
+  textureCount_(images.size())
 {
     auto width = images.front().getSize().x;
     auto height = images.front().getSize().y;

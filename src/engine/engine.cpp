@@ -73,30 +73,11 @@ void Game::init()
 
   loadPieces();
   loadBonuses();
-  loadAccounts();
   loadSettings();
   for (int key = 0; key < kNumGlobalControls; ++key)
     nextGlobalKeyActivationTable[key] = Time::min();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
     players[iPlayer].init(this, iPlayer);
-}
-
-void Game::loadAccounts()
-{
-  // ...
-  loadDefaultAccounts();
-}
-
-void Game::saveAccounts()
-{
-  // ...
-}
-
-void Game::loadDefaultAccounts()
-{
-  accounts.resize(MAX_PLAYERS);
-  for (size_t iAccount = 0; iAccount < accounts.size(); ++iAccount)
-    accounts[iAccount].name = std::string("Player ") + char(iAccount + '1');  // TODO: rewrite
 }
 
 void Game::loadSettings()
@@ -109,7 +90,6 @@ void Game::loadSettings()
   }
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
-    settingsFile >> players[iPlayer].accountNumber;
     int tmp;
     settingsFile >> tmp;
     switch (tmp)
@@ -138,7 +118,6 @@ void Game::saveSettings()
     throw std::runtime_error(ERR_FILE_WRITE_ERROR);   // TODO: format
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)
   {
-    settingsFile << players[iPlayer].accountNumber << " ";
     settingsFile << (players[iPlayer].participates ? 1 : 0) << " ";
     for (int key = 0; key < kNumPlayerControls; ++key)
       settingsFile << players[iPlayer].controls[key] << " ";
@@ -151,7 +130,6 @@ void Game::loadDefaultSettings()
   globalControls[SayHi] = Keyboard::F1;
 
   players[0].participates = true;
-  players[0].accountNumber = 0;
   players[0].controls[Left] = Keyboard::A;
   players[0].controls[Right] = Keyboard::D;
   players[0].controls[RotateCCW] = Keyboard::W;
@@ -161,7 +139,6 @@ void Game::loadDefaultSettings()
   players[0].controls[NextVictim] = Keyboard::Q;
 
   players[1].participates = false;
-  players[1].accountNumber = 1;
   players[1].controls[Left] = Keyboard::H;
   players[1].controls[Right] = Keyboard::K;
   players[1].controls[RotateCCW] = Keyboard::U;
@@ -171,7 +148,6 @@ void Game::loadDefaultSettings()
   players[1].controls[NextVictim] = Keyboard::L;
 
   players[2].participates = true;
-  players[2].accountNumber = 2;
   players[2].controls[Left] = Keyboard::Left;
   players[2].controls[Right] = Keyboard::Right;
   players[2].controls[RotateCCW] = Keyboard::Up;
@@ -181,7 +157,6 @@ void Game::loadDefaultSettings()
   players[2].controls[NextVictim] = Keyboard::RControl;
 
   players[3].participates = false;
-  players[3].accountNumber = 3;
   players[3].controls[Left] = Keyboard::Numpad4;
   players[3].controls[Right] = Keyboard::Numpad6;
   players[3].controls[RotateCCW] = Keyboard::Numpad8;
@@ -359,16 +334,6 @@ void Player::init(Game* game__, int number__)
     nextKeyActivationTable[key] = Time::min();
 }
 
-void Player::loadAccountInfo(int newAccount)
-{
-  accountNumber = newAccount;
-}
-
-AccountInfo* Player::account()
-{
-  return &game->accounts[accountNumber];
-}
-
 void Player::prepareForNewMatch()
 {
   score = 0;
@@ -412,14 +377,14 @@ Time Player::pieceLoweringInterval()
   return AUTO_LOWERING_TIME / speed;
 }
 
+std::string Player::name() const
+{
+  return "Player " + std::to_string(number);
+}
+
 Player* Player::victim() const
 {
   return (victimNumber != number) ? &game->players[victimNumber] : NULL;
-}
-
-std::string Player::victimName() const
-{
-  return victim() ? victim()->account()->name : "[nobody]";
 }
 
 void Player::takesBonus(Bonus bonus)

@@ -17,7 +17,6 @@ namespace engine {
 const std::string RECOURCE_FOLDER = "resources";
 const std::string PIECE_TEMPLATES_FILE = util::joinPath(RECOURCE_FOLDER, "Pieces");
 const std::string SETTINGS_FILE = "Settings";
-const std::string ACCOUNTS_FILE = "Accounts";
 
 const std::string TEXTURES_FOLDER = util::joinPath(RECOURCE_FOLDER, "Textures");
 const std::string BONUS_IMAGES_FOLDER = util::joinPath(TEXTURES_FOLDER, "Bonuses");

@@ -225,20 +225,12 @@ struct Statistics
   }
 };
 
-struct AccountInfo
-{
-  std::string name;
-//  Statistics totalStatistics;
-  // TODO: other stats
-};
-
 // TODO: make sove variabes private
 // Initialize at:  [N]ever, on [C]reation, new [M]atch, new [R]ound, game [S]ettings change
 class Player
 {
 public:
   int           number;         // C
-  int           accountNumber;  // S  // TODO: changeSystem, use some ID's instead of numbers
   Game*         game;           // C
   int           backgroundSeed; // R
 
@@ -272,16 +264,14 @@ public:
   std::array<Time, kNumPlayerControls> nextKeyActivationTable; // C
 
   void          init(Game* game__, int number__);
-  void          loadAccountInfo(int newAccount);
-  AccountInfo*  account();
   void          prepareForNewMatch();
   void          prepareForNewRound();
 
   Time          currentTime();
   Time          pieceLoweringInterval();
 
+  std::string   name() const;
   Player*       victim() const;
-  std::string   victimName() const;
 
   // TODO: standardize terminology:  fantasy  OR  formal (?)
   void          takesBonus(Bonus bonus);
@@ -347,8 +337,6 @@ private:
 class Game
 {
 public:
-  std::vector<AccountInfo> accounts;
-
   // TODO: participants array (to speed up booting)
   std::array<Player, MAX_PLAYERS> players;
   std::vector<Player*> participants;
@@ -367,7 +355,6 @@ public:
 
   void          init();
 
-  void          saveAccounts();
   void          saveSettings();
 
   void          newMatch();
@@ -380,8 +367,6 @@ public:
 private:
   void          loadPieces();
   void          loadBonuses();
-  void          loadAccounts();
-  void          loadDefaultAccounts();
   void          loadSettings();
   void          loadDefaultSettings();
 };

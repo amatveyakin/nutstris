@@ -46,15 +46,16 @@ void Renderer::renderGame ( engine::Game& game, engine::Time now ) {
   for ( size_t iPlayer = 0; iPlayer < game.participants.size(); ++iPlayer ) {
     auto player = game.participants[iPlayer];
     if ( player->active ) {
-      prepareToDrawPlayer_ ( iPlayer );
+      prepareToDrawPlayer_ ( iPlayer, *player, now );
       renderPlayer_ ( *player, now );
     }
   }
 }
 
-void Renderer::prepareToDrawPlayer_ ( size_t iPlayer ) {
+void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, engine::Time now ) {
   glViewport ( playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
                playerViewports_[iPlayer].width, playerViewports_[iPlayer].height );
+  cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
@@ -114,6 +115,10 @@ math::Mat4x4f Renderer::getGlobalRotation_(engine::Player & player, engine::Time
   float rotatingAngle = (-sin(4.0f * rotatingProgress) * 0.15f + rotatingProgress) * 2.0f;
   float flippedScreenAngle = player.visualEffects.flippedScreen.progress(now) * math::kPi;
   return matrixutil::rotation({ 0, 1, 0 }, rotatingAngle) * matrixutil::rotation({ 1, 0, 0 }, flippedScreenAngle);
+}
+
+float Renderer::getWaveProgress(engine::Player & player, engine::Time now) const {
+  return player.visualEffects.wave.progress(now) * 2.0f * math::kPi;
 }
 
 void Renderer::renderWall_ ( engine::Player& player) {

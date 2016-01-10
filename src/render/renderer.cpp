@@ -71,12 +71,13 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   };
   addBlocks ( player.lyingBlockImages );
   addBlocks ( player.fallingBlockImages );
-  renderCubes_ ( cubesData );
-  renderDisappearingLines_( player.disappearingLines, now );
+  renderCubes_ ( cubesData, getGlobalRotation_(player, now) );
+  renderDisappearingLines_( player.disappearingLines, getGlobalRotation_(player, now), now );
   renderWall_( player );
 }
 
-void Renderer::renderDisappearingLines_ ( const std::vector<engine::DisappearingLine>& lines, engine::Time now ) {
+void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, 
+                                        math::Mat4x4f globalRotation, engine::Time now ) {
   for ( size_t iDisappearingLine = 0; iDisappearingLine < lines.size(); ++iDisappearingLine ) {
     auto& currentLine = lines[iDisappearingLine];
     math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
@@ -85,13 +86,13 @@ void Renderer::renderDisappearingLines_ ( const std::vector<engine::Disappearing
     std::vector<dataformats::CubeInstance> lineCubesData;
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
       lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), ColorToVec3 ( currentLine.blockColor[x] ), 0} );
-    renderCubes_ ( lineCubesData, clippingPlane );
+    renderCubes_ ( lineCubesData, globalRotation, clippingPlane );
   }
 }
 
-void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Vec4f clipPlane ) {
+void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Mat4x4f globalRotation, math::Vec4f clipPlane ) {
   cubeMesh_->getShaderProgram().setUniform ( "gVP", getViewProjection_() );
-  cubeMesh_->getShaderProgram().setUniform ( "gGlobalRotation", math::Mat4x4f::identityMatrix() );
+  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", globalRotation);
   cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex() );
   cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
   cubeMesh_->render ( cubesData );
@@ -106,6 +107,13 @@ math::Mat4x4f Renderer::getViewProjection_() const {
   auto matrixProj = matrixutil::perspective ( ANGLE_FOV_Y, VP_ASPECT, 1.0f, 100.0f );
   auto VP = matrixProj * matrixView;
   return VP;
+}
+
+math::Mat4x4f Renderer::getGlobalRotation_(engine::Player & player, engine::Time now) const {
+  float rotatingProgress = player.visualEffects.rotatingField.progress(now) * math::kPi;
+  float rotatingAngle = (-sin(4.0f * rotatingProgress) * 0.15f + rotatingProgress) * 2.0f;
+  float flippedScreenAngle = player.visualEffects.flippedScreen.progress(now) * math::kPi;
+  return matrixutil::rotation({ 0, 1, 0 }, rotatingAngle) * matrixutil::rotation({ 1, 0, 0 }, flippedScreenAngle);
 }
 
 void Renderer::renderWall_ ( engine::Player& player) {

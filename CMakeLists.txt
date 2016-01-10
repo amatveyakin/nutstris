@@ -35,6 +35,8 @@ set(srcs
     ${src_dir}/math/vector.h
     ${src_dir}/render/arraybuffer.h
     ${src_dir}/render/arraybuffer.hpp
+    ${src_dir}/render/basebuffer.h
+    ${src_dir}/render/basebuffer.hpp
     ${src_dir}/render/cubemesh.cpp
     ${src_dir}/render/cubemesh.h
     ${src_dir}/render/dataformats.cpp

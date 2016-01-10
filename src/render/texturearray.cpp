@@ -1,19 +1,12 @@
 #include "texturearray.h"
+#include "render/glfactory.h"
 
 namespace render {
 
-namespace {
-GLuint genTexture() {
-  GLuint res;
-  glGenTextures(1, &res);
-  return res;
-}
-}
-
-TextureArray::TextureArray ( int textureSlotIndex, const std::vector<sf::Image>& images ) 
-: textureSlotIndex_(textureSlotIndex),
+TextureArray::TextureArray(int textureSlotIndex, const std::vector<sf::Image>& images)
+  : textureSlotIndex_(textureSlotIndex),
   textureCount_(images.size()),
-  id_(genTexture())
+  id_(glfactory::genTexture())
 {
     auto width = images.front().getSize().x;
     auto height = images.front().getSize().y;

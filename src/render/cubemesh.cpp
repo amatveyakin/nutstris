@@ -5,23 +5,17 @@
 #include "render/shaderprogram.h"
 #include "render/defs.h"
 #include "render/shaderprogramfactory.h"
+#include "render/glfactory.h"
 
 namespace render {
 
 namespace {
 const float  kCubeSmoothRadius = 0.4f;
 const int    kCubeAngleSteps   = 10;
-
-GLuint genVertexArray() {
-  GLuint res;
-  glGenVertexArrays(1, &res);
-  return res;
-}
-
 }
 
 CubeMesh::CubeMesh()
-  : vertexArrayID_(genVertexArray())
+  : vertexArrayID_(glfactory::genVertexArray())
 {
   glBindVertexArray(vertexArrayID_);
 

@@ -1,17 +1,10 @@
+#include "render/glfactory.h"
+
 namespace render {
 
-namespace {
-GLuint genBuffer() {
-  GLuint res;
-  glGenBuffers(1, &res);
-  return res;
-}
-}
-
-
 template<class DataType>
-ArrayBuffer<DataType>::ArrayBuffer() 
-  : id_(genBuffer())
+ArrayBuffer<DataType>::ArrayBuffer()
+  : id_(glfactory::genBuffer())
 {}
 
 template<class DataType>

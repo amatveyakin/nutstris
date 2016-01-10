@@ -8,6 +8,7 @@ class GLHandle
 {
 public:
     GLHandle(GLuint id) : id_(id) {}
+    GLHandle(GLHandle&& other) : id_(other.id_) { other.id_ = 0; }
     GLHandle(const GLHandle& other) = delete;
     const GLHandle& operator=(const GLHandle& other) = delete;
 
@@ -15,7 +16,7 @@ public:
     const GLuint& get() const { return id_; }
 
 private:
-    const GLuint id_;
+    GLuint id_;
 };
 
 }

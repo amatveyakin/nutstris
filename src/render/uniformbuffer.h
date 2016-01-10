@@ -10,9 +10,12 @@ namespace render {
 
 template<class DataType>
 class UniformBuffer : public BaseBuffer<DataType, GL_UNIFORM_BUFFER> {
+private:
+  using Parent = BaseBuffer<DataType, GL_UNIFORM_BUFFER>;
+
 public:
   void bindTo(GLuint bindingPoint) const {
-    glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, id_);
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, Parent::id_);
   }
 };
 

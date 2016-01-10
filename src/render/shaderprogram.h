@@ -19,7 +19,7 @@ public:
   ~ShaderProgram();
 
   template<typename T>
-  void ShaderProgram::setUniformBuffer(const std::string& name, const UniformBuffer<T>& buffer) {
+  void setUniformBuffer(const std::string& name, const UniformBuffer<T>& buffer) {
     GLuint blockIndex = glGetUniformBlockIndex(id_, name.c_str());
     buffer.bindTo(blockIndex);
   }

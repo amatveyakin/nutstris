@@ -64,8 +64,8 @@ void main() {
   v.position = positionWorld;
   v.normal   = normalize(normalWorld);
  
-  v.diffuseColor  = (1 - textureColor.a) * diffuseColor + textureColor.a * textureColor;
-  v.specularColor = (1 - textureColor.a) * specularColor + textureColor.a * (textureColor + vec4(1.0, 1.0, 1.0, 1.0)) / 2;
+  v.diffuseColor  = mix(diffuseColor,  textureColor, textureColor.a);
+  v.specularColor = mix(specularColor, (textureColor + vec4(1.0, 1.0, 1.0, 1.0)) / 2, textureColor.a);
 
   color = getLitColor(v, vec3(0, 0, 6.86));
 }

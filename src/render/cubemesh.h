@@ -24,7 +24,7 @@ private:
   std::vector<dataformats::UncoloredVertex> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
   std::vector<GLuint> createIndices_(int angleSteps) const;
 
-  GLuint vertexArrayID_;
+  GLHandle vertexArrayID_;
 
   ArrayBuffer<dataformats::UncoloredVertex> cubeVerticesBuffer_;
   ArrayBuffer<dataformats::CubeInstance> perCubeBuffer_;

@@ -3,6 +3,8 @@
 #include <string>
 #include <GL/glew.h>
 
+#include "render/glhandle.h"
+
 namespace render {
 class Shader {
 protected:
@@ -13,7 +15,7 @@ public:
   GLuint getID();
   
 private:
-  GLuint id_ = 0;
+  GLHandle id_;
 };
 
   

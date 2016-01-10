@@ -20,7 +20,7 @@ public:
   
 private:
   std::unique_ptr<ShaderProgram> shaderProgram_; 
-  GLuint vertexArrayID_;
+  GLHandle vertexArrayID_;
   ArrayBuffer<dataformats::TexturedVertex> verticesBuffer_;
 };
 

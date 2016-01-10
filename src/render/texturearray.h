@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <SFML/Graphics/Image.hpp>
 
+#include "render/glhandle.h"
+
 namespace render {
 
 class TextureArray {
@@ -15,7 +17,7 @@ public:
   size_t getTextureCount() const;
   
 private:
-  GLuint id_;
+  GLHandle id_;
   int textureSlotIndex_;
   size_t textureCount_;
 };

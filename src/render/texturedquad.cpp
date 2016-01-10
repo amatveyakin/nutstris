@@ -2,8 +2,18 @@
 #include "render/shaderprogramfactory.h"
 
 namespace render {
-TexturedQuad::TexturedQuad ( float worldWidth, float worldHeight, float texWidth, float texHeight ) {
-  glGenVertexArrays(1, &vertexArrayID_);
+
+namespace {
+GLuint genVertexArray() {
+  GLuint res;
+  glGenVertexArrays(1, &res);
+  return res;
+}
+}
+
+TexturedQuad::TexturedQuad ( float worldWidth, float worldHeight, float texWidth, float texHeight ) 
+  : vertexArrayID_(genVertexArray())
+{
   glBindVertexArray(vertexArrayID_);
   verticesBuffer_.bind();
   verticesBuffer_.setUpLayout();

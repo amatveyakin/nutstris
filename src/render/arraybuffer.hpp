@@ -1,13 +1,23 @@
 namespace render {
 
-template<class DataType>
-ArrayBuffer<DataType>::ArrayBuffer() {
-  glGenBuffers(1, &id_);
+namespace {
+GLuint genBuffer() {
+  GLuint res;
+  glGenBuffers(1, &res);
+  return res;
 }
+}
+
+
+template<class DataType>
+ArrayBuffer<DataType>::ArrayBuffer() 
+  : id_(genBuffer())
+{}
 
 template<class DataType>
 ArrayBuffer<DataType>::~ArrayBuffer() {
-  glDeleteBuffers(1, &id_);
+  GLuint rawId = id_;
+  glDeleteBuffers(1, &rawId);
 }
 
 template<class DataType>

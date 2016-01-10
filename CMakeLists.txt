@@ -40,6 +40,7 @@ set(srcs
     ${src_dir}/render/dataformats.cpp
     ${src_dir}/render/dataformats.h
     ${src_dir}/render/defs.h
+	${src_dir}/render/glhandle.h
     ${src_dir}/render/matrixutil.cpp
     ${src_dir}/render/matrixutil.h
     ${src_dir}/render/playerviewport.cpp

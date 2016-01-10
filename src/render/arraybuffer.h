@@ -4,6 +4,8 @@
 #include <unordered_set>
 #include <GL/glew.h>
 
+#include "render/glhandle.h"
+
 namespace render {
 
 template<class DataType>
@@ -25,7 +27,7 @@ public:
   void setUpIntAttribute(int attributeIndex, size_t count, size_t offset);
  
 private:
-  GLuint id_;
+  GLHandle id_;
   std::unordered_set<int> enabledAttributes_;
 };
 

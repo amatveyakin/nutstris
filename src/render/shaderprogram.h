@@ -5,6 +5,7 @@
 
 #include "math/matrix.h"
 #include "math/vector.h"
+#include "render/glhandle.h"
 
 
 namespace render {
@@ -24,7 +25,7 @@ public:
   void makeActive();
 
 private:
-  GLuint id_;
+  GLHandle id_;
 };
 
 }

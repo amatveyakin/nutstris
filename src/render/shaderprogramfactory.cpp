@@ -7,14 +7,14 @@
 namespace render {
 
 std::unique_ptr<ShaderProgram> ShaderProgramFactory::createBaseCubesRenderingProgram() {
-  auto vertexShader = VertexShader(shaders::cBaseCubesVertexShader);
-  auto fragmentShader = FragmentShader(shaders::cBaseCubesFragmentShader);
+  VertexShader vertexShader(shaders::cBaseCubesVertexShader);
+  FragmentShader fragmentShader(shaders::cBaseCubesFragmentShader);
   return std::make_unique<ShaderProgram>(vertexShader, fragmentShader);
 }
 
 std::unique_ptr< ShaderProgram > ShaderProgramFactory::createTexturedRenderingProgram() {
-  auto vertexShader = VertexShader(shaders::cTexturedVertexShader);
-  auto fragmentShader = FragmentShader(shaders::cTexturedFragmentShader);
+  VertexShader vertexShader(shaders::cTexturedVertexShader);
+  FragmentShader fragmentShader(shaders::cTexturedFragmentShader);
   return std::make_unique<ShaderProgram>(vertexShader, fragmentShader);
 }
 

@@ -11,10 +11,18 @@ namespace render {
 namespace {
 const float  kCubeSmoothRadius = 0.4f;
 const int    kCubeAngleSteps   = 10;
+
+GLuint genVertexArray() {
+  GLuint res;
+  glGenVertexArrays(1, &res);
+  return res;
 }
 
-CubeMesh::CubeMesh() {
-  glGenVertexArrays(1, &vertexArrayID_);
+}
+
+CubeMesh::CubeMesh()
+  : vertexArrayID_(genVertexArray())
+{
   glBindVertexArray(vertexArrayID_);
 
   cubeVerticesBuffer_.bind();

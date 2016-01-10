@@ -25,6 +25,8 @@
 
 namespace engine {
 
+class GameRound;
+
 //================================ Time & speed ================================
 
 extern const double STARTING_SPEED;
@@ -80,70 +82,88 @@ const int    N_BONUS_ONE_ROW_ATTEMPTS = 1;
 const int    BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL = FIELD_HEIGHT / 2;
 
 
+//=================================== Other ====================================
+
+const int    NORMAL_HINT_QUEUE_SIZE = 1;
+
+
 //=================================== Field ====================================
 
-struct FieldLocks
-{
-  bool isBeingCleared;
+struct FieldLocks {
+  bool isBeingCleared = false;
+};
 
-  void clear()
-  {
-    isBeingCleared = false;
-  }
+
+//================================= Player Info ================================
+
+class PlayerInfo {
+public:
+  PlayerInfo(int id__) : id_(id__) {}
+
+  int id() const                      { return id_; }
+
+  std::string name() const            { return name_; }
+  void setName(const std::string& v)  { name_ = v; }
+
+  bool participates() const           { return participates_; }
+  void setParticipates(bool v)        { participates_ = v; }
+
+  const PlayerControls& controls() const    { return controls_; }
+  void setControls(const PlayerControls& v) { controls_ = v; }
+
+  int score() const                   { return score_; }
+  void setScore(int v)                { score_ = v; }
+
+private:
+  int id_ = 0;
+  std::string name_;
+  bool participates_ = false;
+  PlayerControls controls_;
+  int score_ = 0;
 };
 
 
 //=================================== Player ===================================
 
-const int    MAX_PLAYER_NAME_LENGTH = 16;
-const int    NORMAL_HINT_QUEUE_SIZE = 1;
-
-class Game;
-
-// TODO: make sove variabes private
-// Initialize at:  [N]ever, on [C]reation, new [M]atch, new [R]ound, game [S]ettings change
+// TODO: make all variables private
 class Player
 {
 public:
-  int           number;         // C
-  Game*         game;           // C
-  int           backgroundSeed; // R
+  Player(const PlayerInfo* info__, GameRound* game__);
 
-  bool          participates;   // S
-  bool          active;         // R (in Game::newRound)
-  int           score;          // M
-  PlayerControls controls;      // S
+  const PlayerInfo* info;
+  GameRound*        game;  // TODO: rename (?)
 
-  double        speed;          // R
-  Field         field;          // C (boders) / R (content)
-  FieldLocks    fieldLocks;     // R
-  Time          latestLineCollapse; // R
+  bool          active = true;
 
-  FallingPieceState   fallingPieceState;  // R
-  Piece               fallingPiece;       // R
-  std::vector<Piece>  nextPieces;         // R
+  double        speed = 0.;
+  Field         field;
+  FieldLocks    fieldLocks;
+  Time          latestLineCollapse = Time::zero();
 
-  BonusesBitSet bonuces;        // R
-  int           victimNumber;   // R
+  FallingPieceState   fallingPieceState = {};
+  Piece               fallingPiece;
+  std::vector<Piece>  nextPieces;
 
-  EventSet      events;         // R
+  BonusesBitSet bonuces;
+  int           victimId = 0;
 
-  std::vector<BlockImage>                         lyingBlockImages;   // R  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
-  std::map<FieldCoords, int, CompareFieldCoords>  lyingBlockIndices;  // R
-  MovingObject                                    fallingPieceFrame;  // R
-  std::vector<BlockImage>                         fallingBlockImages; // R  (based on fallingPieceFrame)
-  std::vector<DisappearingLine>                   disappearingLines;  // R
-  PlayerVisualEffects                             visualEffects;      // R
+  EventSet      events;
 
-  std::array<Time, kNumPlayerControls> nextKeyActivationTable; // C
+  int                                             backgroundSeed = 0;
+  std::vector<BlockImage>                         lyingBlockImages;  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
+  std::map<FieldCoords, int, CompareFieldCoords>  lyingBlockIndices;
+  MovingObject                                    fallingPieceFrame;
+  std::vector<BlockImage>                         fallingBlockImages;  // (based on fallingPieceFrame)
+  std::vector<DisappearingLine>                   disappearingLines;
+  PlayerVisualEffects                             visualEffects;
 
-  void          init(Game* game__, int number__);
-  void          prepareForNewMatch();
-  void          prepareForNewRound();
+  std::array<Time, kNumPlayerControls> nextKeyActivationTable;
 
   Time          currentTime();
   Time          pieceLoweringInterval();
 
+  int           id() const;
   std::string   name() const;
   Player*       victim() const;
 
@@ -152,6 +172,7 @@ public:
   void          disenchant(Bonus bonus);
   void          heal();  // make private (?)
   void          kill();
+  void          cycleVictim();
 
   void          onKeyPress(PlayerControl key);
   void          onTimer();
@@ -190,7 +211,6 @@ private:
   void          routineSpeedUp();
   void          bonusSpeedUp();
   void          bonusSlowDown();
-  void          cycleVictim();
 
   void          enableBonusVisualEffect(Bonus bonus);
   void          disableBonusVisualEffect(Bonus bonus);

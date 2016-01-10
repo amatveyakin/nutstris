@@ -18,8 +18,6 @@ set(srcs
     ${src_dir}/engine/piece.h
     ${src_dir}/engine/player.cpp
     ${src_dir}/engine/player.h
-    ${src_dir}/engine/settings.cpp
-    ${src_dir}/engine/settings.h
     ${src_dir}/engine/strings.h
     ${src_dir}/engine/units.cpp
     ${src_dir}/engine/units.h

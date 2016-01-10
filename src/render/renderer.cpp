@@ -52,9 +52,9 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
 }
 
-void Renderer::renderGame ( engine::Game& game, engine::Time now ) {
-  for ( size_t iPlayer = 0; iPlayer < game.participants.size(); ++iPlayer ) {
-    auto& player = *game.participants[iPlayer];
+void Renderer::renderGame ( engine::GameRound& game, engine::Time now ) {
+  for ( size_t iPlayer = 0; iPlayer < game.players().size(); ++iPlayer ) {
+    auto& player = *game.players()[iPlayer];
     if ( player.active ) {
       prepareToDrawPlayer_ ( iPlayer, player, now );
       renderPlayer_ ( player, now );

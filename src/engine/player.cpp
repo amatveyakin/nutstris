@@ -66,37 +66,21 @@ const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 
 //=================================== Player ===================================
 
-void Player::init(Game* game__, int number__)
+Player::Player(const PlayerInfo* info__, GameRound* game__)
+  : info(info__)
+  , game(game__)
 {
-  game = game__;
-  number = number__;
   for (int key = 0; key < kNumPlayerControls; ++key)
     nextKeyActivationTable[key] = Time::min();
-}
 
-void Player::prepareForNewMatch()
-{
-  score = 0;
-  // ...
-}
-
-void Player::prepareForNewRound()
-{
-  events.clear();
-  fieldLocks.clear();
-  bonuces.clear();
-  field = Field();
-  lyingBlockImages.clear();
-  lyingBlockIndices.clear();
-  fallingBlockImages.clear();
-  disappearingLines.clear();
-  visualEffects = PlayerVisualEffects();
   visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
   visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
   visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
   latestLineCollapse = Time::min();
-  victimNumber = number;
+
+  victimId = id();
   cycleVictim();
+
   speed = STARTING_SPEED;
 
   backgroundSeed = rand();
@@ -108,7 +92,7 @@ void Player::prepareForNewRound()
 
 Time Player::currentTime()
 {
-  return game->currentTime;
+  return game->currentTime();
 }
 
 Time Player::pieceLoweringInterval()
@@ -116,14 +100,16 @@ Time Player::pieceLoweringInterval()
   return AUTO_LOWERING_TIME / speed;
 }
 
-std::string Player::name() const
-{
-  return "Player " + std::to_string(number);
+int Player::id() const {
+  return info->id();
 }
 
-Player* Player::victim() const
-{
-  return (victimNumber != number) ? &game->players[victimNumber] : NULL;
+std::string Player::name() const {
+  return info->name();
+}
+
+Player* Player::victim() const {
+  return (victimId != id()) ? game->playerById(victimId) : nullptr;
 }
 
 void Player::takesBonus(Bonus bonus)
@@ -132,7 +118,7 @@ void Player::takesBonus(Bonus bonus)
     applyBonus(bonus);
   else
   {
-    if (victim() != NULL)
+    if (victim())
       victim()->applyBonus(bonus);
   }
 }
@@ -210,30 +196,19 @@ void Player::endClearField()
 
 void Player::kill()
 {
-  for (auto i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
-  {
-    if ((*i)->victimNumber == number)
-    {
-      (*i)->cycleVictim();
-      if ((game->activePlayers.size() >= 2) && ((*i)->victimNumber == (*i)->number))
-        (*i)->cycleVictim();
-    }
-  }
-
-  for (auto i = game->activePlayers.begin(); i != game->activePlayers.end(); ++i)
-  {
-    if (*i == this)
-    {
-      game->activePlayers.erase(i);
-      break;
-    }
-  }
-
-  if (game->activePlayers.empty())
-    game->endRound();
-
+  game->deactivatePlayer(id());
   visualEffects.playerDying.enable(PLAYER_DYING_ANIMATION_TIME);
   active = false;
+}
+
+void Player::cycleVictim()
+{
+  if (game->activePlayers().size() < 2)
+    return;
+  do
+  {
+    victimId = (victimId + 1) % MAX_PLAYERS;
+  } while (!(game->playerById(victimId) && game->playerById(victimId)->active));
 }
 
 void Player::onKeyPress(PlayerControl key)
@@ -350,8 +325,8 @@ bool Player::canSendNewPiece() const
 
 Piece Player::randomPiece() const
 {
-  int pieceTemplatesIndex = game->randomPieceTable[rand() % game->randomPieceTable.size()];
-  Piece piece(&game->pieceTemplates[pieceTemplatesIndex]);
+  int pieceTemplatesIndex = game->basics().randomPieceTable[rand() % game->basics().randomPieceTable.size()];
+  Piece piece(&game->basics().pieceTemplates[pieceTemplatesIndex]);
   piece.setRotationState(rand() % piece.nRotationStates());
   piece.moveTo({MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE),  // TODO: modify the formula
                 FIELD_HEIGHT - piece.currentStructure().bounds.bottom});
@@ -417,7 +392,7 @@ Bonus Player::randomBonus() const
 {
   Bonus bonus;
   for (int iAttempt = 0; iAttempt < N_BONUS_CHOOSE_ATTEMPTS; ++iAttempt) {
-    bonus = game->randomBonusTable[rand() % game->randomBonusTable.size()];
+    bonus = game->basics().randomBonusTable[rand() % game->basics().randomBonusTable.size()];
     if (bonusIsUseful(bonus))
       return bonus;
   }
@@ -439,7 +414,7 @@ void Player::setUpPiece()
 
     // TODO: copy images from one array to another with motion (?)
 
-    lyingBlockImages.push_back(BlockImage(NULL, fallingPiece.color(), cell));
+    lyingBlockImages.push_back(BlockImage(nullptr, fallingPiece.color(), cell));
     lyingBlockIndices.insert(std::make_pair(cell, lyingBlockImages.size() - 1));
   }
   fallingBlockImages.clear();
@@ -761,16 +736,6 @@ void Player::bonusSlowDown()
   speed = std::max(speed, STARTING_SPEED);
 }
 
-void Player::cycleVictim()
-{
-  if (game->activePlayers.size() < 2)
-    return;
-  do
-  {
-    victimNumber = (victimNumber + 1) % MAX_PLAYERS;
-  } while (!game->players[victimNumber].active);
-}
-
 void Player::enableBonusVisualEffect(Bonus bonus)
 {
   switch (bonus)
@@ -864,14 +829,14 @@ void Player::disableBonusVisualEffect(Bonus bonus)
 
 void Player::stealPiece()
 {
-  if (victim() == NULL)
+  if (!victim())
     return;
   PieceTheftEffect pieceTheftEffect;
   pieceTheftEffect.enable(currentTime());
-  pieceTheftEffect.sender = number;
-  pieceTheftEffect.target = victimNumber;
-  game->globalEffects.pieceThefts.push_back(pieceTheftEffect);
-  visualEffects.pieceTheftPtr = &game->globalEffects.pieceThefts.back();
+  pieceTheftEffect.sender = id();
+  pieceTheftEffect.target = victimId;
+  game->globalEffects().pieceThefts.push_back(pieceTheftEffect);
+  visualEffects.pieceTheftPtr = &game->globalEffects().pieceThefts.back();
 }
 
 }  // namespace engine

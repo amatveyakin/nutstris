@@ -18,7 +18,7 @@ public:
   Renderer();
   ~Renderer();
   
-  void renderGame(engine::Game& game, engine::Time now);
+  void renderGame(engine::GameRound& game, engine::Time now);
 
   void updatePlayerViewports(int nPlayers, int screenWidth, int screenHeight);
 

@@ -27,8 +27,7 @@ TextureArray::TextureArray ( int textureSlotIndex, const std::vector<sf::Image>&
 }
 
 TextureArray::~TextureArray() {
-  GLuint id = id_;
-  glDeleteTextures(1, &id);
+  glDeleteTextures(1, &id_.get());
 }
 
 int TextureArray::getTextureSlotIndex() const {

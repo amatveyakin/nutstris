@@ -12,6 +12,7 @@ public:
     const GLHandle& operator=(const GLHandle& other) = delete;
 
     operator GLuint() { return id_; }
+    const GLuint& get() const { return id_; }
 
 private:
     const GLuint id_;

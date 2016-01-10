@@ -16,8 +16,7 @@ ArrayBuffer<DataType>::ArrayBuffer()
 
 template<class DataType>
 ArrayBuffer<DataType>::~ArrayBuffer() {
-  GLuint rawId = id_;
-  glDeleteBuffers(1, &rawId);
+  glDeleteBuffers(1, &id_.get());
 }
 
 template<class DataType>

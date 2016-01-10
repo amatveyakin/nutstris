@@ -69,8 +69,7 @@ const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 
 void Game::init()
 {
-  assert(PIECE_FORCED_LOWERING_ANIMATION_TIME <= playerControlCooldown(PlayerControl::Down));
-
+  checkInvariants();
   loadPieces();
   loadBonuses();
   loadSettings();
@@ -235,6 +234,11 @@ void Game::onTimer(Time currentTime__)
 }
 
 
+
+void Game::checkInvariants() const {
+  assert(PIECE_FORCED_LOWERING_ANIMATION_TIME <= playerControlCooldown(PlayerControl::Down));
+  assert(BONUS_LANTERN_MAX_SPEED >= 1.0 / DROPPING_PIECE_LOWERING_TIME);
+}
 
 void Game::loadPieces()   // TODO: rewrite it cleaner
 {

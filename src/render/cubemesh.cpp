@@ -10,7 +10,7 @@
 namespace render {
 
 namespace {
-const float  kCubeSmoothRadius = 0.4f;
+const float  kCubeSmoothRadius = 0.5f;
 const int    kCubeAngleSteps   = 10;
 }
 

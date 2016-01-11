@@ -19,7 +19,7 @@ std::unique_ptr<ShaderProgram> ShaderProgramFactory::createBaseCubesRenderingPro
 
 std::unique_ptr< ShaderProgram > ShaderProgramFactory::createTexturedRenderingProgram() {
   VertexShader vertexShader(kVersionPragma + shaders::kTexturedVertexShader);
-  FragmentShader fragmentShader(kVersionPragma + shaders::kTexturedFragmentShader);
+  FragmentShader fragmentShader(kVersionPragma + shaders::kLightingHelper + shaders::kTexturedFragmentShader);
   return std::make_unique<ShaderProgram>(vertexShader, fragmentShader);
 }
 

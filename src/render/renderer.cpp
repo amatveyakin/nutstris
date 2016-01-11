@@ -77,6 +77,7 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
   lightsSettingsBuffer_->setData({ l });
 
   cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
+  wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
@@ -146,7 +147,8 @@ float Renderer::getWaveProgress(engine::Player & player, engine::Time now) const
 
 void Renderer::renderWall_ ( engine::Player& player) {
   wall_->getShaderProgram().setUniform( "gVP", getViewProjection_() );
-  wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}));
+  wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}) *
+                                                  matrixutil::rotation({ 0.0, 1.0, 0.0 }, math::kPi));
   wall_->getShaderProgram().setUniform ( "gDiffuseMap", wallTexture_->getTextureSlotIndex() );
   wall_->getShaderProgram().setUniform ( "gDiffuseMapLayer", player.backgroundSeed % int(wallTexture_->getTextureCount()) );
   wall_->render();

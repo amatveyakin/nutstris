@@ -42,7 +42,13 @@ out vec3 color;
 
 void main() {
   vec4 textureColor = texture(gDiffuseMap, vec3(textureCoord, gDiffuseMapLayer));
-  color = textureColor.rgb * (0.6 * max(0.0, normalize(normalWorld).z) + 0.2);
+  SurfaceInfo v;
+  v.position = positionWorld;
+  v.normal   = normalize(normalWorld);
+  v.diffuseColor  = textureColor;
+  v.specularColor = 0.2 * textureColor;
+
+  color = getLitColor(v, vec3(0, 0, 6.86));
 }
 )";
 

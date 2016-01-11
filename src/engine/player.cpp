@@ -4,6 +4,7 @@
 #include <cstdio>
 
 #include "engine/game.h"
+#include "engine/io/sound.h"
 #include "engine/strings.h"
 
 
@@ -433,6 +434,8 @@ void Player::setUpPiece()
   fallingPieceState = psAbsent;
 
   bool fullLinesFound = removeFullLines();
+  if (fullLinesFound)
+    playSound(Sound::LineCompleted);
   Time newPieceDelay = fullLinesFound ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
                                         HINT_MATERIALIZATION_TIME;
   events.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
@@ -512,7 +515,6 @@ void Player::lowerPiece(bool forced)
     setUpPiece();
 }
 
-// TODO: Does Player::removeFullLines have to return a bool any more?
 bool Player::removeFullLines()
 {
   bool fullLinesExisted = false;

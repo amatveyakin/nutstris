@@ -4,7 +4,7 @@
 
 #include "engine/bonus.h"
 #include "engine/defs.h"
-#include "engine/input/control.h"
+#include "engine/io/control.h"
 #include "util/file.h"
 
 
@@ -19,6 +19,7 @@ const std::string kSettingsFile = "Settings";
 const std::string kTexturePath = util::joinPath(kResourcePath, "textures");
 const std::string kTextureWallPath = util::joinPath(kTexturePath, "wall");
 const std::string kTextureBonusesPath = util::joinPath(kTexturePath, "bonuses");
+const std::string kSoundPath = util::joinPath(kResourcePath, "sounds");
 
 
 //=============================== Error messages ===============================

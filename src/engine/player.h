@@ -16,7 +16,7 @@
 #include "engine/bonus.h"
 #include "engine/event.h"
 #include "engine/field.h"
-#include "engine/input/control.h"
+#include "engine/io/control.h"
 #include "engine/piece.h"
 #include "engine/visual.h"
 #include "util/containers.h"

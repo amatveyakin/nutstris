@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdio>
 
+#include "engine/io/sound.h"
 #include "engine/strings.h"
 
 
@@ -119,6 +120,7 @@ Game::Game()
 {
   checkInvariants();
   initBasics();
+  initSounds();
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer) {
     playerInfos_.push_back(std::make_unique<PlayerInfo>(iPlayer));
     playerInfos_.back()->setName("Player " + std::to_string(iPlayer));

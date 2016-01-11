@@ -90,31 +90,14 @@ GlobalVisualEffects& GameRound::globalEffects() {
 void GameRound::onTimer(Time currentTime__) {
   currentTime_ = currentTime__;
 
-  for (int key = 0; key < kNumGlobalControls; ++key)
-  {
+  for (int key = 0; key < kNumGlobalControls; ++key) {
     if (Keyboard::isKeyPressed(game_->globalControls()[key]) &&
-        (currentTime_ >= nextGlobalKeyActivationTable_[key]))
-    {
+        (currentTime_ >= nextGlobalKeyActivationTable_[key])) {
       onGlobalKeyPress(GlobalControl(key));
       nextGlobalKeyActivationTable_[key] = currentTime_ + globalControlCooldown(GlobalControl(key));
     }
     else if (!Keyboard::isKeyPressed(game_->globalControls()[key]))
       nextGlobalKeyActivationTable_[key]  = currentTime_;
-  }
-
-  for (size_t iPlayer = 0; iPlayer < activePlayers_.size(); ++iPlayer)
-  {
-    for (int key = 0; key < kNumPlayerControls; ++key)
-    {
-      if (Keyboard::isKeyPressed(activePlayers_[iPlayer]->info->controls()[key]) &&
-          (currentTime_ >= activePlayers_[iPlayer]->nextKeyActivationTable[key]))
-      {
-        activePlayers_[iPlayer]->onKeyPress(PlayerControl(key));
-        activePlayers_[iPlayer]->nextKeyActivationTable[key] = currentTime_ + playerControlCooldown(PlayerControl(key));
-      }
-      else if (!Keyboard::isKeyPressed(activePlayers_[iPlayer]->info->controls()[key]))
-        activePlayers_[iPlayer]->nextKeyActivationTable[key] = currentTime_;
-    }
   }
 
   for (size_t iPlayer = 0; iPlayer < activePlayers_.size(); ++iPlayer)

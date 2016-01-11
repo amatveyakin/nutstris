@@ -73,7 +73,7 @@ Player::Player(const PlayerInfo* info__, GameRound* game__)
   for (int key = 0; key < kNumPlayerControls; ++key)
     nextKeyActivationTable[key] = Time::min();
 
-  visualEffects.lantern.bindTo(&fallingPieceFrame);  // TODO: move to initialization?
+  visualEffects.lantern.bindTo(&fallingPieceFrame);
   visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
   visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
   latestLineCollapse = Time::min();
@@ -239,8 +239,22 @@ void Player::onKeyPress(PlayerControl key)
   }
 }
 
+void Player::processInput() {
+  for (int key = 0; key < kNumPlayerControls; ++key) {
+    if (Keyboard::isKeyPressed(info->controls()[key]) &&
+        (currentTime() >= nextKeyActivationTable[key])) {
+      onKeyPress(PlayerControl(key));
+      nextKeyActivationTable[key] = currentTime() + playerControlCooldown(PlayerControl(key));
+    }
+    else if (!Keyboard::isKeyPressed(info->controls()[key]))
+      nextKeyActivationTable[key] = currentTime();
+  }
+}
+
 void Player::onTimer()
 {
+  processInput();
+
   while ((!events.empty()) && (currentTime() >= events.top().activationTime))
   {
     Event currentEvent = events.top();
@@ -281,7 +295,7 @@ void Player::onTimer()
       kill();
       break;
     default:
-      throw std::runtime_error(ERR_INTERNAL_ERROR);  // TODO: formal  "Events queue crashed (event %d found)"
+      throw std::runtime_error(ERR_INTERNAL_ERROR);
     }
     if (eventDelayed)
     {
@@ -410,10 +424,8 @@ void Player::setUpPiece()
       return;
     }
 
+    // TODO: Make falling pieces look differently. Add materialization animation.
     field.mutableCell(cell).setBlock(fallingPiece.color());
-
-    // TODO: copy images from one array to another with motion (?)
-
     lyingBlockImages.push_back(BlockImage(nullptr, fallingPiece.color(), cell));
     lyingBlockIndices.insert(std::make_pair(cell, lyingBlockImages.size() - 1));
   }
@@ -500,7 +512,6 @@ void Player::lowerPiece(bool forced)
     setUpPiece();
 }
 
-// TODO: Optimize Player::removeFullLines: don't check all lines
 // TODO: Does Player::removeFullLines have to return a bool any more?
 bool Player::removeFullLines()
 {
@@ -562,7 +573,7 @@ bool Player::removeFullLines()
   return fullLinesExisted;
 }
 
-void Player::collapseLine(int row)  // TODO: optimize
+void Player::collapseLine(int row)
 {
   for (int curRow = row; curRow < FIELD_HEIGHT; ++curRow)
   {
@@ -628,13 +639,13 @@ void Player::rotatePiece(int direction)
   {
     fallingPiece.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position() + FieldCoords(1, 0),  // TODO: optimize
+  else if (canDisposePiece(fallingPiece.position() + FieldCoords(1, 0),
       fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
     fallingPiece.moveBy({1, 0});
     fallingPiece.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position() - FieldCoords(1, 0),  // TODO: optimize
+  else if (canDisposePiece(fallingPiece.position() - FieldCoords(1, 0),
       fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
     fallingPiece.moveBy({-1, 0});
@@ -650,9 +661,9 @@ void Player::rotatePiece(int direction)
   }
 }
 
-bool Player::generateBonus()  // TODO: remake
+bool Player::generateBonus()  // TODO: rewrite
 {
-  Bonus bonus = randomBonus();  // Is that possible (?)
+  Bonus bonus = randomBonus();
   if (bonus == Bonus::None)
     return false;
 

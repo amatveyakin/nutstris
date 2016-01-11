@@ -175,6 +175,7 @@ public:
   void          cycleVictim();
 
   void          onKeyPress(PlayerControl key);
+  void          processInput();
   void          onTimer();
 
   void          stealPiece();  // (!) make private

@@ -173,7 +173,7 @@ void Game::loadSettings() {
   // TODO(Andrei): save/load global keys
   globalControls_[SayHi] = Keyboard::F1;
 
-  std::ifstream settingsFile(SETTINGS_FILE);
+  std::ifstream settingsFile(kSettingsFile);
   if (!settingsFile.good()) {
     loadDefaultSettings();
     return;
@@ -202,7 +202,7 @@ void Game::loadSettings() {
 }
 
 void Game::saveSettings() {
-  std::ofstream settingsFile(SETTINGS_FILE);
+  std::ofstream settingsFile(kSettingsFile);
   if (!settingsFile.good())
     throw std::runtime_error(ERR_FILE_WRITE_ERROR);   // TODO: format
   for (int iPlayer = 0; iPlayer < MAX_PLAYERS; ++iPlayer)

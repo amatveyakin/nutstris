@@ -13,7 +13,7 @@ const std::string kPieceEndSignal = "done";
 // TODO(Andrei): rewrite it cleaner
 std::vector<PieceTemplate> loadPieces() {
   std::vector<PieceTemplate> pieceTemplates;
-  std::ifstream piecesFile(PIECE_TEMPLATES_FILE);
+  std::ifstream piecesFile(kPieceTemplatesFile);
   if (!piecesFile.good())
     throw std::runtime_error(ERR_FILE_NOT_FOUND);
 

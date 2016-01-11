@@ -12,12 +12,13 @@ namespace engine {
 
 //=============================== Resource files ===============================
 
-const std::string RECOURCE_FOLDER = "resources";
-const std::string PIECE_TEMPLATES_FILE = util::joinPath(RECOURCE_FOLDER, "Pieces");
-const std::string SETTINGS_FILE = "Settings";
+const std::string kResourcePath = "resources";
+const std::string kPieceTemplatesFile = util::joinPath(kResourcePath, "Pieces");
+const std::string kSettingsFile = "Settings";
 
-const std::string TEXTURES_FOLDER = util::joinPath(RECOURCE_FOLDER, "Textures");
-const std::string BONUS_IMAGES_FOLDER = util::joinPath(TEXTURES_FOLDER, "Bonuses");
+const std::string kTexturePath = util::joinPath(kResourcePath, "textures");
+const std::string kTextureWallPath = util::joinPath(kTexturePath, "wall");
+const std::string kTextureBonusesPath = util::joinPath(kTexturePath, "bonuses");
 
 
 //=============================== Error messages ===============================

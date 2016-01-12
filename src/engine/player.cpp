@@ -80,7 +80,6 @@ Player::Player(const PlayerInfo* info__, GameRound* game__)
   latestLineCollapse = Time::min();
 
   victimId = id();
-  cycleVictim();
 
   speed = STARTING_SPEED;
 

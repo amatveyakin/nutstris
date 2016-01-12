@@ -21,6 +21,8 @@ GameRound::GameRound(const Game* game__, Time currentTime__)
       players_.push_back(std::make_unique<Player>(playerInfo, this));
   }
   activePlayers_ = players();
+  for (const auto& player : players_)
+    player->cycleVictim();
   for (auto& activationTime : nextGlobalKeyActivationTable_)
     activationTime = Time::min();
 }

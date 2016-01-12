@@ -114,6 +114,7 @@ Player* Player::victim() const {
 
 void Player::takesBonus(Bonus bonus)
 {
+  playSound(Sound::BonusTaken);
   if (isKind(bonus))
     applyBonus(bonus);
   else

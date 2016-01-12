@@ -8,10 +8,11 @@
 namespace engine {
 
 static constexpr int kMaxSimultaneousSounds = 256;
-static constexpr int kNumSounds = 1;
+static constexpr int kNumSounds = 2;
 
 enum class Sound {
   LineCompleted,
+  BonusTaken,
 };
 
 extern const Time kLineCompletedSoundRepeteationInterval;

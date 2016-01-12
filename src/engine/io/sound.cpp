@@ -83,6 +83,7 @@ void initSounds() {
 std::string getSoundName(Sound sound) {
   switch (sound) {
     case Sound::LineCompleted:  return "LineCompleted";
+    case Sound::BonusTaken:     return "BonusTaken";
   }
   abort();
 }

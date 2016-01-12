@@ -196,7 +196,7 @@ private:
   void          resizePieceQueue(int newSize);
   bool          sendNewPiece();
   void          lowerPiece(bool forced);
-  bool          removeFullLines();
+  int           removeFullLines();
   void          collapseLine(int row);
   void          movePiece(int direction);
   void          dropPiece();

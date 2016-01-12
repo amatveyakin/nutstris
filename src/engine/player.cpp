@@ -432,11 +432,11 @@ void Player::setUpPiece()
   fallingBlockImages.clear();
   fallingPieceState = psAbsent;
 
-  bool fullLinesFound = removeFullLines();
-  if (fullLinesFound)
-    playSound(Sound::LineCompleted);
-  Time newPieceDelay = fullLinesFound ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
-                                        HINT_MATERIALIZATION_TIME;
+  int nLinesRemoved = removeFullLines();
+  if (nLinesRemoved)
+    playSoundRepeatedly(Sound::LineCompleted, nLinesRemoved, kLineCompletedSoundRepeteationInterval);
+  Time newPieceDelay = nLinesRemoved ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
+                                       HINT_MATERIALIZATION_TIME;
   events.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
   visualEffects.hintMaterialization.enable(newPieceDelay);
   visualEffects.hint.enable(HINT_APPERAING_TIME);
@@ -514,9 +514,9 @@ void Player::lowerPiece(bool forced)
     setUpPiece();
 }
 
-bool Player::removeFullLines()
+int Player::removeFullLines()
 {
-  bool fullLinesExisted = false;
+  int nLinesRemoved = 0;
 
   for (int row = 0; row < FIELD_HEIGHT; ++row)
   {
@@ -532,7 +532,7 @@ bool Player::removeFullLines()
 
     if (rowIsFull)
     {
-      fullLinesExisted = true;
+      ++nLinesRemoved;
 
       disappearingLines.resize(disappearingLines.size() + 1);
       disappearingLines.back().startTime = currentTime();
@@ -571,7 +571,7 @@ bool Player::removeFullLines()
     }
   }
 
-  return fullLinesExisted;
+  return nLinesRemoved;
 }
 
 void Player::collapseLine(int row)

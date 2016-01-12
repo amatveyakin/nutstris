@@ -51,6 +51,7 @@ public:
     while (players_.size() >= kMaxSimultaneousSounds - 1)
       players_.pop();
     auto newSound = std::make_unique<sf::Sound>(buffers_[static_cast<int>(sound)]);
+    newSound->setVolume(50);
     newSound->play();
     players_.push(std::move(newSound));
   }

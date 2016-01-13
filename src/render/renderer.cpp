@@ -133,12 +133,7 @@ void Renderer::renderHint_(engine::Player& player, math::Mat4x4f globalRotation,
   
   cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", 0.3f * float(player.visualEffects.hintMaterialization.progress(now)));
   cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", float(player.visualEffects.hint.progress(now)));
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
   renderCubes_(hintCubesData, globalRotation);
-  glCullFace(GL_BACK);
-  renderCubes_(hintCubesData, globalRotation);
-  glDisable(GL_CULL_FACE);
 }
 
 void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Mat4x4f globalRotation, math::Vec4f clipPlane ) {
@@ -146,7 +141,12 @@ void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cube
   cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", globalRotation);
   cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex() );
   cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
   cubeMesh_->render ( cubesData );
+  glCullFace(GL_BACK);
+  cubeMesh_->render(cubesData);
+  glDisable(GL_CULL_FACE);
 }
 
 math::Mat4x4f Renderer::getViewProjection_() const {

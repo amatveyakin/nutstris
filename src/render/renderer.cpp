@@ -69,7 +69,6 @@ void Renderer::renderGame ( engine::GameRound& game, engine::Time now ) {
 void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, engine::Time now ) {
   glViewport ( playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
                playerViewports_[iPlayer].width, playerViewports_[iPlayer].height );
-  cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
 
   dataformats::LightsSettings l;
   l.ambientColor  = math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -79,16 +78,25 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
   l.lightType = 1;
   l.brightness = 1.0f;
   lightsSettingsBuffer_->setData({ l });
-
   cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
   wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
 
+  cubeMesh_->getShaderProgram().setUniform("gVP", getViewProjection_());
+  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", getGlobalRotation_(player, now));
+  cubeMesh_->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
   cubeMesh_->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
+  cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
+
+  wall_->getShaderProgram().setUniform("gVP", getViewProjection_());
+  wall_->getShaderProgram().setUniform("gWorld", math::Mat4x4f::translationMatrix({ 0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f }) *
+                                       matrixutil::rotation({ 0.0, 1.0, 0.0 }, math::kPi));
+  wall_->getShaderProgram().setUniform("gDiffuseMap", wallTexture_->getTextureSlotIndex());
+  wall_->getShaderProgram().setUniform("gDiffuseMapLayer", player.backgroundSeed % int(wallTexture_->getTextureCount()));
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
-  renderDisappearingLines_(player.disappearingLines, getGlobalRotation_(player, now), now);
-  renderWall_(player);
+  renderWall_();
+  renderDisappearingLines_(player.disappearingLines, now);
   std::vector<dataformats::CubeInstance> cubesData;
   auto addBlocks = [&cubesData, now] ( std::vector<engine::BlockImage>& blockImages ) {
     for ( auto& block : blockImages ) {
@@ -103,14 +111,11 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   };
   addBlocks ( player.lyingBlockImages );
   addBlocks ( player.fallingBlockImages );
-  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", 0.3f);
-  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", 1.0f);
-  renderCubes_ ( cubesData, getGlobalRotation_(player, now) );
-  renderHint_(player, getGlobalRotation_(player, now), now);
+  renderCubes_ ( cubesData, 0.3f, 1.0f );
+  renderHint_(player, now);
 }
 
-void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, 
-                                        math::Mat4x4f globalRotation, engine::Time now ) {
+void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, engine::Time now ) {
   for ( size_t iDisappearingLine = 0; iDisappearingLine < lines.size(); ++iDisappearingLine ) {
     auto& currentLine = lines[iDisappearingLine];
     math::Vec4f clippingPlane = { 2.0f * ( iDisappearingLine % 2 ) - 1.0f, 1.0f, 1.0f,
@@ -120,27 +125,27 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
       lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), 
                                getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0} );
-    renderCubes_ ( lineCubesData, globalRotation, clippingPlane );
+    renderCubes_ ( lineCubesData, 1.0f, 1.0f, clippingPlane );
   }
 }
 
-void Renderer::renderHint_(engine::Player& player, math::Mat4x4f globalRotation, engine::Time now) {
+void Renderer::renderHint_(engine::Player& player, engine::Time now) {
   std::vector<dataformats::CubeInstance> hintCubesData;
   for (size_t i = 0; i < player.nextPieces[0].nBlocks(); ++i) {
     hintCubesData.push_back({ fieldPosToWorldPos(player.nextPieces[0].absoluteCoords(i).x(), player.nextPieces[0].absoluteCoords(i).y()),
                               getDiffuseColor(player.nextPieces[0].color()), getSpecularColor(player.nextPieces[0].color()) });
   }
   
-  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", 0.3f * float(player.visualEffects.hintMaterialization.progress(now)));
-  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", float(player.visualEffects.hint.progress(now)));
-  renderCubes_(hintCubesData, globalRotation);
+  auto faceOpacity = 0.3f * float(player.visualEffects.hintMaterialization.progress(now));
+  auto edgeOpacity = float(player.visualEffects.hint.progress(now));
+  renderCubes_(hintCubesData, faceOpacity, edgeOpacity);
 }
 
-void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Mat4x4f globalRotation, math::Vec4f clipPlane ) {
-  cubeMesh_->getShaderProgram().setUniform ( "gVP", getViewProjection_() );
-  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", globalRotation);
-  cubeMesh_->getShaderProgram().setUniform ( "gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex() );
+void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
+                              math::Vec4f clipPlane ) {
   cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
+  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
+  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   cubeMesh_->render ( cubesData );
@@ -171,12 +176,7 @@ float Renderer::getWaveProgress(engine::Player & player, engine::Time now) const
   return player.visualEffects.wave.progress(now) * 2.0f * math::kPi;
 }
 
-void Renderer::renderWall_ ( engine::Player& player) {
-  wall_->getShaderProgram().setUniform( "gVP", getViewProjection_() );
-  wall_->getShaderProgram().setUniform( "gWorld", math::Mat4x4f::translationMatrix({0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f}) *
-                                                  matrixutil::rotation({ 0.0, 1.0, 0.0 }, math::kPi));
-  wall_->getShaderProgram().setUniform ( "gDiffuseMap", wallTexture_->getTextureSlotIndex() );
-  wall_->getShaderProgram().setUniform ( "gDiffuseMapLayer", player.backgroundSeed % int(wallTexture_->getTextureCount()) );
+void Renderer::renderWall_ () {
   wall_->render();
 }
 

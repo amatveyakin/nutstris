@@ -41,12 +41,12 @@ struct PropertiesMap {
     addBonus(Bonus::TruncatedBlocks , {Permanent, Evil, 4 });
     addBonus(Bonus::NoHint          , {Permanent, Evil, 0 });
     addBonus(Bonus::SpeedUp         , {OneShot  , Evil, 4 });
-    const int kNumBonuses = static_cast<int>(LAST_BONUS) - static_cast<int>(FIRST_BONUS) + 1;
-    assert(data.size() == kNumBonuses);
+    assert(data.size() == static_cast<int>(LAST_BONUS) - static_cast<int>(FIRST_BONUS) + 1);
   }
 
   void addBonus(Bonus bonus, BonusProperties properties) {
     bool inserted = data.insert({bonus, properties}).second;
+    (void)inserted;  // TODO: implement utilities to suppress "unused" warning
     assert(inserted);
   }
 };

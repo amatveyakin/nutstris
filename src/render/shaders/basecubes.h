@@ -53,6 +53,9 @@ in vec2 textureCoord;
 
 uniform sampler2DArray gBonusesTextureArray;
 uniform vec4 gClipPlane;
+uniform vec4 gHintAreaClipPlane;
+uniform float gEdgeOpacity;
+uniform float gFaceOpacity;
 
 out vec4 color;
 
@@ -61,6 +64,15 @@ void main() {
     discard;
  
   float opacity = 1.0;
+
+  if (dot(gHintAreaClipPlane, vec4(positionWorld, 1)) > 0) {
+    vec3 distToGrid = (mod(positionModel + 0.5 - 0.06, 1.0f) - 0.9); //another VERY MAGIC constants
+    if ((distToGrid.x > 0) || (distToGrid.y > 0) || (distToGrid.z > 0))
+      opacity = gFaceOpacity;
+    else
+      opacity = gEdgeOpacity;
+  }
+    
   vec4 textureColor = texture(gBonusesTextureArray, vec3(textureCoord, textureIndex));
   SurfaceInfo v;
   v.position = positionWorld;

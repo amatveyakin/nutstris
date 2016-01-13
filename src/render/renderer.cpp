@@ -42,6 +42,7 @@ Renderer::Renderer() {
   glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   cubeMesh_ = std::make_unique<CubeMesh>();
   wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
@@ -81,9 +82,13 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
 
   cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
   wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
+
+  cubeMesh_->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
 }
 
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
+  renderDisappearingLines_(player.disappearingLines, getGlobalRotation_(player, now), now);
+  renderWall_(player);
   std::vector<dataformats::CubeInstance> cubesData;
   auto addBlocks = [&cubesData, now] ( std::vector<engine::BlockImage>& blockImages ) {
     for ( auto& block : blockImages ) {
@@ -98,9 +103,10 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   };
   addBlocks ( player.lyingBlockImages );
   addBlocks ( player.fallingBlockImages );
+  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", 0.3f);
+  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", 1.0f);
   renderCubes_ ( cubesData, getGlobalRotation_(player, now) );
-  renderDisappearingLines_( player.disappearingLines, getGlobalRotation_(player, now), now );
-  renderWall_( player );
+  renderHint_(player, getGlobalRotation_(player, now), now);
 }
 
 void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, 
@@ -116,6 +122,23 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
                                getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0} );
     renderCubes_ ( lineCubesData, globalRotation, clippingPlane );
   }
+}
+
+void Renderer::renderHint_(engine::Player& player, math::Mat4x4f globalRotation, engine::Time now) {
+  std::vector<dataformats::CubeInstance> hintCubesData;
+  for (size_t i = 0; i < player.nextPieces[0].nBlocks(); ++i) {
+    hintCubesData.push_back({ fieldPosToWorldPos(player.nextPieces[0].absoluteCoords(i).x(), player.nextPieces[0].absoluteCoords(i).y()),
+                              getDiffuseColor(player.nextPieces[0].color()), getSpecularColor(player.nextPieces[0].color()) });
+  }
+  
+  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", 0.3f * float(player.visualEffects.hintMaterialization.progress(now)));
+  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", float(player.visualEffects.hint.progress(now)));
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_FRONT);
+  renderCubes_(hintCubesData, globalRotation);
+  glCullFace(GL_BACK);
+  renderCubes_(hintCubesData, globalRotation);
+  glDisable(GL_CULL_FACE);
 }
 
 void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, math::Mat4x4f globalRotation, math::Vec4f clipPlane ) {
@@ -157,7 +180,7 @@ void Renderer::renderWall_ ( engine::Player& player) {
   wall_->render();
 }
 
-void Renderer::updatePlayerViewports ( int nPlayers, int screenWidth, int screenHeight ) {
+void Renderer::updatePlayerViewports(int nPlayers, int screenWidth, int screenHeight) {
   playerViewports_ = createPlayerViewports ( nPlayers, screenWidth, screenHeight );
 }
 

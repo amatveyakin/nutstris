@@ -28,6 +28,7 @@ private:
   void renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, math::Mat4x4f globalRotation, math::Vec4f clipPlane = {});
   void renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, math::Mat4x4f globalRotation, engine::Time now);
   void renderWall_(engine::Player& player);
+  void renderHint_(engine::Player& player, math::Mat4x4f globalRotation, engine::Time now);
 
   math::Mat4x4f getViewProjection_() const;
   math::Mat4x4f getGlobalRotation_(engine::Player& player, engine::Time now) const;

@@ -38,7 +38,7 @@ in vec2 textureCoord;
 uniform sampler2DArray gDiffuseMap;
 uniform int gDiffuseMapLayer;
 
-out vec3 color;
+out vec4 color;
 
 void main() {
   vec4 textureColor = texture(gDiffuseMap, vec3(textureCoord, gDiffuseMapLayer));
@@ -48,7 +48,7 @@ void main() {
   v.diffuseColor  = textureColor;
   v.specularColor = 0.2 * textureColor;
 
-  color = getLitColor(v, vec3(0, 0, 6.86));
+  color = vec4(getLitColor(v, vec3(0, 0, 6.86)), 1.0);
 }
 )";
 

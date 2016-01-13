@@ -39,6 +39,9 @@ math::Mat4x4f fieldPosToWorldPos ( double fieldX, double fieldY ) {
 Renderer::Renderer() {
   glewInit();
   glEnable ( GL_DEPTH_TEST );
+  glDisable(GL_CULL_FACE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   cubeMesh_ = std::make_unique<CubeMesh>();
   wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),

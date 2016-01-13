@@ -54,20 +54,24 @@ in vec2 textureCoord;
 uniform sampler2DArray gBonusesTextureArray;
 uniform vec4 gClipPlane;
 
-out vec3 color;
+out vec4 color;
 
 void main() {
   if (dot(gClipPlane, vec4(positionModel, 1)) > 0)
     discard;
+ 
+  float opacity = 1.0;
   vec4 textureColor = texture(gBonusesTextureArray, vec3(textureCoord, textureIndex));
   SurfaceInfo v;
   v.position = positionWorld;
   v.normal   = normalize(normalWorld);
+  if (v.normal.z < 0)
+    v.normal *= -1;
  
   v.diffuseColor  = mix(diffuseColor,  textureColor, textureColor.a);
   v.specularColor = mix(specularColor, (textureColor + vec4(1.0, 1.0, 1.0, 1.0)) / 2, textureColor.a);
 
-  color = getLitColor(v, vec3(0, 0, 6.86));
+  color = vec4(getLitColor(v, vec3(0, 0, 6.86)), opacity);
 }
 )";
 

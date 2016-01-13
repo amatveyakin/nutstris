@@ -9,6 +9,9 @@
 namespace render {
 
 namespace {
+const float kMaximalHintFaceOpacity = 0.3f;
+const float kMaximalHintEdgeOpacity = 1.0f;
+
 math::Vec4f getDiffuseColor ( engine::Color c ) {
   return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f};
 }
@@ -111,7 +114,7 @@ void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   };
   addBlocks ( player.lyingBlockImages );
   addBlocks ( player.fallingBlockImages );
-  renderCubes_ ( cubesData, 0.3f, 1.0f );
+  renderCubes_ ( cubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity );
   renderHint_(player, now);
 }
 
@@ -125,7 +128,7 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
       lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), 
                                getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0} );
-    renderCubes_ ( lineCubesData, 1.0f, 1.0f, clippingPlane );
+    renderCubes_ ( lineCubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, clippingPlane );
   }
 }
 
@@ -136,7 +139,7 @@ void Renderer::renderHint_(engine::Player& player, engine::Time now) {
                               getDiffuseColor(player.nextPieces[0].color()), getSpecularColor(player.nextPieces[0].color()) });
   }
   
-  auto faceOpacity = 0.3f * float(player.visualEffects.hintMaterialization.progress(now));
+  auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));
   auto edgeOpacity = float(player.visualEffects.hint.progress(now));
   renderCubes_(hintCubesData, faceOpacity, edgeOpacity);
 }

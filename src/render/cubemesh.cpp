@@ -14,7 +14,7 @@ const float  kCubeSmoothRadius = 0.5f;
 const int    kCubeAngleSteps   = 10;
 }
 
-CubeMesh::CubeMesh()
+CubeMesh::CubeMesh(float smoothnessRadius)
   : vertexArrayID_(glfactory::genVertexArray())
 {
   glBindVertexArray(vertexArrayID_);
@@ -22,7 +22,7 @@ CubeMesh::CubeMesh()
   cubeVerticesBuffer_.bind();
   cubeVerticesBuffer_.setUpLayout();
   cubeVerticesBuffer_.unbind();
-  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0f / 2.0f, kCubeSmoothRadius, kCubeAngleSteps));
+  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0f / 2.0f, smoothnessRadius, kCubeAngleSteps));
 
   perCubeBuffer_.bind();
   perCubeBuffer_.setUpLayout();

@@ -13,7 +13,7 @@ class ShaderProgram;
 
 class CubeMesh {
 public:
-  CubeMesh();
+  CubeMesh(float smoothnessRadius);
   ~CubeMesh();
 
   void render(const std::vector<dataformats::CubeInstance>& cubesData);

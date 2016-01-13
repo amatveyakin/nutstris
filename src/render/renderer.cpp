@@ -60,7 +60,9 @@ Renderer::Renderer() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  cubeMesh_ = std::make_unique<CubeMesh>();
+  cubeMeshFalling_ = std::make_unique<CubeMesh>(0.5);
+  cubeMeshLying_ = std::make_unique<CubeMesh>(0.1);
+
   wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           1.0f,  1.0f);
@@ -83,27 +85,29 @@ void Renderer::renderGame ( engine::GameRound& game, engine::Time now ) {
   }
 }
 
-void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, engine::Time now ) {
-  glViewport ( playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
-               playerViewports_[iPlayer].width, playerViewports_[iPlayer].height );
+void Renderer::prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engine::Time now) {
+  glViewport(playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
+             playerViewports_[iPlayer].width, playerViewports_[iPlayer].height);
 
   dataformats::LightsSettings l;
-  l.ambientColor  = math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
-  l.diffuseColor  = math::Vec4f(0.8f, 0.8f, 0.8f, 0.8f);
+  l.ambientColor = math::Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
+  l.diffuseColor = math::Vec4f(0.8f, 0.8f, 0.8f, 0.8f);
   l.specularColor = math::Vec4f(0.6f, 0.6f, 0.6f, 100.0f);
-  l.direction     = math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f);
+  l.direction = math::Vec4f(0.0f, 0.0f, -1.0f, 0.0f);
   l.lightType = 1;
   l.brightness = 1.0f;
   lightsSettingsBuffer_->setData({ l });
-  cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
+
+  for (auto cubeMeshPtr : { cubeMeshFalling_.get(), cubeMeshLying_.get() }) {
+    cubeMeshPtr->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
+    cubeMeshPtr->getShaderProgram().setUniform("gVP", getViewProjection_());
+    cubeMeshPtr->getShaderProgram().setUniform("gGlobalRotation", getGlobalRotation_(player, now));
+    cubeMeshPtr->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
+    cubeMeshPtr->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
+    cubeMeshPtr->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
+  }
+
   wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
-
-  cubeMesh_->getShaderProgram().setUniform("gVP", getViewProjection_());
-  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", getGlobalRotation_(player, now));
-  cubeMesh_->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
-  cubeMesh_->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
-  cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
-
   wall_->getShaderProgram().setUniform("gVP", getViewProjection_());
   wall_->getShaderProgram().setUniform("gWorld", math::Mat4x4f::translationMatrix({ 0.0f, 0.0f, -CUBE_SCALE * engine::FIELD_HEIGHT / 2.0f }) *
                                        matrixutil::rotation({ 0.0, 1.0, 0.0 }, math::kPi));
@@ -114,8 +118,8 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   renderWall_();
   renderDisappearingLines_(player.disappearingLines, now);
-  renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
-  renderCubes_(blockImagesToCubeInstances(player.fallingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
+  renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false);
+  renderCubes_(blockImagesToCubeInstances(player.fallingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, true);
   renderHint_(player, now);
 }
 
@@ -129,7 +133,7 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
     for ( size_t x = 0; x < engine::FIELD_WIDTH; ++x )
       lineCubesData.push_back ( {fieldPosToWorldPos ( x, currentLine.row ), 
                                getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0} );
-    renderCubes_ ( lineCubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, clippingPlane );
+    renderCubes_ ( lineCubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false, clippingPlane );
   }
 }
 
@@ -142,19 +146,20 @@ void Renderer::renderHint_(engine::Player& player, engine::Time now) {
   
   auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));
   auto edgeOpacity = float(player.visualEffects.hint.progress(now));
-  renderCubes_(hintCubesData, faceOpacity, edgeOpacity);
+  renderCubes_(hintCubesData, faceOpacity, edgeOpacity, true);
 }
 
-void Renderer::renderCubes_ ( const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
-                              math::Vec4f clipPlane ) {
-  cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
-  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
-  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);
+void Renderer::renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
+                            bool falling, math::Vec4f clipPlane) {
+  auto& cubeMeshRef = falling ? *cubeMeshFalling_ : *cubeMeshLying_;
+  cubeMeshRef.getShaderProgram().setUniform ( "gClipPlane", clipPlane );
+  cubeMeshRef.getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
+  cubeMeshRef.getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
-  cubeMesh_->render ( cubesData );
+  cubeMeshRef.render ( cubesData );
   glCullFace(GL_BACK);
-  cubeMesh_->render(cubesData);
+  cubeMeshRef.render(cubesData);
   glDisable(GL_CULL_FACE);
 }
 

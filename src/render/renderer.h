@@ -26,7 +26,7 @@ private:
   void renderPlayer_(engine::Player& player, engine::Time now);
   void prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engine::Time now);
   void renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
-                    math::Vec4f clipPlane = {});
+                    bool falling, math::Vec4f clipPlane = {});
   void renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, engine::Time now);
   void renderWall_();
   void renderHint_(engine::Player& player, engine::Time now);
@@ -36,7 +36,8 @@ private:
   float getWaveProgress(engine::Player & player, engine::Time now) const;
 
 private:
-  std::unique_ptr<CubeMesh> cubeMesh_;
+  std::unique_ptr<CubeMesh> cubeMeshFalling_;
+  std::unique_ptr<CubeMesh> cubeMeshLying_;
   std::unique_ptr<TexturedQuad> wall_;
   std::unique_ptr<TextureArray> bonusesTexture_;
   std::unique_ptr<TextureArray> wallTexture_;

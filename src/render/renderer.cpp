@@ -37,6 +37,21 @@ math::Mat4x4f fieldPosToWorldPos(double fieldX, double fieldY) {
     render::matrixutil::scale(render::CUBE_SCALE);
 }
 
+std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(std::vector<engine::BlockImage>& blockImages,
+                                                                  engine::Time now) {
+  std::vector<dataformats::CubeInstance> result;
+  for (auto& block : blockImages) {
+    float bonusProgress = float(block.bonusImage().progress(now));
+    auto bonusIndex = (bonusProgress > 0.5f) ? int(block.bonus()) : 0;
+    auto cubeScale = math::abs(2.f * bonusProgress - 1.f);
+    auto scaleMatrix = render::matrixutil::scale(cubeScale);
+    auto pos2d = block.absolutePosition(now);
+    result.push_back({ fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix,
+                       getDiffuseColor(block.color()), getSpecularColor(block.color()), bonusIndex });
+  }
+  return result;
+}
+}
 
 Renderer::Renderer() {
   glewInit();
@@ -99,21 +114,8 @@ void Renderer::prepareToDrawPlayer_ ( size_t iPlayer, engine::Player& player, en
 void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
   renderWall_();
   renderDisappearingLines_(player.disappearingLines, now);
-  std::vector<dataformats::CubeInstance> cubesData;
-  auto addBlocks = [&cubesData, now] ( std::vector<engine::BlockImage>& blockImages ) {
-    for ( auto& block : blockImages ) {
-      float bonusProgress = float(block.bonusImage().progress ( now ));
-      auto bonusIndex = ( bonusProgress > 0.5f ) ? int ( block.bonus() ) : 0;
-      auto cubeScale = math::abs( 2.f * bonusProgress - 1.f );
-      auto scaleMatrix = render::matrixutil::scale ( cubeScale );
-      auto pos2d = block.absolutePosition ( now );
-      cubesData.push_back ( {fieldPosToWorldPos ( pos2d.x(), pos2d.y() ) * scaleMatrix, 
-                           getDiffuseColor(block.color()), getSpecularColor(block.color()), bonusIndex} );
-    }
-  };
-  addBlocks ( player.lyingBlockImages );
-  addBlocks ( player.fallingBlockImages );
-  renderCubes_ ( cubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity );
+  renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
+  renderCubes_(blockImagesToCubeInstances(player.fallingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
   renderHint_(player, now);
 }
 

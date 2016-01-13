@@ -12,8 +12,8 @@ namespace {
 const float kMaximalHintFaceOpacity = 0.3f;
 const float kMaximalHintEdgeOpacity = 1.0f;
 
-math::Vec4f getDiffuseColor ( engine::Color c ) {
-  return {c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f};
+math::Vec4f getDiffuseColor(engine::Color c) {
+  return{ c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f };
 }
 
 const math::Vec4f kWhiteColor = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -24,18 +24,17 @@ math::Vec4f getSpecularColor(engine::Color c) {
   return specularColor;
 }
 
-float fieldToWorldX (double fieldX ) {
-  return ( float(fieldX) - (engine::FIELD_WIDTH - 1.0f) / 2.0f) * render::CUBE_SCALE;
+float fieldToWorldX(double fieldX) {
+  return (float(fieldX) - (engine::FIELD_WIDTH - 1.0f) / 2.0f) * render::CUBE_SCALE;
 }
 
-float fieldToWorldY (double fieldY ) {
-  return ( float(fieldY) - ( engine::FIELD_HEIGHT - 1.0f ) / 2.0f ) * render::CUBE_SCALE;
+float fieldToWorldY(double fieldY) {
+  return (float(fieldY) - (engine::FIELD_HEIGHT - 1.0f) / 2.0f) * render::CUBE_SCALE;
 }
 
-math::Mat4x4f fieldPosToWorldPos ( double fieldX, double fieldY ) {
-  return math::Mat4x4f::translationMatrix ( {fieldToWorldX ( fieldX ), fieldToWorldY ( fieldY ), 0.0f} ) *
-         render::matrixutil::scale ( render::CUBE_SCALE );
-}
+math::Mat4x4f fieldPosToWorldPos(double fieldX, double fieldY) {
+  return math::Mat4x4f::translationMatrix({ fieldToWorldX(fieldX), fieldToWorldY(fieldY), 0.0f }) *
+    render::matrixutil::scale(render::CUBE_SCALE);
 }
 
 

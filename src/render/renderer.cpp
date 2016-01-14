@@ -60,8 +60,7 @@ Renderer::Renderer() {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  cubeMeshFalling_ = std::make_unique<CubeMesh>(0.5);
-  cubeMeshLying_ = std::make_unique<CubeMesh>(0.1);
+  cubeMesh_ = std::make_unique<CubeMesh>();
 
   wall_ = std::make_unique<TexturedQuad>( CUBE_SCALE * engine::FIELD_WIDTH  * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
                                           CUBE_SCALE * engine::FIELD_HEIGHT * (1.0f + CUBE_SCALE * (engine::FIELD_HEIGHT / 2.0f + 0.5f) / EYE_TO_FIELD),
@@ -98,14 +97,12 @@ void Renderer::prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engi
   l.brightness = 1.0f;
   lightsSettingsBuffer_->setData({ l });
 
-  for (auto cubeMeshPtr : { cubeMeshFalling_.get(), cubeMeshLying_.get() }) {
-    cubeMeshPtr->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
-    cubeMeshPtr->getShaderProgram().setUniform("gVP", getViewProjection_());
-    cubeMeshPtr->getShaderProgram().setUniform("gGlobalRotation", getGlobalRotation_(player, now));
-    cubeMeshPtr->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
-    cubeMeshPtr->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
-    cubeMeshPtr->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
-  }
+  cubeMesh_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
+  cubeMesh_->getShaderProgram().setUniform("gVP", getViewProjection_());
+  cubeMesh_->getShaderProgram().setUniform("gGlobalRotation", getGlobalRotation_(player, now));
+  cubeMesh_->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
+  cubeMesh_->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
+  cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
 
   wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
   wall_->getShaderProgram().setUniform("gVP", getViewProjection_());
@@ -151,15 +148,19 @@ void Renderer::renderHint_(engine::Player& player, engine::Time now) {
 
 void Renderer::renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
                             bool falling, math::Vec4f clipPlane) {
-  auto& cubeMeshRef = falling ? *cubeMeshFalling_ : *cubeMeshLying_;
-  cubeMeshRef.getShaderProgram().setUniform ( "gClipPlane", clipPlane );
-  cubeMeshRef.getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
-  cubeMeshRef.getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);
+  if (falling)
+    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.5f);
+  else
+    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.2f);
+
+  cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
+  cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
+  cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
-  cubeMeshRef.render ( cubesData );
+  cubeMesh_->render ( cubesData );
   glCullFace(GL_BACK);
-  cubeMeshRef.render(cubesData);
+  cubeMesh_->render(cubesData);
   glDisable(GL_CULL_FACE);
 }
 

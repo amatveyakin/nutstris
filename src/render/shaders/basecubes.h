@@ -15,6 +15,7 @@ layout(location = 9) in vec4 specularColorIn;
 uniform mat4 gVP;
 uniform mat4 gGlobalRotation;
 uniform float gWaveProgress;
+uniform float gCubeSmoothness;
 
 out vec3 positionModel;
 out vec3 positionWorld;
@@ -25,9 +26,9 @@ flat out int textureIndex;
 out vec2 textureCoord;
 
 void main() {
-  positionModel = positionModelIn;
+  positionModel = 0.5 * mix(sign(positionModelIn), positionModelIn, gCubeSmoothness);
 
-  positionWorld = (modelToWorldIn * vec4(positionModelIn, 1)).xyz;
+  positionWorld = (modelToWorldIn * vec4(positionModel, 1)).xyz;
   positionWorld.x += sin(gWaveProgress) * sin(4 * positionWorld.y)  * 0.2 * cos(abs(positionWorld.x / 0.7));
   positionWorld = (gGlobalRotation * vec4(positionWorld, 1)).xyz;
 
@@ -38,7 +39,7 @@ void main() {
   diffuseColor = diffuseColorIn;
   specularColor = specularColorIn;
   textureIndex = textureIndexIn;
-  textureCoord = positionModelIn.xy + vec2(0.5, 0.5);
+  textureCoord = positionModel.xy + vec2(0.5, 0.5);
 }
 )";
  

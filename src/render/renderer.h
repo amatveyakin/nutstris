@@ -36,8 +36,7 @@ private:
   float getWaveProgress(engine::Player & player, engine::Time now) const;
 
 private:
-  std::unique_ptr<CubeMesh> cubeMeshFalling_;
-  std::unique_ptr<CubeMesh> cubeMeshLying_;
+  std::unique_ptr<CubeMesh> cubeMesh_;
   std::unique_ptr<TexturedQuad> wall_;
   std::unique_ptr<TextureArray> bonusesTexture_;
   std::unique_ptr<TextureArray> wallTexture_;

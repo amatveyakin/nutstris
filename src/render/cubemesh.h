@@ -13,7 +13,7 @@ class ShaderProgram;
 
 class CubeMesh {
 public:
-  CubeMesh(float smoothnessRadius);
+  CubeMesh();
   ~CubeMesh();
 
   void render(const std::vector<dataformats::CubeInstance>& cubesData);
@@ -21,7 +21,7 @@ public:
   ShaderProgram& getShaderProgram();
 
 private:
-  std::vector<dataformats::UncoloredVertex> createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const;
+  std::vector<dataformats::UncoloredVertex> createVerticesPositionsAndNormals_(int angleSteps) const;
   std::vector<GLuint> createIndices_(int angleSteps) const;
 
   GLHandle vertexArrayID_;

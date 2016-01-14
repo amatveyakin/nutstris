@@ -10,11 +10,10 @@
 namespace render {
 
 namespace {
-const float  kCubeSmoothRadius = 0.5f;
 const int    kCubeAngleSteps   = 10;
 }
 
-CubeMesh::CubeMesh(float smoothnessRadius)
+CubeMesh::CubeMesh()
   : vertexArrayID_(glfactory::genVertexArray())
 {
   glBindVertexArray(vertexArrayID_);
@@ -22,7 +21,7 @@ CubeMesh::CubeMesh(float smoothnessRadius)
   cubeVerticesBuffer_.bind();
   cubeVerticesBuffer_.setUpLayout();
   cubeVerticesBuffer_.unbind();
-  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(1.0f / 2.0f, smoothnessRadius, kCubeAngleSteps));
+  cubeVerticesBuffer_.setData(createVerticesPositionsAndNormals_(kCubeAngleSteps));
 
   perCubeBuffer_.bind();
   perCubeBuffer_.setUpLayout();
@@ -57,7 +56,7 @@ ShaderProgram& CubeMesh::getShaderProgram() {
   return *shaderProgram_;
 }
 
-std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNormals_(float scale, float smoothnessRadius, int angleSteps) const {
+std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNormals_(int angleSteps) const {
   auto nVertices = 8 * angleSteps * angleSteps;
   std::vector<dataformats::UncoloredVertex> result(nVertices);
 
@@ -72,10 +71,7 @@ std::vector<dataformats::UncoloredVertex> CubeMesh::createVerticesPositionsAndNo
       auto z = cosf(alpha) * sinf(beta);
       auto y = sinf(alpha);
 
-      result[i * 4 * angleSteps + j].point = { scale * (smoothnessRadius * x + (1 - smoothnessRadius) * math::sgn(x)),
-					       scale * (smoothnessRadius * y + (1 - smoothnessRadius) * math::sgn(y)),
-                                               scale * (smoothnessRadius * z + (1 - smoothnessRadius) * math::sgn(z))  };
-
+      result[i * 4 * angleSteps + j].point = { x, y, z };
       result[i * 4 * angleSteps + j].normal = {x, y, z};
     }
   }

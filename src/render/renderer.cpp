@@ -103,6 +103,7 @@ void Renderer::prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engi
   cubeMesh_->getShaderProgram().setUniform("gBonusesTextureArray", bonusesTexture_->getTextureSlotIndex());
   cubeMesh_->getShaderProgram().setUniform("gHintAreaClipPlane", math::Vec4f(0.0, 1.0, 0.0, -MAX_WORLD_FIELD_HEIGHT / 2.0));
   cubeMesh_->getShaderProgram().setUniform("gWaveProgress", getWaveProgress(player, now));
+  cubeMesh_->getShaderProgram().setUniform("gTruncatedCubesProgress", float(player.visualEffects.semicubes.progress(now)));
 
   wall_->getShaderProgram().setUniformBuffer("LightsSettings", *lightsSettingsBuffer_);
   wall_->getShaderProgram().setUniform("gVP", getViewProjection_());

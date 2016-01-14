@@ -57,6 +57,7 @@ uniform vec4 gClipPlane;
 uniform vec4 gHintAreaClipPlane;
 uniform float gEdgeOpacity;
 uniform float gFaceOpacity;
+uniform float gTruncatedCubesProgress;
 
 out vec4 color;
 
@@ -64,6 +65,11 @@ void main() {
   if (dot(gClipPlane, vec4(positionModel, 1)) > 0)
     discard;
  
+  float t = mix(0.92, 0.15, sqrt(gTruncatedCubesProgress)); //some magic constants
+  if   (+ pow(abs( positionModel.x - t), 4)
+        + pow(abs( positionModel.y - t), 4)
+        + pow(abs(-positionModel.z - t), 4) < 0.2) discard;
+
   float opacity = 1.0;
 
   if (dot(gHintAreaClipPlane, vec4(positionWorld, 1)) > 0) {

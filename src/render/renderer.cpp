@@ -37,7 +37,7 @@ math::Mat4x4f fieldPosToWorldPos(double fieldX, double fieldY) {
     render::matrixutil::scale(render::CUBE_SCALE);
 }
 
-std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(std::vector<engine::BlockImage>& blockImages,
+std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(const std::vector<engine::BlockImage>& blockImages,
                                                                   engine::Time now) {
   std::vector<dataformats::CubeInstance> result;
   for (auto& block : blockImages) {
@@ -51,7 +51,7 @@ std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(std::vector<en
   }
   return result;
 }
-}
+}  // namespace
 
 Renderer::Renderer() {
   glewInit();
@@ -74,7 +74,7 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
 }
 
-void Renderer::renderGame ( engine::GameRound& game, engine::Time now ) {
+void Renderer::renderGame ( const engine::GameRound& game, engine::Time now ) {
   for ( size_t iPlayer = 0; iPlayer < game.players().size(); ++iPlayer ) {
     auto& player = *game.players()[iPlayer];
     if ( player.active ) {
@@ -84,7 +84,7 @@ void Renderer::renderGame ( engine::GameRound& game, engine::Time now ) {
   }
 }
 
-void Renderer::prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engine::Time now) {
+void Renderer::prepareToDrawPlayer_(size_t iPlayer, const engine::Player& player, engine::Time now) {
   glViewport(playerViewports_[iPlayer].x, playerViewports_[iPlayer].y,
              playerViewports_[iPlayer].width, playerViewports_[iPlayer].height);
 
@@ -113,7 +113,7 @@ void Renderer::prepareToDrawPlayer_(size_t iPlayer, engine::Player& player, engi
   wall_->getShaderProgram().setUniform("gDiffuseMapLayer", player.backgroundSeed % int(wallTexture_->getTextureCount()));
 }
 
-void Renderer::renderPlayer_ ( engine::Player& player, engine::Time now ) {
+void Renderer::renderPlayer_ ( const engine::Player& player, engine::Time now ) {
   renderWall_();
   renderDisappearingLines_(player.disappearingLines, now);
   renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false);
@@ -135,7 +135,7 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
   }
 }
 
-void Renderer::renderHint_(engine::Player& player, engine::Time now) {
+void Renderer::renderHint_(const engine::Player& player, engine::Time now) {
   std::vector<dataformats::CubeInstance> hintCubesData;
   for (size_t i = 0; i < player.nextPieces[0].nBlocks(); ++i) {
     hintCubesData.push_back({ fieldPosToWorldPos(player.nextPieces[0].absoluteCoords(i).x(), player.nextPieces[0].absoluteCoords(i).y()),
@@ -143,7 +143,7 @@ void Renderer::renderHint_(engine::Player& player, engine::Time now) {
   }
   
   auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));
-  auto edgeOpacity = float(player.visualEffects.hint.progress(now));
+  auto edgeOpacity = float(player.visualEffects.hintAppearance.progress(now));
   renderCubes_(hintCubesData, faceOpacity, edgeOpacity, true);
 }
 
@@ -176,14 +176,14 @@ math::Mat4x4f Renderer::getViewProjection_() const {
   return VP;
 }
 
-math::Mat4x4f Renderer::getGlobalRotation_(engine::Player & player, engine::Time now) const {
+math::Mat4x4f Renderer::getGlobalRotation_(const engine::Player & player, engine::Time now) const {
   float rotatingProgress = player.visualEffects.rotatingField.progress(now) * math::kPi;
   float rotatingAngle = (-sin(4.0f * rotatingProgress) * 0.15f + rotatingProgress) * 2.0f;
   float flippedScreenAngle = player.visualEffects.flippedScreen.progress(now) * math::kPi;
   return matrixutil::rotation({ 0, 1, 0 }, rotatingAngle) * matrixutil::rotation({ 1, 0, 0 }, flippedScreenAngle);
 }
 
-float Renderer::getWaveProgress(engine::Player & player, engine::Time now) const {
+float Renderer::getWaveProgress(const engine::Player & player, engine::Time now) const {
   return player.visualEffects.wave.progress(now) * 2.0f * math::kPi;
 }
 
@@ -195,4 +195,4 @@ void Renderer::updatePlayerViewports(int nPlayers, int screenWidth, int screenHe
   playerViewports_ = createPlayerViewports ( nPlayers, screenWidth, screenHeight );
 }
 
-}
+}  // namespace render

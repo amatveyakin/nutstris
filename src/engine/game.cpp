@@ -10,6 +10,15 @@
 
 namespace engine {
 
+namespace {
+template<typename ElementT, typename FuncT>
+auto transformedVector(const std::vector<ElementT>& vector, FuncT func) {
+  std::vector<std::result_of_t<FuncT(ElementT)>> result;
+  std::transform(vector.begin(), vector.end(), std::back_inserter(result), func);
+  return result;
+}
+}  // namespace
+
 //================================= Game Round =================================
 
 GameRound::GameRound(const Game* game__, Time currentTime__)
@@ -31,23 +40,28 @@ const GameBasics& GameRound::basics() const {
   return game_->basics();
 }
 
-std::vector<Player*> GameRound::players() const {
-  std::vector<Player*> result;
-  for (const auto& player : players_)
-    result.push_back(player.get());
-  return result;
+std::vector<const Player*> GameRound::players() const {
+  return transformedVector(players_, [](auto&& player) -> const Player* { return player.get(); });
 }
 
-std::vector<Player*> GameRound::activePlayers() const {
+std::vector<Player*> GameRound::players() {
+  return transformedVector(players_, [](auto&& player) -> Player* { return player.get(); });
+}
+
+std::vector<const Player*> GameRound::activePlayers() const {
+  return transformedVector(activePlayers_, [](auto&& player) -> const Player* { return player; });
+}
+
+std::vector<Player*> GameRound::activePlayers() {
   return activePlayers_;
 }
 
-Player* GameRound::playerById(int id) const {
-  for (const auto& player : players_) {
-    if (player->id() == id)
-      return player.get();
-  }
-  return nullptr;
+const Player* GameRound::playerById(int id) const {
+  return doGetPlayerById(id);
+}
+
+Player* GameRound::playerById(int id) {
+  return doGetPlayerById(id);
 }
 
 void GameRound::deactivatePlayer(int id) {
@@ -105,6 +119,14 @@ void GameRound::onTimer(Time currentTime__) {
 
   for (size_t iPlayer = 0; iPlayer < activePlayers_.size(); ++iPlayer)
     activePlayers_[iPlayer]->onTimer();
+}
+
+Player* GameRound::doGetPlayerById(int id) const {
+  for (const auto& player : players_) {
+    if (player->id() == id)
+      return player.get();
+  }
+  return nullptr;
 }
 
 void GameRound::onGlobalKeyPress(GlobalControl key) {

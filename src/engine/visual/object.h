@@ -17,13 +17,13 @@ public:
 
   virtual ~VisualObject() {}
 
-  VisualObject* parent() {
+  const VisualObject* parent() const {
     return parent_;
   }
 
-  virtual FloatFieldCoords relativePosition(Time currentTime) = 0;
+  virtual FloatFieldCoords relativePosition(Time currentTime) const = 0;
 
-  FloatFieldCoords absolutePosition(Time currentTime) {
+  FloatFieldCoords absolutePosition(Time currentTime) const {
     if (parent_)
       return parent_->absolutePosition(currentTime) + relativePosition(currentTime);
     else
@@ -44,12 +44,12 @@ public:
     position_ = newPosition;
   }
 
-  FloatFieldCoords relativePosition(Time /*currentTime*/) override {
+  FloatFieldCoords relativePosition(Time /*currentTime*/) const override {
     return position_;
   }
 
 protected:
-  FloatFieldCoords position_;
+  mutable FloatFieldCoords position_;  // TODO(Andrei): remove "mutable"
 };
 
 
@@ -58,7 +58,7 @@ class MovingObject : public AffixmentPointObject
 public:
   using AffixmentPointObject::AffixmentPointObject;
 
-  std::vector<Motion> motions;
+  mutable std::vector<Motion> motions;  // TODO(Andrei): remove "mutable"
 
   void addMotion(FloatFieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration) {
     // TODO(Andrei): Choose correct easing for each case
@@ -70,7 +70,7 @@ public:
     motions.clear();
   }
 
-  virtual FloatFieldCoords relativePosition(Time currentTime) {
+  virtual FloatFieldCoords relativePosition(Time currentTime) const {
     FloatFieldCoords currentPosition = position_;
     for (auto motionIt = motions.begin(); motionIt != motions.end(); ) {
       FloatFieldCoords motionShift = motionIt->shiftVector(currentTime);
@@ -108,7 +108,7 @@ public:
   }
 
   // TODO: update position separately, make getter constant
-  virtual FloatFieldCoords relativePosition(Time currentTime) {
+  virtual FloatFieldCoords relativePosition(Time currentTime) const {
     Time deltaTime = currentTime - lastUpdated_;
     lastUpdated_ = currentTime;
     if (!binding_)
@@ -128,7 +128,7 @@ public:
 protected:
   VisualObject* binding_ = nullptr;
   Speed maxSpeed_ = Speed::zero();
-  Time lastUpdated_;
+  mutable Time lastUpdated_;  // TODO(Andrei): remove "mutable"
 };
 
 }  // namespace engine

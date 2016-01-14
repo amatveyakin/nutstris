@@ -8,12 +8,7 @@ namespace engine {
 
 class BlockImage : public MovingObject {
 public:
-  BlockImage(VisualObject* parent__, Color color__, FieldCoords position__)
-      : MovingObject(parent__)
-      , color_(color__)
-  {
-    placeAt(FloatFieldCoords(position__));
-  }
+  BlockImage(VisualObject* parent__, Color color__, FieldCoords position__);
 
   Color color() const {
     return color_;
@@ -22,19 +17,21 @@ public:
   Bonus bonus() const {
     return bonus_;
   }
-
-  AutoStoppingEffectType<FadingEffectType>& bonusImage() {
-    return bonusImage_;
-  }
-
   void setBonus(Bonus bonus__) {
     bonus_ = bonus__;
+  }
+
+  const NormalEffectType& bonusImage() const {
+    return bonusImage_;
+  }
+  NormalEffectType& bonusImage() {
+    return bonusImage_;
   }
 
 private:
   Color color_;
   Bonus bonus_ = Bonus::None;
-  AutoStoppingEffectType<FadingEffectType> bonusImage_;
+  NormalEffectType bonusImage_;
 };
 
 

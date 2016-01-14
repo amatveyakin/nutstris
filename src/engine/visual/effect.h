@@ -1,5 +1,3 @@
-// TODO(Andrei): consider using composition based on virtual functions instead of templates
-
 #pragma once
 
 #include <list>
@@ -10,267 +8,128 @@
 
 namespace engine {
 
-// Base effect type, do not use directly
-class BaseEffectType
-{
-protected:
-  bool active_ = false;
-};
-
-
-class SmoothEffectType : public BaseEffectType
-{
+class BaseEffectType {
 public:
-  bool fullyInactive() const {
-    return (progress_ == MIN_PROGRESS);
-  }
+  virtual ~BaseEffectType();
 
-  bool fullyActive() const {
-    return (progress_ == MAX_PROGRESS);
-  }
+  virtual double progress(Time currentTime) const = 0;
 
-  bool somehowActive() const {
-    return (progress_ > MIN_PROGRESS);
-  }
-
-protected:
-  // Remove these constants (?)
-  static constexpr double MIN_PROGRESS = 0.0;
-  static constexpr double MAX_PROGRESS = 1.0;
-  static constexpr double PROGRESS_RANGE = MAX_PROGRESS - MIN_PROGRESS;
-
-  double progress_ = MIN_PROGRESS;
-  Time lastUpdated_ = 0.0s;
-};
-
-
-// An effect that repeats periodically (starting from zero moment)
-class PeriodicalEffectType : public SmoothEffectType
-{
-public:
-  void enable(Time newPeriod) {
-    active_ = true;
-    isStopping_ = false;
-    period_ = newPeriod;
-  }
-
-  void disable() {
-    isStopping_ = true;
-    stoppingAcceleration_ = 0.0s;
-  }
-
-  double progress(Time currentTime) {
-    if (!active_) {
-      lastUpdated_ = currentTime;
-      return MIN_PROGRESS;
+  virtual void enable(Time currentTime) {
+    if (!enabled_) {
+      enabled_ = true;
+      lastToggled_ = currentTime;
     }
+  }
 
-    double progress_increment = (currentTime - lastUpdated_) / period_;
-    progress_ += progress_increment;
-    if (isStopping_) {
-      stoppingAcceleration_ += progress_increment * STOPPING_ACCELERATION_COEFF;
-      progress_ += stoppingAcceleration_ / 1.0s;
+  virtual void disable(Time currentTime) {
+    if (enabled_) {
+      initialProgress_ = progress(currentTime);
+      enabled_ = false;
+      lastToggled_ = currentTime;
     }
+  }
 
-    while (progress_ > MAX_PROGRESS) {
-      if (isStopping_) {
-        progress_ = MIN_PROGRESS;
-        active_ = false;
-      }
-      else
-        progress_ -= PROGRESS_RANGE;
-    }
-    lastUpdated_ = currentTime;
-    return progress_;
+  virtual void reset(Time currentTime) {
+    initialProgress_ = kMinProgress;
+    enabled_ = false;
+    lastToggled_ = currentTime;
   }
 
 protected:
-  static constexpr Time STOPPING_ACCELERATION_COEFF = 0.05s;
+  // TODO: Remove (?) It is implicitly assumed that these constants equal these value in some places.
+  static constexpr double kMinProgress = 0.0;
+  static constexpr double kMaxProgress = 1.0;
+  static constexpr double kProgressRange = kMaxProgress - kMinProgress;
 
-  Time period_ = 1.0s;
-  bool isStopping_ = false;
-  Time stoppingAcceleration_ = 0.0s;
-};
-
-
-// An effect that can fade in and (or) out. If (active == true) the effect is turned on
-// and thus is either functioning normally [if (current_time > endTime] or is being
-// activated now [if (current time <= endTime)]. If (active == false) everything is vice versa.
-class FadingEffectType : public SmoothEffectType
-{
-public:
-  void enable(Time newDuration) {
-    active_ = true;
-    duration_ = newDuration;
-  }
-
-  void disable() {
-    active_ = false;
-  }
-
-  double progress(Time currentTime) {
-    double progressChange = (currentTime - lastUpdated_) / duration_;
-    if (active_)
-      progress_ = std::min(progress_ + progressChange, MAX_PROGRESS);
+  static constexpr double fmodBackAndForth(double dividend, double divisor) {
+    double v = std::fmod(dividend, 2 * divisor);
+    if (v < divisor)
+      return v;
     else
-      progress_ = std::max(progress_ - progressChange, MIN_PROGRESS);
-    lastUpdated_ = currentTime;
-    return progress_;
+      return 2 * divisor - v;
   }
 
-protected:
-  Time duration_ = 1.0s;
+  bool enabled_ = false;
+  double initialProgress_ = kMinProgress;
+  Time lastToggled_ = 0.0s;
 };
 
 
-// Effect that acts once
-class SingleEffectType : public SmoothEffectType   // Name (?)
-{
+// An effect that repeats periodically
+class PeriodicalEffectType : public BaseEffectType {
+  using Parent = BaseEffectType;
 public:
-  void enable(Time newDuration) {
-    active_ = true;
-    duration_ = newDuration;
+  PeriodicalEffectType(Time period__)
+    : period_(period__) {}
+
+  void enable(Time currentTime) override {
+    Parent::enable(currentTime);
+    stoppingSince_ = Time::min();
   }
 
-  // TODO(Andrei): Should SingleEffectType::disable be simply ignored?
-  void disable() { }
+  void disable(Time currentTime) override {
+    if (enabled_)
+      stoppingSince_ = currentTime;
+    Parent::disable(currentTime);
+  }
 
-  double progress(Time currentTime) {
-    double progressChange = (currentTime - lastUpdated_) / duration_;
-    if (active_) {
-      progress_ += progressChange;
-      if (progress_ > MAX_PROGRESS)
-      {
-        progress_ = MIN_PROGRESS;
-        active_ = false;
-      }
+  double progress(Time currentTime) const {
+    if (enabled_) {
+      double progressDelta = (currentTime - lastToggled_) / period_;
+      return fmod(initialProgress_ + progressDelta, kProgressRange);
+    } else {
+      // These tricks are requires, because we don't have Time^2 unit
+      double progressDelta = math::sqr((currentTime - lastToggled_) / 1.0s) * 1.0s / period_ * 1.0s * kStoppingSpeed;
+      return std::min(initialProgress_ + progressDelta, kMaxProgress);
     }
-    lastUpdated_ = currentTime;
-    return progress_;
   }
 
 protected:
-  Time duration_ = 1.0s;
+  static constexpr Speed kStoppingSpeed = 1.0 / 0.05s;
+
+  Time period_ = 0.0s;
+  Time stoppingSince_ = Time::min();
 };
 
+// Fades in on enable, fades out on disable.
+class NormalEffectType : public BaseEffectType {
+public:
+  NormalEffectType(Time duration__)
+    : duration_(duration__) {}
+
+  void setDuration(Time duration__) {
+    duration_ = duration__;
+  }
+
+  double progress(Time currentTime) const {
+    double progressDelta = (currentTime - lastToggled_) / duration_;
+    if (enabled_)
+      return std::min(initialProgress_ + progressDelta, kMaxProgress);
+    else
+      return std::max(initialProgress_ - progressDelta, kMinProgress);
+  }
+
+protected:
+  Time duration_ = 0.0s;
+};
 
 // Effect that fades in and than immediately fades out.
-class FlashEffectType : public SmoothEffectType
-{
+class FlashEffectType : public BaseEffectType {
 public:
-  void enable(Time newDuration) {
-    active_ = true;
-    halfDuration_ = newDuration / 2.0;
-  }
+  FlashEffectType(Time halfDuration__)
+    : halfDuration_(halfDuration__) {}
 
-  void disable() {
-    active_ = false;
-  }
-
-  double progress(Time currentTime) {
-    double progressChange = (currentTime - lastUpdated_) / halfDuration_;
-    if (active_) {
-      progress_ += progressChange;
-      if (progress_ > MAX_PROGRESS)
-      {
-        progress_ = MAX_PROGRESS;
-        active_ = false;
-      }
+  double progress(Time currentTime) const {
+    double progressDelta = (currentTime - lastToggled_) / halfDuration_;
+    if (enabled_) {
+      return fmodBackAndForth(initialProgress_ + progressDelta, kProgressRange);
+    } else {
+      return std::max(initialProgress_ - progressDelta, kMinProgress);
     }
-    else
-      progress_ = std::max(progress_ - progressChange, MIN_PROGRESS);
-    lastUpdated_ = currentTime;
-    return progress_;
   }
 
 protected:
-  Time halfDuration_ = 1.0s;
-};
-
-
-// TODO(Andrei): Join with FadingEffectType (?)
-
-// Effect fades in and remains fully active until it is reset
-class PermanentEffectType : public SmoothEffectType   // Name (?)
-{
-public:
-  void enable(Time newDuration) {
-    active_ = true;
-    duration_ = newDuration;
-  }
-
-  void disable() {
-    active_ = false;
-    progress_ = MIN_PROGRESS;
-  }
-
-  /*void restart(Time newDuration)
-  {
-    disable();
-    enable(newDuration);
-  }*/
-
-  double progress(Time currentTime) {
-    double progressChange = (currentTime - lastUpdated_) / duration_;
-    if (active_) {
-      progress_ += progressChange;
-      if (progress_ > MAX_PROGRESS)
-        progress_ = MAX_PROGRESS;
-    }
-    lastUpdated_ = currentTime;
-    return progress_;
-  }
-
-protected:
-  Time duration_ = 1.0s;
-};
-
-
-template<class EffectT>
-class AutoStartingEffectType : public EffectT
-{
-public:
-  void startAt(Time startTime) {
-    startTime_ = startTime;
-  }
-
-  void enable(Time newDuration) {
-    startTime_ = Time::max();
-    EffectT::enable();
-  }
-
-  double progress(Time currentTime) {
-    if (currentTime > startTime_)
-      enable();
-    return EffectT::progress(currentTime);
-  }
-
-protected:
-  Time startTime_ = Time::max();
-};
-
-
-template<class EffectT>
-class AutoStoppingEffectType : public EffectT
-{
-public:
-  void stopAt(Time stopTime) {
-    stopTime_ = stopTime;
-  }
-
-  void disable() {
-    stopTime_ = Time::max();
-    EffectT::disable();
-  }
-
-  double progress(Time currentTime) {
-    if (currentTime > stopTime_)
-      disable();
-    return EffectT::progress(currentTime);
-  }
-
-protected:
-  Time stopTime_ = Time::max();
+  Time halfDuration_ = 0.0s;
 };
 
 
@@ -280,35 +139,24 @@ struct DirectedEffectExtraType
   int target = 0;
 };
 
-
-using HintEffect = PermanentEffectType;
-
-using HintMaterializationEffect = PermanentEffectType;
-
-using FieldCleaningEffect = SingleEffectType; // --> FlashEffectType (?)
-
-// if can't actually fade out :-)
-using PlayerDyingEffect = FadingEffectType;
-
-using NoHintEffect = FadingEffectType;
-
-using FlippedScreenEffect = FadingEffectType;
-
+using HintAppearanceEffect = NormalEffectType;
+using HintMaterializationEffect = NormalEffectType;
+using FieldCleaningEffect = NormalEffectType;
+using PlayerDyingEffect = NormalEffectType;
+using NoHintEffect = NormalEffectType;
+using FlippedScreenEffect = NormalEffectType;
 using RotatingFieldEffect = PeriodicalEffectType;
-
-using SemicubesEffect = FadingEffectType;
-
-using WaveEffect = PeriodicalEffectType; // += FadingEffectType (?)
-
-class LanternEffect : public FadingEffectType, public MagnetObject { };
-
-class PieceTheftEffect : public SingleEffectType, public DirectedEffectExtraType { };
-
-
-class PlayerVisualEffects
-{
+using SemicubesEffect = NormalEffectType;
+using WaveEffect = PeriodicalEffectType;
+using LanternEffect = NormalEffectType;
+class PieceTheftEffect : public NormalEffectType, public DirectedEffectExtraType {
 public:
-  HintEffect hint;
+  PieceTheftEffect();
+};
+
+class PlayerVisualEffects {
+public:
+  HintAppearanceEffect hintAppearance;
   HintMaterializationEffect hintMaterialization;
   FieldCleaningEffect fieldCleaning;
   PlayerDyingEffect playerDying;
@@ -318,9 +166,11 @@ public:
   SemicubesEffect semicubes;
   WaveEffect wave;
   LanternEffect lantern;
+  MagnetObject lanternObject;
   PieceTheftEffect* pieceTheftPtr = nullptr;
-};
 
+  PlayerVisualEffects();
+};
 
 class GlobalVisualEffects
 {

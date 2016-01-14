@@ -28,9 +28,16 @@ public:
 
   const GameBasics& basics() const;
 
-  std::vector<Player*> players() const;  // players participating in this round; fixed size vector
-  std::vector<Player*> activePlayers() const;  // players that are still alive; this vector can shrink
-  Player* playerById(int id) const;
+  // players participating in this round; fixed size vector
+  std::vector<const Player*> players() const;
+  std::vector<Player*> players();
+
+  // players that are still alive; this vector can shrink
+  std::vector<const Player*> activePlayers() const;
+  std::vector<Player*> activePlayers();
+
+  const Player* playerById(int id) const;
+  Player* playerById(int id);
 
   void deactivatePlayer(int id);
 
@@ -45,6 +52,8 @@ public:
   void onTimer(Time currentTime);
 
 private:
+  Player* doGetPlayerById(int id) const;
+
   void onGlobalKeyPress(GlobalControl key);
 
 private:

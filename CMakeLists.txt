@@ -27,6 +27,7 @@ set(srcs
     ${src_dir}/engine/visual/effect.cpp
     ${src_dir}/engine/visual/effect.h
     ${src_dir}/engine/visual/misc.h
+    ${src_dir}/engine/visual/misc.cpp
     ${src_dir}/engine/visual/motion.cpp
     ${src_dir}/engine/visual/motion.h
     ${src_dir}/engine/visual/object.h

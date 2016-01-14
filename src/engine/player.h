@@ -27,6 +27,8 @@ namespace engine {
 
 class GameRound;
 
+// TODO(Andrei): Move the constants to a separate file.
+
 //================================ Time & speed ================================
 
 extern const double STARTING_SPEED;
@@ -68,6 +70,7 @@ const Time   BONUS_REMOVING_HINT_DURATION = 1.0s;
 const Time   BONUS_LANTERN_FADING_TIME = 1.5s;
 // const Time   BONUS_LANTERN_ANIMATION_TIME = PIECE_FORCED_LOWERING_ANIMATION_TIME;  // (?)
 const Speed  BONUS_LANTERN_MAX_SPEED = 100.0 / 1.0s;
+const Time   BONUS_PIECE_THEFT_DURATION = 0.7s;
 
 const Time   MIN_BONUS_APPEAR_TIME = 4.0s;
 const Time   MAX_BONUS_APPEAR_TIME = 6.0s;
@@ -203,9 +206,10 @@ private:
   void          rotatePiece(int direction);
 
   bool          generateBonus();
+  void          startBonusDisappearanceAnimations();
   void          removeBonuses();
   void          planBonusAppearance();
-  void          planBonusDisappearance(FieldCoords bonusCoords);
+  void          planBonusDisappearance();
 
   void          moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration);
 

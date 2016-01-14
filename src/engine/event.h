@@ -16,6 +16,7 @@ enum EventType
   etNewPiece,
   etRoutineSpeedUp,
   etBonusAppearance,
+  etBonusDisappearanceAnimationStart,
   etBonusDisappearance,
   etHeal,
   etBeginClearField,

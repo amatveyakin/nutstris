@@ -74,9 +74,9 @@ Player::Player(const PlayerInfo* info__, GameRound* game__)
   for (int key = 0; key < kNumPlayerControls; ++key)
     nextKeyActivationTable[key] = Time::min();
 
-  visualEffects.lantern.bindTo(&fallingPieceFrame);
-  visualEffects.lantern.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
-  visualEffects.lantern.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
+  visualEffects.lanternObject.bindTo(&fallingPieceFrame);
+  visualEffects.lanternObject.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
+  visualEffects.lanternObject.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
   latestLineCollapse = Time::min();
 
   victimId = id();
@@ -184,7 +184,7 @@ void Player::beginClearField()
   //  TODO: also handle a case when the bonus is taken somehow but a piece is still falling (?)
   fieldLocks.isBeingCleared = true;
   field = Field();
-  visualEffects.fieldCleaning.enable(BONUS_CLEAR_FIELD_DURATION);
+  visualEffects.fieldCleaning.enable(currentTime());
   events.push(etEndClearField, currentTime() + BONUS_CLEAR_FIELD_DURATION);
 }
 
@@ -198,7 +198,7 @@ void Player::endClearField()
 void Player::kill()
 {
   game->deactivatePlayer(id());
-  visualEffects.playerDying.enable(PLAYER_DYING_ANIMATION_TIME);
+  visualEffects.playerDying.enable(currentTime());
   active = false;
 }
 
@@ -279,6 +279,9 @@ void Player::onTimer()
     case etBonusAppearance:
       if (!generateBonus())
         eventDelayed = true;
+      break;
+    case etBonusDisappearanceAnimationStart:
+      startBonusDisappearanceAnimations();
       break;
     case etBonusDisappearance:
       removeBonuses();   // TODO: remove only one (?)
@@ -439,8 +442,9 @@ void Player::setUpPiece()
   Time newPieceDelay = nLinesRemoved ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
                                        HINT_MATERIALIZATION_TIME;
   events.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
-  visualEffects.hintMaterialization.enable(newPieceDelay);
-  visualEffects.hint.enable(HINT_APPERAING_TIME);
+  visualEffects.hintMaterialization.setDuration(newPieceDelay);
+  visualEffects.hintMaterialization.enable(currentTime());
+  visualEffects.hintAppearance.enable(currentTime());
 //  visualEffects.lantern.resetBinding();
 }
 
@@ -467,8 +471,8 @@ bool Player::sendNewPiece()
   fallingPiece = nextPieces[0];
   assert(fallingPiece.valid());
 
-  visualEffects.hint.disable();
-  visualEffects.hintMaterialization.disable();
+  visualEffects.hintAppearance.reset(currentTime());
+  visualEffects.hintMaterialization.reset(currentTime());
 
   fallingPieceState = psNormal;
   fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece.position()));
@@ -504,7 +508,7 @@ void Player::lowerPiece(bool forced)
     fallingPiece.moveTo(newPosition);
 
     if (fallingPieceCannotReachSky())
-      visualEffects.hint.enable(HINT_APPERAING_TIME);
+      visualEffects.hintAppearance.enable(currentTime());
 
     events.push(etPieceLowering,
                 currentTime() +
@@ -682,8 +686,8 @@ bool Player::generateBonus()  // TODO: rewrite
         {
           field.mutableCell({col, row}).setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(BONUS_FADING_DURATION);
-          planBonusDisappearance(FieldCoords(col, row));
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(currentTime());
+          planBonusDisappearance();
           return true;
         }
       }
@@ -692,16 +696,22 @@ bool Player::generateBonus()  // TODO: rewrite
   return false;
 }
 
-void Player::removeBonuses()
-{
-  for (int row = 0; row < FIELD_HEIGHT; ++row)
-  {
-    for (int col = 0; col < FIELD_WIDTH; ++col)
-    {
-      if (field({col, row}).blocked())
-      {
+void Player::startBonusDisappearanceAnimations() {
+  for (int row = 0; row < FIELD_HEIGHT; ++row) {
+    for (int col = 0; col < FIELD_WIDTH; ++col) {
+      if (field({col, row}).blocked()) {
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
+      }
+    }
+  }
+}
+
+void Player::removeBonuses() {
+  for (int row = 0; row < FIELD_HEIGHT; ++row) {
+    for (int col = 0; col < FIELD_WIDTH; ++col) {
+      if (field({col, row}).blocked()) {
         field.mutableCell({col, row}).setBonus(Bonus::None);
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable();
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
       }
     }
   }
@@ -710,15 +720,16 @@ void Player::removeBonuses()
 
 void Player::planBonusAppearance()
 {
+  events.eraseEventType(etBonusDisappearanceAnimationStart);
+  events.eraseEventType(etBonusDisappearance);
   events.push(etBonusAppearance, currentTime() + randomTimeRange(MIN_BONUS_APPEAR_TIME, MAX_BONUS_APPEAR_TIME));
 }
 
-void Player::planBonusDisappearance(FieldCoords bonusCoords)
+void Player::planBonusDisappearance()
 {
   Time bonusDisappearTime = currentTime() + randomTimeRange(MIN_BONUS_LIFE_TIME, MAX_BONUS_LIFE_TIME);
   events.push(etBonusDisappearance, bonusDisappearTime);
-  lyingBlockImages[lyingBlockIndices[bonusCoords]].bonusImage().stopAt(
-          bonusDisappearTime - BONUS_FADING_DURATION);
+  events.push(etBonusDisappearanceAnimationStart, bonusDisappearTime - BONUS_FADING_DURATION);
 }
 
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
@@ -761,28 +772,28 @@ void Player::enableBonusVisualEffect(Bonus bonus)
     break;
   case Bonus::ClearField:
     // (!) It is enabled in beginClearField().  May be the conceptions needs changing
-    //visualEffects.fieldCleaning.enable(BONUS_CLEAR_FIELD_DURATION / 2);  // (!) Change if effect type is changed
+    //visualEffects.fieldCleaning.enable(currentTime());  // (!) Change if effect type is changed
     break;
   case Bonus::FlippedScreen:
-    visualEffects.flippedScreen.enable(BONUS_FLIPPING_SCREEN_DURATION);
+    visualEffects.flippedScreen.enable(currentTime());
     break;
   case Bonus::RotatingScreen:
-    visualEffects.rotatingField.enable(BONUS_ROTATING_SCREEN_PERIOD);
+    visualEffects.rotatingField.enable(currentTime());
     break;
   case Bonus::Wave:
-    visualEffects.wave.enable(BONUS_WAVE_PERIOD);
+    visualEffects.wave.enable(currentTime());
     break;
   case Bonus::Lantern:
-    visualEffects.lantern.enable(BONUS_LANTERN_FADING_TIME);
+    visualEffects.lantern.enable(currentTime());
     break;
   case Bonus::CrazyPieces:
     // no effect
     break;
   case Bonus::TruncatedBlocks:
-    visualEffects.semicubes.enable(BONUS_CUTTING_BLOCKS_DURATION);
+    visualEffects.semicubes.enable(currentTime());
     break;
   case Bonus::NoHint:
-    visualEffects.noHint.enable(BONUS_REMOVING_HINT_DURATION);
+    visualEffects.noHint.enable(currentTime());
     break;
   case Bonus::SpeedUp:
     // no effect
@@ -809,25 +820,25 @@ void Player::disableBonusVisualEffect(Bonus bonus)
     // the effect ends itself
     break;
   case Bonus::FlippedScreen:
-    visualEffects.flippedScreen.disable();
+    visualEffects.flippedScreen.disable(currentTime());
     break;
   case Bonus::RotatingScreen:
-    visualEffects.rotatingField.disable();
+    visualEffects.rotatingField.disable(currentTime());
     break;
   case Bonus::Wave:
-    visualEffects.wave.disable();
+    visualEffects.wave.disable(currentTime());
     break;
   case Bonus::Lantern:
-    visualEffects.lantern.disable();
+    visualEffects.lantern.disable(currentTime());
     break;
   case Bonus::CrazyPieces:
     // no effect
     break;
   case Bonus::TruncatedBlocks:
-    visualEffects.semicubes.disable();
+    visualEffects.semicubes.disable(currentTime());
     break;
   case Bonus::NoHint:
-    visualEffects.noHint.disable();
+    visualEffects.noHint.disable(currentTime());
     break;
   case Bonus::SpeedUp:
     // no effect

@@ -150,9 +150,9 @@ void Renderer::renderHint_(const engine::Player& player, engine::Time now) {
 void Renderer::renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
                             bool falling, math::Vec4f clipPlane) {
   if (falling)
-    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.5f);
+    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.55f);
   else
-    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.2f);
+    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.35f);
 
   cubeMesh_->getShaderProgram().setUniform ( "gClipPlane", clipPlane );
   cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", faceOpacity);

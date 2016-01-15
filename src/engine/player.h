@@ -134,25 +134,6 @@ class Player
 public:
   Player(const PlayerInfo* info__, GameRound* game__);
 
-  const PlayerInfo* info = nullptr;
-  GameRound*        game = nullptr;  // TODO: rename (?)
-
-  bool          active = true;
-
-  double        speed = 0.;
-  Field         field;
-  FieldLocks    fieldLocks;
-  Time          latestLineCollapse = Time::zero();
-
-  FallingPieceState   fallingPieceState = {};
-  Piece               fallingPiece;
-  std::vector<Piece>  nextPieces;
-
-  BonusesBitSet bonuces;
-  int           victimId = 0;
-
-  EventSet      events;
-
   int                                             backgroundSeed = 0;
   std::vector<BlockImage>                         lyingBlockImages;  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
   std::map<FieldCoords, int, CompareFieldCoords>  lyingBlockIndices;
@@ -161,13 +142,16 @@ public:
   std::vector<DisappearingLine>                   disappearingLines;
   PlayerVisualEffects                             visualEffects;
 
-  std::array<Time, kNumPlayerControls> nextKeyActivationTable;
-
   Time          currentTime();
   Time          pieceLoweringInterval();
 
   int           id() const;
   std::string   name() const;
+
+  bool          active() const;
+  const std::vector<Piece>& nextPieces() const;
+
+  int           victimId() const;
   Player*       victim() const;
 
   void          takesBonus(Bonus bonus);
@@ -220,6 +204,28 @@ private:
 
   void          enableBonusVisualEffect(Bonus bonus);
   void          disableBonusVisualEffect(Bonus bonus);
+
+private:
+  const PlayerInfo* info_ = nullptr;
+  GameRound*        game_ = nullptr;  // TODO: rename (?)
+
+  bool          active_ = true;
+
+  double        speed_ = 0.;
+  Field         field_;
+  FieldLocks    fieldLocks_;
+  Time          latestLineCollapse_ = Time::zero();
+
+  FallingPieceState   fallingPieceState_ = {};
+  Piece               fallingPiece_;
+  std::vector<Piece>  nextPieces_;  // TODO(Andrei): add corresponding visual class
+
+  BonusesBitSet bonuces_;
+  int           victimId_ = 0;
+
+  EventSet      events_;
+
+  std::array<Time, kNumPlayerControls> nextKeyActivationTable_;
 };
 
 }  // namespace engine

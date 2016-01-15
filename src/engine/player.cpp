@@ -68,23 +68,23 @@ const Time   PLAYER_DYING_ANIMATION_TIME = 1.0s;
 //=================================== Player ===================================
 
 Player::Player(const PlayerInfo* info__, GameRound* game__)
-  : info(info__)
-  , game(game__)
+  : info_(info__)
+  , game_(game__)
 {
   for (int key = 0; key < kNumPlayerControls; ++key)
-    nextKeyActivationTable[key] = Time::min();
+    nextKeyActivationTable_[key] = Time::min();
 
   visualEffects.lanternObject.bindTo(&fallingPieceFrame);
   visualEffects.lanternObject.placeAt(FloatFieldCoords((FIELD_WIDTH  - 1.0) / 2.0, (FIELD_HEIGHT - 1.0) / 2.0));
   visualEffects.lanternObject.setMaxSpeed(BONUS_LANTERN_MAX_SPEED);
-  latestLineCollapse = Time::min();
+  latestLineCollapse_ = Time::min();
 
-  victimId = id();
+  victimId_ = id();
 
-  speed = STARTING_SPEED;
+  speed_ = STARTING_SPEED;
 
   backgroundSeed = rand();
-  events.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
+  events_.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
   initPieceQueue(NORMAL_HINT_QUEUE_SIZE);
   planBonusAppearance();
   sendNewPiece();
@@ -92,24 +92,36 @@ Player::Player(const PlayerInfo* info__, GameRound* game__)
 
 Time Player::currentTime()
 {
-  return game->currentTime();
+  return game_->currentTime();
 }
 
 Time Player::pieceLoweringInterval()
 {
-  return AUTO_LOWERING_TIME / speed;
+  return AUTO_LOWERING_TIME / speed_;
 }
 
 int Player::id() const {
-  return info->id();
+  return info_->id();
 }
 
 std::string Player::name() const {
-  return info->name();
+  return info_->name();
+}
+
+bool Player::active() const {
+  return active_;
+}
+
+const std::vector<Piece>& Player::nextPieces() const {
+  return nextPieces_;
+}
+
+int Player::victimId() const {
+  return victimId_;
 }
 
 Player* Player::victim() const {
-  return (victimId != id()) ? game->playerById(victimId) : nullptr;
+  return (victimId_ != id()) ? game_->playerById(victimId_) : nullptr;
 }
 
 void Player::takesBonus(Bonus bonus)
@@ -134,14 +146,14 @@ void Player::applyBonus(Bonus bonus)
   case Bonus::PieceTheft:
     break;
   case Bonus::Heal:
-    events.push(etHeal, currentTime());
+    events_.push(etHeal, currentTime());
 //    heal();
     break;
   case Bonus::SlowDown:
     bonusSlowDown();
     break;
   case Bonus::ClearField:
-    events.push(etBeginClearField, currentTime());
+    events_.push(etBeginClearField, currentTime());
     break;
   case Bonus::SpeedUp:
     bonusSpeedUp();
@@ -149,7 +161,7 @@ void Player::applyBonus(Bonus bonus)
   default: break;  // TODO(Andrei): handle all values
   }
   if (isPermanent(bonus))
-    bonuces.add(bonus);
+    bonuces_.add(bonus);
   enableBonusVisualEffect(bonus);
 }
 
@@ -167,14 +179,14 @@ void Player::disenchant(Bonus bonus)
   // ...
   default: break;  // TODO(Andrei): handle all values
   }
-  bonuces.remove(bonus);
+  bonuces_.remove(bonus);
   disableBonusVisualEffect(bonus);
 }
 
 void Player::heal()
 {
   for (Bonus bonus : ForEachBonus()) {
-    if (isDebuff(bonus) && bonuces.test(bonus))
+    if (isDebuff(bonus) && bonuces_.test(bonus))
       disenchant(bonus);
   }
 }
@@ -182,35 +194,35 @@ void Player::heal()
 void Player::beginClearField()
 {
   //  TODO: also handle a case when the bonus is taken somehow but a piece is still falling (?)
-  fieldLocks.isBeingCleared = true;
-  field = Field();
+  fieldLocks_.isBeingCleared = true;
+  field_ = Field();
   visualEffects.fieldCleaning.enable(currentTime());
-  events.push(etEndClearField, currentTime() + BONUS_CLEAR_FIELD_DURATION);
+  events_.push(etEndClearField, currentTime() + BONUS_CLEAR_FIELD_DURATION);
 }
 
 void Player::endClearField()
 {
-  fieldLocks.isBeingCleared = false;
+  fieldLocks_.isBeingCleared = false;
   lyingBlockImages.clear();
   lyingBlockIndices.clear();
 }
 
 void Player::kill()
 {
-  events.clear();
-  game->deactivatePlayer(id());
+  events_.clear();
+  game_->deactivatePlayer(id());
   visualEffects.playerDying.enable(currentTime());
-  active = false;
+  active_ = false;
 }
 
 void Player::cycleVictim()
 {
-  if (game->activePlayers().size() < 2)
+  if (game_->activePlayers().size() < 2)
     return;
   do
   {
-    victimId = (victimId + 1) % MAX_PLAYERS;
-  } while (!(game->playerById(victimId) && game->playerById(victimId)->active));
+    victimId_ = (victimId_ + 1) % MAX_PLAYERS;
+  } while (!(game_->playerById(victimId_) && game_->playerById(victimId_)->active_));
 }
 
 void Player::onKeyPress(PlayerControl key)
@@ -229,7 +241,7 @@ void Player::onKeyPress(PlayerControl key)
     rotatePiece(1);
     break;
   case PlayerControl::Down:
-    events.eraseEventType(etPieceLowering);
+    events_.eraseEventType(etPieceLowering);
     lowerPiece(true /* forced */);
     break;
   case PlayerControl::Drop:
@@ -243,13 +255,13 @@ void Player::onKeyPress(PlayerControl key)
 
 void Player::processInput() {
   for (int key = 0; key < kNumPlayerControls; ++key) {
-    if (Keyboard::isKeyPressed(info->controls()[key]) &&
-        (currentTime() >= nextKeyActivationTable[key])) {
+    if (Keyboard::isKeyPressed(info_->controls()[key]) &&
+        (currentTime() >= nextKeyActivationTable_[key])) {
       onKeyPress(PlayerControl(key));
-      nextKeyActivationTable[key] = currentTime() + playerControlCooldown(PlayerControl(key));
+      nextKeyActivationTable_[key] = currentTime() + playerControlCooldown(PlayerControl(key));
     }
-    else if (!Keyboard::isKeyPressed(info->controls()[key]))
-      nextKeyActivationTable[key] = currentTime();
+    else if (!Keyboard::isKeyPressed(info_->controls()[key]))
+      nextKeyActivationTable_[key] = currentTime();
   }
 }
 
@@ -267,10 +279,10 @@ void Player::onTimer()
   processInput();
   updateObjects();
 
-  while ((!events.empty()) && (currentTime() >= events.top().activationTime))
+  while ((!events_.empty()) && (currentTime() >= events_.top().activationTime))
   {
-    Event currentEvent = events.top();
-    events.pop();
+    Event currentEvent = events_.top();
+    events_.pop();
     bool eventDelayed = false;
     switch (currentEvent.type)
     {
@@ -315,7 +327,7 @@ void Player::onTimer()
     if (eventDelayed)
     {
       currentEvent.activationTime += EVENT_DELAY_TIME;
-      events.push(currentEvent);
+      events_.push(currentEvent);
     }
   }
 }
@@ -326,7 +338,7 @@ int Player::highestNonemptyRow() const
 {
   for (int row = FIELD_HEIGHT - 1; row >= 0; --row)
     for (int col = 0; col < FIELD_WIDTH; ++col)
-      if (field({col, row}).blocked())
+      if (field_({col, row}).blocked())
         return row;
   return -1;
 }
@@ -334,28 +346,28 @@ int Player::highestNonemptyRow() const
 bool Player::canDisposePiece(FieldCoords position, const BlockStructure& piece) const
 {
   for (size_t i = 0; i < piece.blocks.size(); ++i)
-    if (field(position + piece.blocks[i]).blocked())
+    if (field_(position + piece.blocks[i]).blocked())
       return false;
   return true;
 }
 
 bool Player::fallingPieceCannotReachSky() const
 {
-  for (int i = 0; i < fallingPiece.nRotationStates(); ++i)
-    if (fallingPiece.pieceTemplate()->structure[i].bounds.top + fallingPiece.position().y() >= FIELD_HEIGHT)
+  for (int i = 0; i < fallingPiece_.nRotationStates(); ++i)
+    if (fallingPiece_.pieceTemplate()->structure[i].bounds.top + fallingPiece_.position().y() >= FIELD_HEIGHT)
       return false;
   return true;
 }
 
 bool Player::canSendNewPiece() const
 {
-  return disappearingLines.empty() && !fieldLocks.isBeingCleared;
+  return disappearingLines.empty() && !fieldLocks_.isBeingCleared;
 }
 
 Piece Player::randomPiece() const
 {
-  int pieceTemplatesIndex = game->basics().randomPieceTable[rand() % game->basics().randomPieceTable.size()];
-  Piece piece(&game->basics().pieceTemplates[pieceTemplatesIndex]);
+  int pieceTemplatesIndex = game_->basics().randomPieceTable[rand() % game_->basics().randomPieceTable.size()];
+  Piece piece(&game_->basics().pieceTemplates[pieceTemplatesIndex]);
   piece.setRotationState(rand() % piece.nRotationStates());
   piece.moveTo({MAX_PIECE_SIZE + rand() % (FIELD_WIDTH - 2 * MAX_PIECE_SIZE),  // TODO: modify the formula
                 FIELD_HEIGHT - piece.currentStructure().bounds.bottom});
@@ -366,7 +378,7 @@ bool Player::bonusIsUseful(Bonus bonus) const
 {
   // TODO: process all debuffs uniformly  (may be, they are just always useful?)
   if (isBuff(bonus))
-    return !bonuces.test(bonus);
+    return !bonuces_.test(bonus);
 
   switch (bonus)
   {
@@ -374,12 +386,12 @@ bool Player::bonusIsUseful(Bonus bonus) const
     return false;
   case Bonus::Heal:
     for (Bonus b : ForEachBonus()) {
-      if (isDebuff(b) && bonuces.test(b))
+      if (isDebuff(b) && bonuces_.test(b))
         return true;
     }
     return false;
   case Bonus::SlowDown:
-    return speed > STARTING_SPEED + BONUS_SLOW_DOWN_VALUE;  // (?)
+    return speed_ > STARTING_SPEED + BONUS_SLOW_DOWN_VALUE;  // (?)
     break;
   case Bonus::ClearField:
     return highestNonemptyRow() > BONUS_HIGHEST_LINE_MAKING_CLEARING_USEFUL;
@@ -421,7 +433,7 @@ Bonus Player::randomBonus() const
 {
   Bonus bonus;
   for (int iAttempt = 0; iAttempt < N_BONUS_CHOOSE_ATTEMPTS; ++iAttempt) {
-    bonus = game->basics().randomBonusTable[rand() % game->basics().randomBonusTable.size()];
+    bonus = game_->basics().randomBonusTable[rand() % game_->basics().randomBonusTable.size()];
     if (bonusIsUseful(bonus))
       return bonus;
   }
@@ -430,29 +442,29 @@ Bonus Player::randomBonus() const
 
 void Player::setUpPiece()
 {
-  for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
+  for (size_t i = 0; i < fallingPiece_.nBlocks(); ++i)
   {
-    FieldCoords cell = fallingPiece.absoluteCoords(i);
+    FieldCoords cell = fallingPiece_.absoluteCoords(i);
     if (cell.y() >= FIELD_HEIGHT)
     {
-      events.push(etKill, currentTime());
+      events_.push(etKill, currentTime());
       return;
     }
 
     // TODO: Make falling pieces look differently. Add materialization animation.
-    field.mutableCell(cell).setBlock(fallingPiece.color());
-    lyingBlockImages.push_back(BlockImage(nullptr, fallingPiece.color(), cell));
+    field_.mutableCell(cell).setBlock(fallingPiece_.color());
+    lyingBlockImages.push_back(BlockImage(nullptr, fallingPiece_.color(), cell));
     lyingBlockIndices.insert(std::make_pair(cell, lyingBlockImages.size() - 1));
   }
   fallingBlockImages.clear();
-  fallingPieceState = psAbsent;
+  fallingPieceState_ = psAbsent;
 
   int nLinesRemoved = removeFullLines();
   if (nLinesRemoved)
     playSoundRepeatedly(Sound::LineCompleted, nLinesRemoved, kLineCompletedSoundRepeteationInterval);
   Time newPieceDelay = nLinesRemoved ? std::max(HINT_MATERIALIZATION_TIME, LINE_DISAPPEAR_TIME) :
                                        HINT_MATERIALIZATION_TIME;
-  events.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
+  events_.pushWithUniquenessCheck(etNewPiece, currentTime() + newPieceDelay);
   visualEffects.hintMaterialization.setDuration(newPieceDelay);
   visualEffects.hintMaterialization.enable(currentTime());
   visualEffects.hintAppearance.enable(currentTime());
@@ -461,17 +473,17 @@ void Player::setUpPiece()
 
 void Player::initPieceQueue(int size)
 {
-  nextPieces.clear();
+  nextPieces_.clear();
   resizePieceQueue(size);
 }
 
 void Player::resizePieceQueue(int newSize)
 {
-  int oldSize = nextPieces.size();
-  nextPieces.resize(newSize);
+  int oldSize = nextPieces_.size();
+  nextPieces_.resize(newSize);
   if (newSize > oldSize)
     for (int i = oldSize; i < newSize; ++i)
-      nextPieces[i] = randomPiece();
+      nextPieces_[i] = randomPiece();
 }
 
 bool Player::sendNewPiece()
@@ -479,21 +491,21 @@ bool Player::sendNewPiece()
   if (!canSendNewPiece())
     return false;
 
-  fallingPiece = nextPieces[0];
-  assert(fallingPiece.valid());
+  fallingPiece_ = nextPieces_[0];
+  assert(fallingPiece_.valid());
 
   visualEffects.hintAppearance.reset(currentTime());
   visualEffects.hintMaterialization.reset(currentTime());
 
-  fallingPieceState = psNormal;
-  fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece.position()));
-  for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
-    fallingBlockImages.push_back(BlockImage(&fallingPieceFrame, fallingPiece.color(), fallingPiece.relativeCoords(i)));
+  fallingPieceState_ = psNormal;
+  fallingPieceFrame.placeAt(FloatFieldCoords(fallingPiece_.position()));
+  for (size_t i = 0; i < fallingPiece_.nBlocks(); ++i)
+    fallingBlockImages.push_back(BlockImage(&fallingPieceFrame, fallingPiece_.color(), fallingPiece_.relativeCoords(i)));
 //  visualEffects.lantern.bindTo(&fallingPieceFrame);
-  events.push(etPieceLowering, currentTime() + pieceLoweringInterval());
+  events_.push(etPieceLowering, currentTime() + pieceLoweringInterval());
 
-  nextPieces.erase(nextPieces.begin());
-  nextPieces.push_back(randomPiece());
+  nextPieces_.erase(nextPieces_.begin());
+  nextPieces_.push_back(randomPiece());
   /*for (size_t i = 0; i < nextPieces.size() - 1; ++i)
     nextPieces[i] = nextPieces[i + 1];
   nextPieces.back() = randomPiece();*/
@@ -502,28 +514,28 @@ bool Player::sendNewPiece()
 
 void Player::lowerPiece(bool forced)
 {
-  if (fallingPieceState == psAbsent)
+  if (fallingPieceState_ == psAbsent)
     return;
 
-  FieldCoords newPosition = fallingPiece.position() + FieldCoords(0, -1);
+  FieldCoords newPosition = fallingPiece_.position() + FieldCoords(0, -1);
   // We should not forget about the case when a piece gets stuck as the result of
   // field modification. Such pieces should not continue falling.
-  if (canDisposePiece(fallingPiece.position(), fallingPiece.currentStructure()) &&
-      canDisposePiece(newPosition,             fallingPiece.currentStructure()))
+  if (canDisposePiece(fallingPiece_.position(), fallingPiece_.currentStructure()) &&
+      canDisposePiece(newPosition,             fallingPiece_.currentStructure()))
   {
-    Time loweringTime = (fallingPieceState == psDropping) ? DROPPING_PIECE_LOWERING_TIME :
+    Time loweringTime = (fallingPieceState_ == psDropping) ? DROPPING_PIECE_LOWERING_TIME :
                         (forced ? PIECE_FORCED_LOWERING_ANIMATION_TIME :
                                   PIECE_AUTO_LOWERING_ANIMATION_TIME);
-    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position()), currentTime(), loweringTime);
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece_.position()), currentTime(), loweringTime);
 
-    fallingPiece.moveTo(newPosition);
+    fallingPiece_.moveTo(newPosition);
 
     if (fallingPieceCannotReachSky())
       visualEffects.hintAppearance.enable(currentTime());
 
-    events.push(etPieceLowering,
+    events_.push(etPieceLowering,
                 currentTime() +
-                ((fallingPieceState == psDropping) ?
+                ((fallingPieceState_ == psDropping) ?
                  DROPPING_PIECE_LOWERING_TIME : pieceLoweringInterval()));
   }
   else
@@ -539,7 +551,7 @@ int Player::removeFullLines()
     bool rowIsFull = true;
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      if (!field({col, row}).blocked())
+      if (!field_({col, row}).blocked())
       {
         rowIsFull = false;
         break;
@@ -556,14 +568,14 @@ int Player::removeFullLines()
       disappearingLines.back().row = row;
       for (int col = 0; col < FIELD_WIDTH; ++col)
       {
-        if (field({col, row}).bonus() != Bonus::None)
+        if (field_({col, row}).bonus() != Bonus::None)
         {
-          takesBonus(field({col, row}).bonus());
-          events.eraseEventType(etBonusDisappearance);
+          takesBonus(field_({col, row}).bonus());
+          events_.eraseEventType(etBonusDisappearance);
           planBonusAppearance();
         }
-        disappearingLines.back().blockColor[col] = field({col, row}).color();
-        field.mutableCell({col, row}).clear();
+        disappearingLines.back().blockColor[col] = field_({col, row}).color();
+        field_.mutableCell({col, row}).clear();
 
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
         // TODO: No, *that* was not the point of  lyingBlockIndices !
@@ -578,12 +590,12 @@ int Player::removeFullLines()
         lyingBlockIndices.erase(FieldCoords(col, row));
       }
 
-      if (latestLineCollapse < currentTime() + LINE_DISAPPEAR_TIME)
-        latestLineCollapse = currentTime() + LINE_DISAPPEAR_TIME;
-      latestLineCollapse += LINE_COLLAPSE_TIME;
-      Event event(etLineCollapse, latestLineCollapse);
+      if (latestLineCollapse_ < currentTime() + LINE_DISAPPEAR_TIME)
+        latestLineCollapse_ = currentTime() + LINE_DISAPPEAR_TIME;
+      latestLineCollapse_ += LINE_COLLAPSE_TIME;
+      Event event(etLineCollapse, latestLineCollapse_);
       event.parameters.lineCollapse.row = row;
-      events.push(event);
+      events_.push(event);
     }
   }
 
@@ -596,8 +608,8 @@ void Player::collapseLine(int row)
   {
     for (int col = 0; col < FIELD_WIDTH; ++col)
     {
-      field.mutableCell({col, curRow}) = field({col, curRow + 1});
-      if (field({col, curRow}).blocked())
+      field_.mutableCell({col, curRow}) = field_({col, curRow + 1});
+      if (field_({col, curRow}).blocked())
         moveLyingBlockImage(FieldCoords(col, curRow + 1), FieldCoords(col, curRow), LINE_COLLAPSE_ANIMATION_TIME);
     }
   }
@@ -615,65 +627,65 @@ void Player::collapseLine(int row)
        i != disappearingLines.end(); ++i)
     if (i->row > row)
       --i->row;
-  for (auto myEvent = events.begin(); myEvent != events.end(); ++myEvent)
+  for (auto myEvent = events_.begin(); myEvent != events_.end(); ++myEvent)
     if ((myEvent->type == etLineCollapse) && (myEvent->parameters.lineCollapse.row > row))
       --const_cast<int&>(myEvent->parameters.lineCollapse.row);
 }
 
 void Player::movePiece(int direction)
 {
-  if (fallingPieceState != psNormal)
+  if (fallingPieceState_ != psNormal)
     return;
-  FieldCoords newPosition = fallingPiece.position() + FieldCoords(direction, 0);
-  if (canDisposePiece(newPosition, fallingPiece.currentStructure()))
+  FieldCoords newPosition = fallingPiece_.position() + FieldCoords(direction, 0);
+  if (canDisposePiece(newPosition, fallingPiece_.currentStructure()))
   {
-    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece.position()), currentTime(), PIECE_MOVING_ANIMATION_TIME);
-    fallingPiece.moveTo(newPosition);
+    fallingPieceFrame.addMotion(FloatFieldCoords(newPosition - fallingPiece_.position()), currentTime(), PIECE_MOVING_ANIMATION_TIME);
+    fallingPiece_.moveTo(newPosition);
   }
 }
 
 void Player::dropPiece()
 {
-  if (fallingPieceState != psNormal)
+  if (fallingPieceState_ != psNormal)
     return;
-  fallingPieceState = psDropping;
-  events.eraseEventType(etPieceLowering);
-  events.push(etPieceLowering, currentTime() + DROPPING_PIECE_LOWERING_TIME);
+  fallingPieceState_ = psDropping;
+  events_.eraseEventType(etPieceLowering);
+  events_.push(etPieceLowering, currentTime() + DROPPING_PIECE_LOWERING_TIME);
 }
 
 void Player::rotatePiece(int direction)
 {
-  if (fallingPieceState != psNormal)
+  if (fallingPieceState_ != psNormal)
     return;
 
   // TODO: simply create a  Piece  copy instead (?)
-  FieldCoords oldPosition = fallingPiece.position();
-  int oldRotationState = fallingPiece.rotationState();
-  int newFallingPieceRotationState = math::modFloored(fallingPiece.rotationState() + direction, fallingPiece.nRotationStates());
+  FieldCoords oldPosition = fallingPiece_.position();
+  int oldRotationState = fallingPiece_.rotationState();
+  int newFallingPieceRotationState = math::modFloored(fallingPiece_.rotationState() + direction, fallingPiece_.nRotationStates());
 
-  if (canDisposePiece(fallingPiece.position(),
-      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
+  if (canDisposePiece(fallingPiece_.position(),
+      fallingPiece_.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.setRotationState(newFallingPieceRotationState);
+    fallingPiece_.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position() + FieldCoords(1, 0),
-      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
+  else if (canDisposePiece(fallingPiece_.position() + FieldCoords(1, 0),
+      fallingPiece_.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.moveBy({1, 0});
-    fallingPiece.setRotationState(newFallingPieceRotationState);
+    fallingPiece_.moveBy({1, 0});
+    fallingPiece_.setRotationState(newFallingPieceRotationState);
   }
-  else if (canDisposePiece(fallingPiece.position() - FieldCoords(1, 0),
-      fallingPiece.pieceTemplate()->structure[newFallingPieceRotationState]))
+  else if (canDisposePiece(fallingPiece_.position() - FieldCoords(1, 0),
+      fallingPiece_.pieceTemplate()->structure[newFallingPieceRotationState]))
   {
-    fallingPiece.moveBy({-1, 0});
-    fallingPiece.setRotationState(newFallingPieceRotationState);
+    fallingPiece_.moveBy({-1, 0});
+    fallingPiece_.setRotationState(newFallingPieceRotationState);
   }
 
-  for (size_t i = 0; i < fallingPiece.nBlocks(); ++i)
+  for (size_t i = 0; i < fallingPiece_.nBlocks(); ++i)
   {
     fallingBlockImages[i].addMotion(
-            FloatFieldCoords(fallingPiece.absoluteCoords(i) -
-                             (oldPosition + fallingPiece.pieceTemplate()->structure[oldRotationState].blocks[i])),
+            FloatFieldCoords(fallingPiece_.absoluteCoords(i) -
+                             (oldPosition + fallingPiece_.pieceTemplate()->structure[oldRotationState].blocks[i])),
             currentTime(), PIECE_ROTATING_ANIMATION_TIME);
   }
 }
@@ -693,9 +705,9 @@ bool Player::generateBonus()  // TODO: rewrite
       for (int colIter = 0; colIter < N_BONUS_ONE_ROW_ATTEMPTS; ++colIter)
       {
         int col = rand() % FIELD_WIDTH;
-        if (field({col, row}).blocked())
+        if (field_({col, row}).blocked())
         {
-          field.mutableCell({col, row}).setBonus(bonus);
+          field_.mutableCell({col, row}).setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(currentTime());
           planBonusDisappearance();
@@ -710,7 +722,7 @@ bool Player::generateBonus()  // TODO: rewrite
 void Player::startBonusDisappearanceAnimations() {
   for (int row = 0; row < FIELD_HEIGHT; ++row) {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
-      if (field({col, row}).blocked()) {
+      if (field_({col, row}).blocked()) {
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
       }
     }
@@ -720,8 +732,8 @@ void Player::startBonusDisappearanceAnimations() {
 void Player::removeBonuses() {
   for (int row = 0; row < FIELD_HEIGHT; ++row) {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
-      if (field({col, row}).blocked()) {
-        field.mutableCell({col, row}).setBonus(Bonus::None);
+      if (field_({col, row}).blocked()) {
+        field_.mutableCell({col, row}).setBonus(Bonus::None);
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
       }
     }
@@ -731,16 +743,16 @@ void Player::removeBonuses() {
 
 void Player::planBonusAppearance()
 {
-  events.eraseEventType(etBonusDisappearanceAnimationStart);
-  events.eraseEventType(etBonusDisappearance);
-  events.push(etBonusAppearance, currentTime() + randomTimeRange(MIN_BONUS_APPEAR_TIME, MAX_BONUS_APPEAR_TIME));
+  events_.eraseEventType(etBonusDisappearanceAnimationStart);
+  events_.eraseEventType(etBonusDisappearance);
+  events_.push(etBonusAppearance, currentTime() + randomTimeRange(MIN_BONUS_APPEAR_TIME, MAX_BONUS_APPEAR_TIME));
 }
 
 void Player::planBonusDisappearance()
 {
   Time bonusDisappearTime = currentTime() + randomTimeRange(MIN_BONUS_LIFE_TIME, MAX_BONUS_LIFE_TIME);
-  events.push(etBonusDisappearance, bonusDisappearTime);
-  events.push(etBonusDisappearanceAnimationStart, bonusDisappearTime - BONUS_FADING_DURATION);
+  events_.push(etBonusDisappearance, bonusDisappearTime);
+  events_.push(etBonusDisappearanceAnimationStart, bonusDisappearTime - BONUS_FADING_DURATION);
 }
 
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
@@ -753,22 +765,22 @@ void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, T
 
 void Player::routineSpeedUp()
 {
-  double maxSpeed = std::max(NORMAL_SPEED_LIMIT, speed);
-  speed += ROUTINE_SPEED_UP_VALUE;
-  speed = std::min(speed, maxSpeed);
-  events.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
+  double maxSpeed = std::max(NORMAL_SPEED_LIMIT, speed_);
+  speed_ += ROUTINE_SPEED_UP_VALUE;
+  speed_ = std::min(speed_, maxSpeed);
+  events_.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
 }
 
 void Player::bonusSpeedUp()
 {
-  speed += BONUS_SPEED_UP_VALUE;
-  speed = std::min(speed, ABSOLUTE_SPEED_LIMIT);
+  speed_ += BONUS_SPEED_UP_VALUE;
+  speed_ = std::min(speed_, ABSOLUTE_SPEED_LIMIT);
 }
 
 void Player::bonusSlowDown()
 {
-  speed -= BONUS_SLOW_DOWN_VALUE;
-  speed = std::max(speed, STARTING_SPEED);
+  speed_ -= BONUS_SLOW_DOWN_VALUE;
+  speed_ = std::max(speed_, STARTING_SPEED);
 }
 
 void Player::enableBonusVisualEffect(Bonus bonus)
@@ -869,9 +881,9 @@ void Player::stealPiece()
   PieceTheftEffect pieceTheftEffect;
   pieceTheftEffect.enable(currentTime());
   pieceTheftEffect.sender = id();
-  pieceTheftEffect.target = victimId;
-  game->globalEffects().pieceThefts.push_back(pieceTheftEffect);
-  visualEffects.pieceTheftPtr = &game->globalEffects().pieceThefts.back();
+  pieceTheftEffect.target = victimId_;
+  game_->globalEffects().pieceThefts.push_back(pieceTheftEffect);
+  visualEffects.pieceTheftPtr = &game_->globalEffects().pieceThefts.back();
 }
 
 }  // namespace engine

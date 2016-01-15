@@ -77,7 +77,7 @@ Renderer::~Renderer() {
 void Renderer::renderGame ( const engine::GameRound& game, engine::Time now ) {
   for ( size_t iPlayer = 0; iPlayer < game.players().size(); ++iPlayer ) {
     auto& player = *game.players()[iPlayer];
-    if ( player.active ) {
+    if ( player.active() ) {
       prepareToDrawPlayer_ ( iPlayer, player, now );
       renderPlayer_ ( player, now );
     }
@@ -137,9 +137,9 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
 
 void Renderer::renderHint_(const engine::Player& player, engine::Time now) {
   std::vector<dataformats::CubeInstance> hintCubesData;
-  for (size_t i = 0; i < player.nextPieces[0].nBlocks(); ++i) {
-    hintCubesData.push_back({ fieldPosToWorldPos(player.nextPieces[0].absoluteCoords(i).x(), player.nextPieces[0].absoluteCoords(i).y()),
-                              getDiffuseColor(player.nextPieces[0].color()), getSpecularColor(player.nextPieces[0].color()), 0 });
+  for (size_t i = 0; i < player.nextPieces()[0].nBlocks(); ++i) {
+    hintCubesData.push_back({ fieldPosToWorldPos(player.nextPieces()[0].absoluteCoords(i).x(), player.nextPieces()[0].absoluteCoords(i).y()),
+                              getDiffuseColor(player.nextPieces()[0].color()), getSpecularColor(player.nextPieces()[0].color()), 0 });
   }
   
   auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));

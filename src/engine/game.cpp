@@ -66,9 +66,9 @@ Player* GameRound::playerById(int id) {
 
 void GameRound::deactivatePlayer(int id) {
   for (auto p : activePlayers_) {
-    if (p->victimId == id) {
+    if (p->victimId() == id) {
       p->cycleVictim();
-      if ((activePlayers_.size() >= 2) && (p->victimId == p->id()))
+      if ((activePlayers_.size() >= 2) && (p->victimId() == p->id()))
         p->cycleVictim();
     }
   }

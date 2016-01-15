@@ -134,8 +134,8 @@ class Player
 public:
   Player(const PlayerInfo* info__, GameRound* game__);
 
-  const PlayerInfo* info;
-  GameRound*        game;  // TODO: rename (?)
+  const PlayerInfo* info = nullptr;
+  GameRound*        game = nullptr;  // TODO: rename (?)
 
   bool          active = true;
 
@@ -179,6 +179,7 @@ public:
 
   void          onKeyPress(PlayerControl key);
   void          processInput();
+  void          updateObjects();
   void          onTimer();
 
   void          stealPiece();  // (!) make private

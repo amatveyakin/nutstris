@@ -9,8 +9,7 @@
 
 namespace engine {
 
-class VisualObject
-{
+class VisualObject {
 public:
   VisualObject(VisualObject* parent__ = nullptr)
       : parent_(parent__) {}
@@ -20,6 +19,8 @@ public:
   const VisualObject* parent() const {
     return parent_;
   }
+
+  virtual void update(Time currentTime) = 0;
 
   virtual FloatFieldCoords relativePosition(Time currentTime) const = 0;
 
@@ -35,8 +36,7 @@ private:
 };
 
 
-class AffixmentPointObject : public VisualObject  // name -> (?)
-{
+class AffixmentPointObject : public VisualObject {  // name -> (?)
 public:
   using VisualObject::VisualObject;
 
@@ -44,51 +44,51 @@ public:
     position_ = newPosition;
   }
 
-  FloatFieldCoords relativePosition(Time /*currentTime*/) const override {
+  FloatFieldCoords relativePosition(Time /*currentTime*/) const final {
     return position_;
   }
 
 protected:
-  mutable FloatFieldCoords position_;  // TODO(Andrei): remove "mutable"
+  FloatFieldCoords position_;
 };
 
 
-class MovingObject : public AffixmentPointObject
-{
+class MovingObject : public AffixmentPointObject {
 public:
   using AffixmentPointObject::AffixmentPointObject;
-
-  mutable std::vector<Motion> motions;  // TODO(Andrei): remove "mutable"
 
   void addMotion(FloatFieldCoords aimingShiftVector, Time movingStartTime, Time movingDuration) {
     // TODO(Andrei): Choose correct easing for each case
     motions.push_back(Motion(&math::easeInOutQuad, aimingShiftVector, movingStartTime, movingDuration));
   }
 
-  virtual void placeAt(FloatFieldCoords newPosition) {
+  void placeAt(FloatFieldCoords newPosition) override {
     AffixmentPointObject::placeAt(newPosition);
+    placementPosition_ = newPosition;
     motions.clear();
   }
 
-  virtual FloatFieldCoords relativePosition(Time currentTime) const {
-    FloatFieldCoords currentPosition = position_;
+  void update(Time currentTime) override {
+    position_ = placementPosition_;
     for (auto motionIt = motions.begin(); motionIt != motions.end(); ) {
       FloatFieldCoords motionShift = motionIt->shiftVector(currentTime);
-      currentPosition += motionShift;
+      position_ += motionShift;
       if (motionIt->finished(currentTime)) {
-        position_ += motionShift;
+        placementPosition_ += motionShift;
         motionIt = motions.erase(motionIt);
       }
       else
         ++motionIt;
     }
-    return currentPosition;
   }
+
+protected:
+  FloatFieldCoords placementPosition_;
+  std::vector<Motion> motions;
 };
 
 
-class MagnetObject : public AffixmentPointObject
-{
+class MagnetObject : public AffixmentPointObject {
 public:
   VisualObject* binding() const {
     return binding_;
@@ -107,28 +107,24 @@ public:
     maxSpeed_ = newMaxSpeed;
   }
 
-  // TODO: update position separately, make getter constant
-  virtual FloatFieldCoords relativePosition(Time currentTime) const {
+  void update(Time currentTime) override {
     Time deltaTime = currentTime - lastUpdated_;
     lastUpdated_ = currentTime;
     if (!binding_)
-      return position_;
+      return;
     FloatFieldCoords shiftVector = binding_->absolutePosition(currentTime) - position_;
     double deltaDistance = math::L2::norm(shiftVector);
     double maxDistance = maxSpeed_.operator*(deltaTime);  // TODO: Fix. Note: ``maxSpeed_ * deltaTime'' doesn't compile in MSVC 2015
-    FloatFieldCoords newPosition;
     if (deltaDistance <= maxDistance)
-      newPosition = binding_->absolutePosition(currentTime);
+      position_ = binding_->absolutePosition(currentTime);
     else
-      newPosition = position_ + shiftVector * maxDistance / deltaDistance;  // (?)
-    position_ = newPosition;
-    return newPosition;
+      position_ += shiftVector * maxDistance / deltaDistance;
   }
 
 protected:
   VisualObject* binding_ = nullptr;
   Speed maxSpeed_ = Speed::zero();
-  mutable Time lastUpdated_;  // TODO(Andrei): remove "mutable"
+  Time lastUpdated_;
 };
 
 }  // namespace engine

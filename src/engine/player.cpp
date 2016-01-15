@@ -197,6 +197,7 @@ void Player::endClearField()
 
 void Player::kill()
 {
+  events.clear();
   game->deactivatePlayer(id());
   visualEffects.playerDying.enable(currentTime());
   active = false;
@@ -252,9 +253,19 @@ void Player::processInput() {
   }
 }
 
+void Player::updateObjects() {
+  visualEffects.lanternObject.update(currentTime());
+  fallingPieceFrame.update(currentTime());
+  for (BlockImage& block : lyingBlockImages)
+    block.update(currentTime());
+  for (BlockImage& block : fallingBlockImages)
+    block.update(currentTime());
+}
+
 void Player::onTimer()
 {
   processInput();
+  updateObjects();
 
   while ((!events.empty()) && (currentTime() >= events.top().activationTime))
   {

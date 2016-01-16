@@ -132,15 +132,16 @@ private:
 class Player
 {
 public:
+  using LyingBlockImagesMap = std::map<FieldCoords, BlockImage, CompareFieldCoords>;
+
   Player(const PlayerInfo* info__, GameRound* game__);
 
-  int                                             backgroundSeed = 0;
-  std::vector<BlockImage>                         lyingBlockImages;  // TODO: make be, simply use an  std::map  of  lyingBlockImages ?
-  std::map<FieldCoords, int, CompareFieldCoords>  lyingBlockIndices;
-  MovingObject                                    fallingPieceFrame;
-  std::vector<BlockImage>                         fallingBlockImages;  // (based on fallingPieceFrame)
-  std::vector<DisappearingLine>                   disappearingLines;
-  PlayerVisualEffects                             visualEffects;
+  int                             backgroundSeed = 0;
+  LyingBlockImagesMap             lyingBlockImages;
+  MovingObject                    fallingPieceFrame;
+  std::vector<BlockImage>         fallingBlockImages;  // (based on fallingPieceFrame)
+  std::vector<DisappearingLine>   disappearingLines;
+  PlayerVisualEffects             visualEffects;
 
   Time          currentTime();
   Time          pieceLoweringInterval();

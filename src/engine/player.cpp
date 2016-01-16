@@ -204,7 +204,6 @@ void Player::endClearField()
 {
   fieldLocks_.isBeingCleared = false;
   lyingBlockImages.clear();
-  lyingBlockIndices.clear();
 }
 
 void Player::kill()
@@ -268,8 +267,8 @@ void Player::processInput() {
 void Player::updateObjects() {
   visualEffects.lanternObject.update(currentTime());
   fallingPieceFrame.update(currentTime());
-  for (BlockImage& block : lyingBlockImages)
-    block.update(currentTime());
+  for (auto& blockItem : lyingBlockImages)
+    blockItem.second.update(currentTime());
   for (BlockImage& block : fallingBlockImages)
     block.update(currentTime());
 }
@@ -453,8 +452,7 @@ void Player::setUpPiece()
 
     // TODO: Make falling pieces look differently. Add materialization animation.
     field_.mutableCell(cell).setBlock(fallingPiece_.color());
-    lyingBlockImages.push_back(BlockImage(nullptr, fallingPiece_.color(), cell));
-    lyingBlockIndices.insert(std::make_pair(cell, lyingBlockImages.size() - 1));
+    util::mapInsertUnique(lyingBlockImages, {cell, BlockImage(nullptr, fallingPiece_.color(), cell)});
   }
   fallingBlockImages.clear();
   fallingPieceState_ = psAbsent;
@@ -565,17 +563,7 @@ int Player::removeFullLines() {
           planBonusAppearance();
         }
         field_.mutableCell({col, row}).clear();
-        disappearingBlockImages[col] = lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]];
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
-        // TODO: No, *that* was not the point of  lyingBlockIndices !
-        for (auto it = lyingBlockIndices.begin(); it != lyingBlockIndices.end(); ++it) {
-          if (it->second == static_cast<int>(lyingBlockImages.size()) - 1) {
-            it->second = lyingBlockIndices[FieldCoords(col, row)];
-            break;
-          }
-        }
-        lyingBlockImages.pop_back();
-        lyingBlockIndices.erase(FieldCoords(col, row));
+        disappearingBlockImages[col] = util::mapExtract(lyingBlockImages, {col, row});
       }
 
       disappearingLines.push_back({row, disappearingBlockImages, currentTime()});
@@ -698,8 +686,8 @@ bool Player::generateBonus()  // TODO: rewrite
         if (field_({col, row}).blocked())
         {
           field_.mutableCell({col, row}).setBonus(bonus);
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().enable(currentTime());
+          lyingBlockImages[{col, row}].setBonus(bonus);
+          lyingBlockImages[{col, row}].bonusEffect().enable(currentTime());
           planBonusDisappearance();
           return true;
         }
@@ -713,7 +701,7 @@ void Player::startBonusDisappearanceAnimations() {
   for (int row = 0; row < FIELD_HEIGHT; ++row) {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
       if (field_({col, row}).blocked()) {
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().disable(currentTime());
+        lyingBlockImages[{col, row}].bonusEffect().disable(currentTime());
       }
     }
   }
@@ -724,7 +712,7 @@ void Player::removeBonuses() {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
       if (field_({col, row}).blocked()) {
         field_.mutableCell({col, row}).setBonus(Bonus::None);
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().disable(currentTime());
+        lyingBlockImages[{col, row}].bonusEffect().disable(currentTime());
       }
     }
   }
@@ -748,9 +736,9 @@ void Player::planBonusDisappearance()
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
   if (movingFrom == movingTo)
     return;
-  lyingBlockImages[lyingBlockIndices[movingFrom]].addMotion(FloatFieldCoords(movingTo - movingFrom), currentTime(), movingDuration);
-  lyingBlockIndices[movingTo] = lyingBlockIndices[movingFrom];
-  lyingBlockIndices.erase(movingFrom);
+  BlockImage block = util::mapExtract(lyingBlockImages, movingFrom);
+  block.addMotion(FloatFieldCoords(movingTo - movingFrom), currentTime(), movingDuration);
+  util::mapInsertUnique(lyingBlockImages, {movingTo, std::move(block)});
 }
 
 void Player::routineSpeedUp()

@@ -2,9 +2,25 @@
 
 #include <bitset>
 #include <cassert>
+#include <map>
 
 
 namespace util {
+
+template<typename MapT>
+typename MapT::mapped_type mapExtract(MapT& map, const typename MapT::key_type& key) {
+  auto it = map.find(key);
+  assert(it != map.end());
+  typename MapT::mapped_type value = std::move(it->second);
+  map.erase(it);
+  return value;
+}
+
+template<typename MapT>
+void mapInsertUnique(MapT& map, typename MapT::value_type keyValue) {
+  auto insertionResult = map.insert(std::move(keyValue));
+  assert(insertionResult.second);
+}
 
 template <typename IndexT, IndexT elementBegin, IndexT elementEnd>
 class StronglyTypedBitSet : private std::bitset<static_cast<size_t>(elementEnd) - static_cast<size_t>(elementBegin)> {

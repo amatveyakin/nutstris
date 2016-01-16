@@ -55,6 +55,14 @@ std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(const std::vec
     result.push_back(blockImageToCubeInstance(block, now));
   return result;
 }
+
+std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(const engine::Player::LyingBlockImagesMap& blockImages,
+                                                                  engine::Time now) {
+  std::vector<dataformats::CubeInstance> result;
+  for (auto& blockItem : blockImages)
+    result.push_back(blockImageToCubeInstance(blockItem.second, now));
+  return result;
+}
 }  // namespace
 
 Renderer::Renderer() {

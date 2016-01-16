@@ -27,7 +27,7 @@ math::Mat4x4f rotation(math::Vec3f axis, float angle) {
   return createFromColumns(transformed[0], transformed[1], transformed[2], {0, 0, 0});
 }
 
-math::Mat4x4f scale ( float coeff ) {
+math::Mat4x4f scale(float coeff) {
   math::Mat4x4f result;
   for (int i = 0; i < 3; ++i)
     result(i, i) = coeff;

@@ -31,6 +31,8 @@ set(srcs
     ${src_dir}/engine/visual/motion.cpp
     ${src_dir}/engine/visual/motion.h
     ${src_dir}/engine/visual/object.h
+    ${src_dir}/engine/visual/player_effect.cpp
+    ${src_dir}/engine/visual/player_effect.h
     ${src_dir}/main.cpp
     ${src_dir}/math/basic.h
     ${src_dir}/math/easing.cpp

@@ -542,45 +542,33 @@ void Player::lowerPiece(bool forced)
     setUpPiece();
 }
 
-int Player::removeFullLines()
-{
+int Player::removeFullLines() {
   int nLinesRemoved = 0;
 
-  for (int row = 0; row < FIELD_HEIGHT; ++row)
-  {
+  for (int row = 0; row < FIELD_HEIGHT; ++row) {
     bool rowIsFull = true;
-    for (int col = 0; col < FIELD_WIDTH; ++col)
-    {
-      if (!field_({col, row}).blocked())
-      {
+    for (int col = 0; col < FIELD_WIDTH; ++col) {
+      if (!field_({col, row}).blocked()) {
         rowIsFull = false;
         break;
       }
     }
 
-    if (rowIsFull)
-    {
+    if (rowIsFull) {
       ++nLinesRemoved;
 
-      disappearingLines.resize(disappearingLines.size() + 1);
-      disappearingLines.back().startTime = currentTime();
-      disappearingLines.back().duration = LINE_DISAPPEAR_TIME;
-      disappearingLines.back().row = row;
-      for (int col = 0; col < FIELD_WIDTH; ++col)
-      {
-        if (field_({col, row}).bonus() != Bonus::None)
-        {
+      std::array<BlockImage, FIELD_WIDTH> disappearingBlockImages;
+      for (int col = 0; col < FIELD_WIDTH; ++col) {
+        if (field_({col, row}).bonus() != Bonus::None) {
           takesBonus(field_({col, row}).bonus());
           events_.eraseEventType(etBonusDisappearance);
           planBonusAppearance();
         }
-        disappearingLines.back().blockColor[col] = field_({col, row}).color();
         field_.mutableCell({col, row}).clear();
-
+        disappearingBlockImages[col] = lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]];
         lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]] = lyingBlockImages.back();
         // TODO: No, *that* was not the point of  lyingBlockIndices !
-        for (auto it = lyingBlockIndices.begin(); it != lyingBlockIndices.end(); ++it)
-        {
+        for (auto it = lyingBlockIndices.begin(); it != lyingBlockIndices.end(); ++it) {
           if (it->second == static_cast<int>(lyingBlockImages.size()) - 1) {
             it->second = lyingBlockIndices[FieldCoords(col, row)];
             break;
@@ -589,6 +577,8 @@ int Player::removeFullLines()
         lyingBlockImages.pop_back();
         lyingBlockIndices.erase(FieldCoords(col, row));
       }
+
+      disappearingLines.push_back({row, disappearingBlockImages, currentTime()});
 
       if (latestLineCollapse_ < currentTime() + LINE_DISAPPEAR_TIME)
         latestLineCollapse_ = currentTime() + LINE_DISAPPEAR_TIME;
@@ -617,7 +607,7 @@ void Player::collapseLine(int row)
   for (auto i = disappearingLines.begin();
        i != disappearingLines.end(); ++i)
   {
-    if (i->row == row)
+    if (i->row() == row)
     {
       disappearingLines.erase(i);
       break;
@@ -625,8 +615,8 @@ void Player::collapseLine(int row)
   }
   for (auto i = disappearingLines.begin();
        i != disappearingLines.end(); ++i)
-    if (i->row > row)
-      --i->row;
+    if (i->row() > row)
+      --i->row();
   for (auto myEvent = events_.begin(); myEvent != events_.end(); ++myEvent)
     if ((myEvent->type == etLineCollapse) && (myEvent->parameters.lineCollapse.row > row))
       --const_cast<int&>(myEvent->parameters.lineCollapse.row);
@@ -709,7 +699,7 @@ bool Player::generateBonus()  // TODO: rewrite
         {
           field_.mutableCell({col, row}).setBonus(bonus);
           lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].setBonus(bonus);
-          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().enable(currentTime());
+          lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().enable(currentTime());
           planBonusDisappearance();
           return true;
         }
@@ -723,7 +713,7 @@ void Player::startBonusDisappearanceAnimations() {
   for (int row = 0; row < FIELD_HEIGHT; ++row) {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
       if (field_({col, row}).blocked()) {
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().disable(currentTime());
       }
     }
   }
@@ -734,7 +724,7 @@ void Player::removeBonuses() {
     for (int col = 0; col < FIELD_WIDTH; ++col) {
       if (field_({col, row}).blocked()) {
         field_.mutableCell({col, row}).setBonus(Bonus::None);
-        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusImage().disable(currentTime());
+        lyingBlockImages[lyingBlockIndices[FieldCoords(col, row)]].bonusEffect().disable(currentTime());
       }
     }
   }

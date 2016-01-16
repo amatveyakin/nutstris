@@ -8,6 +8,7 @@ namespace engine {
 
 class BlockImage : public MovingObject {
 public:
+  BlockImage();
   BlockImage(VisualObject* parent__, Color color__, FieldCoords position__);
 
   Color color() const {
@@ -21,30 +22,43 @@ public:
     bonus_ = bonus__;
   }
 
-  const NormalEffectType& bonusImage() const {
-    return bonusImage_;
+  const NormalEffectType& bonusEffect() const {
+    return bonusEffect_;
   }
-  NormalEffectType& bonusImage() {
-    return bonusImage_;
+  NormalEffectType& bonusEffect() {
+    return bonusEffect_;
   }
 
 private:
   Color color_;
   Bonus bonus_ = Bonus::None;
-  NormalEffectType bonusImage_;
+  NormalEffectType bonusEffect_;
 };
 
 
-struct DisappearingLine {
-  Color blockColor[FIELD_WIDTH];
-  int row;
-  Time startTime;
-  Time duration;
+class DisappearingLine {
+public:
+  DisappearingLine(int row__, std::array<BlockImage, FIELD_WIDTH> blockImages__, Time disappearingStartTime__);
 
-  // TODO(Andrei): declare constants (?)
-  double progress(Time currentTime) const {
-    return math::bound(0.0, (currentTime - startTime) / duration, 1.0);
+  int row() const {
+    return row_;
   }
+  int& row() {
+    return row_;
+  }
+
+  const std::array<BlockImage, FIELD_WIDTH>& blockImages() const {
+    return blockImages_;
+  }
+
+  const NormalEffectType& disappearingEffect() const {
+    return disappearingEffect_;
+  }
+
+private:
+  int row_;
+  std::array<BlockImage, FIELD_WIDTH> blockImages_;
+  NormalEffectType disappearingEffect_;
 };
 
 }  // namespace engine

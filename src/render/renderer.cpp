@@ -37,18 +37,22 @@ math::Mat4x4f fieldPosToWorldPos(double fieldX, double fieldY) {
     render::matrixutil::scale(render::CUBE_SCALE);
 }
 
+dataformats::CubeInstance blockImageToCubeInstance(const engine::BlockImage& blockImage,
+                                                   engine::Time now) {
+  float bonusProgress = float(blockImage.bonusEffect().progress(now));
+  auto bonusIndex = (bonusProgress > 0.5f) ? int(blockImage.bonus()) : 0;
+  auto cubeScale = math::abs(2.f * bonusProgress - 1.f);
+  auto scaleMatrix = render::matrixutil::scale(cubeScale);
+  auto pos2d = blockImage.absolutePosition(now);
+  return { fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix,
+           getDiffuseColor(blockImage.color()), getSpecularColor(blockImage.color()), bonusIndex };
+}
+
 std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(const std::vector<engine::BlockImage>& blockImages,
                                                                   engine::Time now) {
   std::vector<dataformats::CubeInstance> result;
-  for (auto& block : blockImages) {
-    float bonusProgress = float(block.bonusImage().progress(now));
-    auto bonusIndex = (bonusProgress > 0.5f) ? int(block.bonus()) : 0;
-    auto cubeScale = math::abs(2.f * bonusProgress - 1.f);
-    auto scaleMatrix = render::matrixutil::scale(cubeScale);
-    auto pos2d = block.absolutePosition(now);
-    result.push_back({ fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix,
-                       getDiffuseColor(block.color()), getSpecularColor(block.color()), bonusIndex });
-  }
+  for (auto& block : blockImages)
+    result.push_back(blockImageToCubeInstance(block, now));
   return result;
 }
 }  // namespace
@@ -125,12 +129,11 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
   for (size_t iDisappearingLine = 0; iDisappearingLine < lines.size(); ++iDisappearingLine) {
     auto& currentLine = lines[iDisappearingLine];
     math::Vec4f clippingPlane = { 2.0f * (iDisappearingLine % 2) - 1.0f, 1.0f, 1.0f,
-                                  1.5f * (2.f * float(currentLine.progress(now)) - 1.f)
+                                  1.5f * (2.f * float(currentLine.disappearingEffect().progress(now)) - 1.f)
                                 };
     std::vector<dataformats::CubeInstance> lineCubesData;
     for (size_t x = 0; x < engine::FIELD_WIDTH; ++x)
-      lineCubesData.push_back({fieldPosToWorldPos(x, currentLine.row),
-                               getDiffuseColor(currentLine.blockColor[x]), getSpecularColor(currentLine.blockColor[x]), 0});
+      lineCubesData.push_back(blockImageToCubeInstance(currentLine.blockImages()[x], now));
     renderCubes_(lineCubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false, clippingPlane);
   }
 }

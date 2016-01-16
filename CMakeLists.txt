@@ -24,10 +24,10 @@ set(srcs
     ${src_dir}/engine/units.cpp
     ${src_dir}/engine/units.h
     ${src_dir}/engine/visual.h
+    ${src_dir}/engine/visual/block_image.h
+    ${src_dir}/engine/visual/block_image.cpp
     ${src_dir}/engine/visual/effect.cpp
     ${src_dir}/engine/visual/effect.h
-    ${src_dir}/engine/visual/misc.h
-    ${src_dir}/engine/visual/misc.cpp
     ${src_dir}/engine/visual/motion.cpp
     ${src_dir}/engine/visual/motion.h
     ${src_dir}/engine/visual/object.h

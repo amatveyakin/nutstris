@@ -38,7 +38,7 @@ protected:
   static constexpr double kMaxProgress = 1.0;
   static constexpr double kProgressRange = kMaxProgress - kMinProgress;
 
-  static constexpr double fmodBackAndForth(double dividend, double divisor) {
+  static double fmodBackAndForth(double dividend, double divisor) {
     double v = std::fmod(dividend, 2 * divisor);
     if (v < divisor)
       return v;
@@ -76,7 +76,7 @@ public:
       return fmod(initialProgress_ + progressDelta, kProgressRange);
     } else {
       // These tricks are requires, because we don't have Time^2 unit
-      double progressDelta = math::sqr((currentTime - lastToggled_) / 1.0s) * 1.0s / period_ * 1.0s * kStoppingSpeed;
+      double progressDelta = math::sqr((currentTime - lastToggled_) / 1.0s) * 1.0s / period_ * (kStoppingSpeed.operator*(1.0s));
       return std::min(initialProgress_ + progressDelta, kMaxProgress);
     }
   }

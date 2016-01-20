@@ -22,11 +22,13 @@ const int kAimTextureSlot = 3;
 
 std::unique_ptr<TextureArray> TextureFactory::createBonusesTexture() {
   std::vector<sf::Image> images;
+  bool successfullyLoaded = true;
   for (auto bonus : engine::ForEachBonus()) {
     auto fullFileName = util::joinPath(engine::kTextureBonusesPath, getBonusName(bonus) + ".png");
     images.push_back( {});
-    assert(images.back().loadFromFile(fullFileName));
+    successfullyLoaded = images.back().loadFromFile(fullFileName) && successfullyLoaded;
   }
+  assert(successfullyLoaded);
   return std::make_unique<TextureArray>(kBonusesTextureSlot, images);
 }
 

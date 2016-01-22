@@ -6,6 +6,7 @@ namespace engine {
 BlockImage::BlockImage()
   : MovingObject(nullptr)
   , color_(COLORLESS)
+  , mountEffect_(PIECE_MOUNTING_ANIMATION_TIME)
   , bonusEffect_(BONUS_FADING_DURATION)
 {
 }
@@ -13,6 +14,7 @@ BlockImage::BlockImage()
 BlockImage::BlockImage(VisualObject* parent__, Color color__, FieldCoords position__)
   : MovingObject(parent__)
   , color_(color__)
+  , mountEffect_(PIECE_MOUNTING_ANIMATION_TIME)
   , bonusEffect_(BONUS_FADING_DURATION)
 {
   placeAt(FloatFieldCoords(position__));

@@ -47,6 +47,7 @@ extern const Time   PIECE_FORCED_LOWERING_ANIMATION_TIME;
 extern const Time   LINE_COLLAPSE_ANIMATION_TIME;
 extern const Time   PIECE_MOVING_ANIMATION_TIME;
 extern const Time   PIECE_ROTATING_ANIMATION_TIME;
+extern const Time   PIECE_MOUNTING_ANIMATION_TIME;
 
 extern const Time   HINT_APPERAING_TIME;
 extern const Time   HINT_MATERIALIZATION_TIME;

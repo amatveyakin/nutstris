@@ -27,6 +27,13 @@ public:
     bonus_ = bonus__;
   }
 
+  const NormalEffectType& mountEffect() const {
+    return mountEffect_;
+  }
+  NormalEffectType& mountEffect() {
+    return mountEffect_;
+  }
+
   const NormalEffectType& bonusEffect() const {
     return bonusEffect_;
   }
@@ -37,6 +44,7 @@ public:
 private:
   Color color_;
   Bonus bonus_ = Bonus::None;
+  NormalEffectType mountEffect_;
   NormalEffectType bonusEffect_;
 };
 

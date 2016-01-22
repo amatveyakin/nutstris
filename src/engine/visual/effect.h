@@ -70,7 +70,7 @@ public:
     Parent::disable(currentTime);
   }
 
-  double progress(Time currentTime) const {
+  double progress(Time currentTime) const override {
     if (enabled_) {
       double progressDelta = (currentTime - lastToggled_) / period_;
       return fmod(initialProgress_ + progressDelta, kProgressRange);
@@ -98,7 +98,7 @@ public:
     duration_ = duration__;
   }
 
-  double progress(Time currentTime) const {
+  double progress(Time currentTime) const override {
     double progressDelta = (currentTime - lastToggled_) / duration_;
     if (enabled_)
       return std::min(initialProgress_ + progressDelta, kMaxProgress);
@@ -116,7 +116,7 @@ public:
   FlashEffectType(Time halfDuration__)
     : halfDuration_(halfDuration__) {}
 
-  double progress(Time currentTime) const {
+  double progress(Time currentTime) const override {
     double progressDelta = (currentTime - lastToggled_) / halfDuration_;
     if (enabled_) {
       return fmodBackAndForth(initialProgress_ + progressDelta, kProgressRange);

@@ -44,7 +44,7 @@ public:
     position_ = newPosition;
   }
 
-  FloatFieldCoords relativePosition(Time /*currentTime*/) const final {
+  FloatFieldCoords relativePosition(Time /*currentTime*/) const override final {
     return position_;
   }
 

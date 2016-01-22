@@ -267,10 +267,10 @@ void Player::processInput() {
 void Player::updateObjects() {
   visualEffects.lanternObject.update(currentTime());
   fallingPieceFrame.update(currentTime());
-  for (auto& blockItem : lyingBlockImages)
-    blockItem.second.update(currentTime());
-  for (BlockImage& block : fallingBlockImages)
-    block.update(currentTime());
+  for (auto& blockImageItem : lyingBlockImages)
+    blockImageItem.second.update(currentTime());
+  for (BlockImage& blockImage : fallingBlockImages)
+    blockImage.update(currentTime());
 }
 
 void Player::onTimer()
@@ -439,23 +439,26 @@ Bonus Player::randomBonus() const
   return Bonus::None;
 }
 
-void Player::setUpPiece()
-{
-  for (size_t i = 0; i < fallingPiece_.nBlocks(); ++i)
-  {
+void Player::setUpPiece() {
+  assert(fallingBlockImages.size() == fallingPiece_.nBlocks());
+  bool playerDied = false;
+  for (size_t i = 0; i < fallingPiece_.nBlocks(); ++i) {
     FieldCoords cell = fallingPiece_.absoluteCoords(i);
     if (cell.y() >= FIELD_HEIGHT)
-    {
-      events_.push(etKill, currentTime());
-      return;
-    }
-
+      playerDied = true;
     // TODO: Make falling pieces look differently. Add materialization animation.
     field_.mutableCell(cell).setBlock(fallingPiece_.color());
-    util::mapInsertUnique(lyingBlockImages, {cell, BlockImage(nullptr, fallingPiece_.color(), cell)});
+    BlockImage& blockImage = fallingBlockImages[i];
+    blockImage.detachFromParent(currentTime());
+    util::mapInsertUnique(lyingBlockImages, {cell, std::move(blockImage)});
   }
   fallingBlockImages.clear();
   fallingPieceState_ = psAbsent;
+
+  if (playerDied) {
+    events_.push(etKill, currentTime());
+    return;
+  }
 
   int nLinesRemoved = removeFullLines();
   if (nLinesRemoved)
@@ -726,9 +729,9 @@ void Player::planBonusDisappearance()
 void Player::moveLyingBlockImage(FieldCoords movingFrom, FieldCoords movingTo, Time movingDuration) {
   if (movingFrom == movingTo)
     return;
-  BlockImage block = util::mapExtract(lyingBlockImages, movingFrom);
-  block.addMotion(FloatFieldCoords(movingTo - movingFrom), currentTime(), movingDuration);
-  util::mapInsertUnique(lyingBlockImages, {movingTo, std::move(block)});
+  BlockImage blockImage = util::mapExtract(lyingBlockImages, movingFrom);
+  blockImage.addMotion(FloatFieldCoords(movingTo - movingFrom), currentTime(), movingDuration);
+  util::mapInsertUnique(lyingBlockImages, {movingTo, std::move(blockImage)});
 }
 
 void Player::routineSpeedUp()

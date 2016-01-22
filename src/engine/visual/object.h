@@ -19,8 +19,8 @@ public:
   const VisualObject* parent() const {
     return parent_;
   }
-  virtual void detachFromParent(Time /*currentTime*/) {
-    parent_ = nullptr;
+  void setParent(VisualObject* newParent) {
+    parent_ = newParent;
   }
 
   virtual void update(Time currentTime) = 0;
@@ -47,12 +47,6 @@ public:
     position_ = newPosition;
   }
 
-  void detachFromParent(Time currentTime) override {
-    update(currentTime);
-    position_ = absolutePosition(currentTime);
-    VisualObject::detachFromParent(currentTime);
-  }
-
   FloatFieldCoords relativePosition(Time /*currentTime*/) const override final {
     return position_;
   }
@@ -75,11 +69,6 @@ public:
     AffixmentPointObject::placeAt(newPosition);
     placementPosition_ = newPosition;
     motions.clear();
-  }
-
-  void detachFromParent(Time currentTime) override {
-    AffixmentPointObject::detachFromParent(currentTime);
-    placementPosition_ = position_;
   }
 
   void update(Time currentTime) override {

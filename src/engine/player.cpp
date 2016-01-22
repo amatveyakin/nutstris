@@ -450,7 +450,8 @@ void Player::setUpPiece() {
     // TODO: Make falling pieces look differently. Add materialization animation.
     field_.mutableCell(cell).setBlock(fallingPiece_.color());
     BlockImage& blockImage = fallingBlockImages[i];
-    blockImage.detachFromParent(currentTime());
+    blockImage.setParent(nullptr);
+    blockImage.placeAt(FloatFieldCoords(cell));
     util::mapInsertUnique(lyingBlockImages, {cell, std::move(blockImage)});
   }
   fallingBlockImages.clear();

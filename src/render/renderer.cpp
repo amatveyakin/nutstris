@@ -148,7 +148,7 @@ void Renderer::renderHint_(const engine::Player& player, engine::Time now) {
   std::vector<dataformats::CubeInstance> hintCubesData;
   for (size_t i = 0; i < player.nextPieces()[0].nBlocks(); ++i) {
     hintCubesData.push_back({fieldPosToWorldPos(player.nextPieces()[0].absoluteCoords(i).x(), player.nextPieces()[0].absoluteCoords(i).y()),
-                             getDiffuseColor(player.nextPieces()[0].color()), getSpecularColor(player.nextPieces()[0].color()), 0});
+                             getDiffuseColor(player.nextPieces()[0].color()), getSpecularColor(player.nextPieces()[0].color()), 0, 0.0f});
   }
   
   auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));

@@ -45,7 +45,8 @@ dataformats::CubeInstance blockImageToCubeInstance(const engine::BlockImage& blo
   auto scaleMatrix = render::matrixutil::scale(cubeScale);
   auto pos2d = blockImage.absolutePosition(now);
   return { fieldPosToWorldPos(pos2d.x(), pos2d.y()) * scaleMatrix,
-           getDiffuseColor(blockImage.color()), getSpecularColor(blockImage.color()), bonusIndex };
+           getDiffuseColor(blockImage.color()), getSpecularColor(blockImage.color()), bonusIndex, 
+           float(blockImage.mountEffect().progress(now)) };
 }
 
 std::vector<dataformats::CubeInstance> blockImagesToCubeInstances(const std::vector<engine::BlockImage>& blockImages,
@@ -128,8 +129,8 @@ void Renderer::prepareToDrawPlayer_(size_t iPlayer, const engine::Player& player
 void Renderer::renderPlayer_(const engine::Player& player, engine::Time now) {
   renderWall_();
   renderDisappearingLines_(player.disappearingLines, now);
-  renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false);
-  renderCubes_(blockImagesToCubeInstances(player.fallingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, true);
+  renderCubes_(blockImagesToCubeInstances(player.lyingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
+  renderCubes_(blockImagesToCubeInstances(player.fallingBlockImages, now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity);
   renderHint_(player, now);
 }
 
@@ -139,7 +140,7 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
     math::Vec4f clippingPlane = { 2.0f * (iDisappearingLine % 2) - 1.0f, 1.0f, 1.0f,
                                   1.5f * (2.f * float(currentLine.disappearingEffect().progress(now)) - 1.f)
                                 };
-    renderCubes_(blockImagesToCubeInstances(currentLine.blockImages(), now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false, clippingPlane);
+    renderCubes_(blockImagesToCubeInstances(currentLine.blockImages(), now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, clippingPlane);
   }
 }
 
@@ -152,16 +153,11 @@ void Renderer::renderHint_(const engine::Player& player, engine::Time now) {
   
   auto faceOpacity = kMaximalHintFaceOpacity * float(player.visualEffects.hintMaterialization.progress(now));
   auto edgeOpacity = float(player.visualEffects.hintAppearance.progress(now));
-  renderCubes_(hintCubesData, faceOpacity, edgeOpacity, true);
+  renderCubes_(hintCubesData, faceOpacity, edgeOpacity);
 }
 
 void Renderer::renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
-                            bool falling, math::Vec4f clipPlane) {
-  if (falling)
-    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.55f);
-  else
-    cubeMesh_->getShaderProgram().setUniform("gCubeSmoothness", 0.35f);
-
+                            math::Vec4f clipPlane) {
   cubeMesh_->getShaderProgram().setUniform("gClipPlane", clipPlane);
   cubeMesh_->getShaderProgram().setUniform("gFaceOpacity", faceOpacity);
   cubeMesh_->getShaderProgram().setUniform("gEdgeOpacity", edgeOpacity);

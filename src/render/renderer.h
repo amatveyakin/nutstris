@@ -25,8 +25,8 @@ public:
 private:
   void renderPlayer_(const engine::Player& player, engine::Time now);
   void prepareToDrawPlayer_(size_t iPlayer, const engine::Player& player, engine::Time now);
-  void renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, float edgeOpacity, 
-                    bool falling, math::Vec4f clipPlane = {});
+  void renderCubes_(const std::vector<dataformats::CubeInstance>& cubesData, float faceOpacity, 
+                    float edgeOpacity, math::Vec4f clipPlane = {});
   void renderDisappearingLines_(const std::vector<engine::DisappearingLine>& lines, engine::Time now);
   void renderWall_();
   void renderHint_(const engine::Player& player, engine::Time now);

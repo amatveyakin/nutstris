@@ -11,11 +11,11 @@ layout(location = 2) in int  textureIndexIn;
 layout(location = 4) in mat4 modelToWorldIn;
 layout(location = 8) in vec4 diffuseColorIn;
 layout(location = 9) in vec4 specularColorIn;
+layout(location = 10) in float cubeSmoothnessIn;
 
 uniform mat4 gVP;
 uniform mat4 gGlobalRotation;
 uniform float gWaveProgress;
-uniform float gCubeSmoothness;
 
 out vec3 positionModel;
 out vec3 positionWorld;
@@ -26,7 +26,7 @@ flat out int textureIndex;
 out vec2 textureCoord;
 
 void main() {
-  positionModel = 0.5 * mix(sign(positionModelIn), positionModelIn, gCubeSmoothness);
+  positionModel = 0.5 * mix(sign(positionModelIn), positionModelIn, mix(0.55, 0.35, cubeSmoothnessIn));
 
   positionWorld = (modelToWorldIn * vec4(positionModel, 1)).xyz;
   positionWorld.x += sin(gWaveProgress) * sin(4 * positionWorld.y)  * 0.2 * cos(abs(positionWorld.x / 0.7));

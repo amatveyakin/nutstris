@@ -29,6 +29,7 @@ struct CubeInstance
   math::Vec4f   diffuseColor;
   math::Vec4f   specularColor;
   int           textureIndex;
+  float         cubeSmoothness;
 
   static void setUpLayout(ArrayBuffer<CubeInstance>& buffer);
 };

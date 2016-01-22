@@ -11,6 +11,11 @@ public:
   BlockImage();
   BlockImage(VisualObject* parent__, Color color__, FieldCoords position__);
 
+  BlockImage(const BlockImage&) = delete;
+  BlockImage& operator=(const BlockImage&) = delete;
+  BlockImage(BlockImage&&) = default;
+  BlockImage& operator=(BlockImage&&) = default;
+
   Color color() const {
     return color_;
   }

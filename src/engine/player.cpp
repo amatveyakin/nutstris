@@ -566,7 +566,7 @@ int Player::removeFullLines() {
         disappearingBlockImages.push_back(util::mapExtract(lyingBlockImages, {col, row}));
       }
 
-      disappearingLines.push_back({row, disappearingBlockImages, currentTime()});
+      disappearingLines.push_back({row, std::move(disappearingBlockImages), currentTime()});
 
       if (latestLineCollapse_ < currentTime() + LINE_DISAPPEAR_TIME)
         latestLineCollapse_ = currentTime() + LINE_DISAPPEAR_TIME;

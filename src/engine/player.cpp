@@ -452,6 +452,7 @@ void Player::setUpPiece() {
     BlockImage& blockImage = fallingBlockImages[i];
     blockImage.setParent(nullptr);
     blockImage.placeAt(FloatFieldCoords(cell));
+    blockImage.mountEffect().enable(currentTime());
     util::mapInsertUnique(lyingBlockImages, {cell, std::move(blockImage)});
   }
   fallingBlockImages.clear();

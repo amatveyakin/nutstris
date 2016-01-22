@@ -139,10 +139,7 @@ void Renderer::renderDisappearingLines_(const std::vector<engine::DisappearingLi
     math::Vec4f clippingPlane = { 2.0f * (iDisappearingLine % 2) - 1.0f, 1.0f, 1.0f,
                                   1.5f * (2.f * float(currentLine.disappearingEffect().progress(now)) - 1.f)
                                 };
-    std::vector<dataformats::CubeInstance> lineCubesData;
-    for (size_t x = 0; x < engine::FIELD_WIDTH; ++x)
-      lineCubesData.push_back(blockImageToCubeInstance(currentLine.blockImages()[x], now));
-    renderCubes_(lineCubesData, kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false, clippingPlane);
+    renderCubes_(blockImagesToCubeInstances(currentLine.blockImages(), now), kMaximalHintFaceOpacity, kMaximalHintEdgeOpacity, false, clippingPlane);
   }
 }
 

@@ -38,7 +38,7 @@ private:
 
 class DisappearingLine {
 public:
-  DisappearingLine(int row__, std::array<BlockImage, FIELD_WIDTH> blockImages__, Time disappearingStartTime__);
+  DisappearingLine(int row__, std::vector<BlockImage> blockImages__, Time disappearingStartTime__);
 
   int row() const {
     return row_;
@@ -47,7 +47,7 @@ public:
     return row_;
   }
 
-  const std::array<BlockImage, FIELD_WIDTH>& blockImages() const {
+  const std::vector<BlockImage>& blockImages() const {
     return blockImages_;
   }
 
@@ -57,7 +57,7 @@ public:
 
 private:
   int row_;
-  std::array<BlockImage, FIELD_WIDTH> blockImages_;
+  std::vector<BlockImage> blockImages_;
   NormalEffectType disappearingEffect_;
 };
 

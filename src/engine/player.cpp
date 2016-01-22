@@ -555,7 +555,7 @@ int Player::removeFullLines() {
     if (rowIsFull) {
       ++nLinesRemoved;
 
-      std::array<BlockImage, FIELD_WIDTH> disappearingBlockImages;
+      std::vector<BlockImage> disappearingBlockImages;
       for (int col = 0; col < FIELD_WIDTH; ++col) {
         if (field_({col, row}).bonus() != Bonus::None) {
           takesBonus(field_({col, row}).bonus());
@@ -563,7 +563,7 @@ int Player::removeFullLines() {
           planBonusAppearance();
         }
         field_.mutableCell({col, row}).clear();
-        disappearingBlockImages[col] = util::mapExtract(lyingBlockImages, {col, row});
+        disappearingBlockImages.push_back(util::mapExtract(lyingBlockImages, {col, row}));
       }
 
       disappearingLines.push_back({row, disappearingBlockImages, currentTime()});

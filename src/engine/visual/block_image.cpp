@@ -19,11 +19,12 @@ BlockImage::BlockImage(VisualObject* parent__, Color color__, FieldCoords positi
 }
 
 
-DisappearingLine::DisappearingLine(int row__, std::array<BlockImage, FIELD_WIDTH> blockImages__, Time disappearingStartTime__)
+DisappearingLine::DisappearingLine(int row__, std::vector<BlockImage> blockImages__, Time disappearingStartTime__)
   : row_(row__)
   , blockImages_(std::move(blockImages__))
   , disappearingEffect_(LINE_DISAPPEAR_TIME)
 {
+  assert(blockImages_.size() == FIELD_WIDTH);
   disappearingEffect_.enable(disappearingStartTime__);
 }
 

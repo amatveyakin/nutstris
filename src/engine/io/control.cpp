@@ -6,8 +6,6 @@
 namespace engine {
 
 Time playerControlCooldown(PlayerControl control) {
-  const Time kMoveControlCooldown = 0.12s;
-  const Time kRotateControlCooldown = 0.15s;
   switch (control) {
   case Left      :
   case Right     : return 0.12s;

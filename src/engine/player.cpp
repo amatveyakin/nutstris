@@ -447,8 +447,8 @@ void Player::setUpPiece() {
     FieldCoords cell = fallingPiece_.absoluteCoords(i);
     if (cell.y() >= FIELD_HEIGHT)
       playerDied = true;
-    // TODO: Make falling pieces look differently. Add materialization animation.
-    field_.mutableCell(cell).setBlock(fallingPiece_.color());
+    else
+      field_.mutableCell(cell).setBlock(fallingPiece_.color());
     BlockImage& blockImage = fallingBlockImages[i];
     blockImage.setParent(nullptr);
     blockImage.placeAt(FloatFieldCoords(cell));

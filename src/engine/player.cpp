@@ -85,7 +85,7 @@ Player::Player(const PlayerInfo* info__, GameRound* game__)
 
   backgroundSeed = rand();
   events_.push(etRoutineSpeedUp, currentTime() + ROUTINE_SPEED_UP_INTERVAL);
-  initPieceQueue(NORMAL_HINT_QUEUE_SIZE);
+  resizePieceQueue(NORMAL_HINT_QUEUE_SIZE);
   planBonusAppearance();
   sendNewPiece();
 }
@@ -469,19 +469,12 @@ void Player::setUpPiece()
 //  visualEffects.lantern.resetBinding();
 }
 
-void Player::initPieceQueue(int size)
-{
-  nextPieces_.clear();
-  resizePieceQueue(size);
-}
-
 void Player::resizePieceQueue(int newSize)
 {
   int oldSize = nextPieces_.size();
   nextPieces_.resize(newSize);
-  if (newSize > oldSize)
-    for (int i = oldSize; i < newSize; ++i)
-      nextPieces_[i] = randomPiece();
+  for (int i = oldSize; i < newSize; ++i)
+    nextPieces_[i] = randomPiece();
 }
 
 bool Player::sendNewPiece()
@@ -504,9 +497,6 @@ bool Player::sendNewPiece()
 
   nextPieces_.erase(nextPieces_.begin());
   nextPieces_.push_back(randomPiece());
-  /*for (size_t i = 0; i < nextPieces.size() - 1; ++i)
-    nextPieces[i] = nextPieces[i + 1];
-  nextPieces.back() = randomPiece();*/
   return true;
 }
 

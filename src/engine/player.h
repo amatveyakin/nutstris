@@ -181,7 +181,6 @@ private:
   void          beginClearField();
   void          endClearField();
   void          setUpPiece();
-  void          initPieceQueue(int size);
   void          resizePieceQueue(int newSize);
   bool          sendNewPiece();
   void          lowerPiece(bool forced);
